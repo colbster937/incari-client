@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 22:39:58 -0400
+Subject: [PATCH] multiplayer: Featured servers pinned atop the server list,
+ Sponsored, never saved or deleted
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java b/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
+index 3750c4ddcb3cca8e35bb63e9fd445d59483df59e..8e2e2db09df0d2ffc721b433afc45c3ac8a7ee4a 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
+@@ -269,2 +269,5 @@
+                 this.deleteButton.active = true;
++                // Incari start: featured servers can't be edited or deleted
++                if (incari.client.net.FeaturedServers.is(((ServerSelectionList.OnlineServerEntry)entry).getServerData())) this.editButton.active = this.deleteButton.active = false;
++                // Incari end
+             }
+diff --git a/src/main/java/net/minecraft/client/gui/screens/multiplayer/ServerSelectionList.java b/src/main/java/net/minecraft/client/gui/screens/multiplayer/ServerSelectionList.java
+index 1fa99921cddf97590e119bd6ffaca16a16c090f6..48e0437ce5ee320baeab70fd1607e350f0373105 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/multiplayer/ServerSelectionList.java
++++ b/src/main/java/net/minecraft/client/gui/screens/multiplayer/ServerSelectionList.java
+@@ -309,2 +309,5 @@
+             graphics.text(this.minecraft.font, this.serverData.name, this.getContentX() + 32 + 3, this.getContentY() + 1, -1);
++            // Incari start: a featured server's Sponsored label
++            incari.client.net.FeaturedServers.decorate(graphics, this.minecraft.font, this.serverData, this.getContentX() + 32 + 3 + this.minecraft.font.width(this.serverData.name) + 4, this.getContentY() + 1);
++            // Incari end
+             List<FormattedCharSequence> lines = this.minecraft.font.split(this.serverData.motd, this.getContentWidth() - 32 - 2);
+@@ -490,2 +493,5 @@
+         private void swap(final int currentIndex, final int newIndex) {
++            // Incari start: featured servers stay where they are
++            if (incari.client.net.FeaturedServers.pinned(this.screen.getServers(), currentIndex, newIndex)) return;
++            // Incari end
+             this.screen.getServers().swap(currentIndex, newIndex);
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerList.java b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+index 0cfcbc89f28840f9f1ad7471578eeef4a149fc67..75d5f548a948b1041d81ca439f09fe7463afae25 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerList.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+@@ -33,2 +33,5 @@
+             this.hiddenServerList.clear();
++            // Incari start: featured servers first, never saved
++            incari.client.net.FeaturedServers.addTo(this.serverList);
++            // Incari end
+             CompoundTag tag = NbtIo.read(this.minecraft.gameDirectory.toPath().resolve("servers.dat"));
+@@ -56,2 +59,5 @@
+             for (ServerData server : this.serverList) {
++                // Incari start: featured servers first, never saved
++                if (incari.client.net.FeaturedServers.is(server)) continue;
++                // Incari end
+                 CompoundTag serverTag = server.write();
+@@ -114,2 +120,5 @@
+     public void remove(final ServerData thing) {
++        // Incari start: featured servers can't be deleted
++        if (incari.client.net.FeaturedServers.is(thing)) return;
++        // Incari end
+         if (!this.serverList.remove(thing)) {

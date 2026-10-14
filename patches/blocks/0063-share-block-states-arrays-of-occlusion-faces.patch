@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 23:13:24 -0400
+Subject: [PATCH] blocks: Share block states' arrays of occlusion faces
+
+
+diff --git a/src/main/java/net/minecraft/world/level/block/Blocks.java b/src/main/java/net/minecraft/world/level/block/Blocks.java
+index bb709f69cdc3615528568a98dab97ec8493b8026..801f5ada3e1426c033dd783f101a09320e1de88a 100644
+--- a/src/main/java/net/minecraft/world/level/block/Blocks.java
++++ b/src/main/java/net/minecraft/world/level/block/Blocks.java
+@@ -5945,2 +5945,5 @@
+         });
++        // Incari start: what the states share is settled
++        incari.client.memory.BlockStateSharing.done();
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+index dcdeef5b5d58e0ba1ef8b69734d057e634fce0c6..c3d583ea0aed5a432b55cf365c997302ee2e8be8 100644
+--- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -531,2 +531,5 @@
+                 }
++                // Incari start: states with the same faces share one array of them
++                this.occlusionShapesByFace = incari.client.memory.BlockStateSharing.faces(this.occlusionShapesByFace);
++                // Incari end
+             }

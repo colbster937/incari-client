@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:56:28 -0400
+Subject: [PATCH] multiplayer: The player's saved servers marked as theirs,
+ kept beside featured ones
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerList.java b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+index 58ba8d3515f7f9e66cf94f1d3e469e3ba8a6b271..f126d2ae620c0f7da866e93497ed6f7d34eed441 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerList.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+@@ -44,3 +44,3 @@
+                 // Incari start: featured servers first, never saved
+-                if (incari.client.net.FeaturedServers.isSavedCopy(serverData)) return;
++                if (incari.client.net.FeaturedServers.isSavedCopy(serverTag, serverData)) return;
+                 // Incari end
+@@ -77,2 +77,5 @@
+             CompoundTag tag = new CompoundTag();
++            // Incari start: the player's own entries told apart from older builds' featured copies
++            incari.client.net.FeaturedServers.markOwn(serverTags);
++            // Incari end
+             tag.put("servers", serverTags);

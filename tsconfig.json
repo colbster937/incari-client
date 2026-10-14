@@ -1,0 +1,28 @@
+{
+  // Incari's TypeScript: the browser host page. Strict everywhere, and only syntax that type
+  // stripping can erase, so Node runs the tests straight from source. The storage worker
+  // (platform-web/src/main/js) is JavaScript the page runs as it is, checked through its
+  // JSDoc types.
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["es2023", "dom", "dom.iterable", "dom.asynciterable"],
+    "allowJs": true,
+    "checkJs": true,
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "isolatedModules": true,
+    "skipLibCheck": false,
+    "noEmit": true
+  },
+  "include": ["app-web/src/main/ts", "app-web/src/test/ts", "platform-web/src/main/js", "platform-web/src/test/ts"]
+}

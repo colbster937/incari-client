@@ -1,0 +1,219 @@
+# The screenshot-diff harness's scenes: ./gradlew :app-web:screenshotDiff renders each one
+# with the desktop game (Mojang's OpenGL backend) and the browser build (WebGL2), and compares the
+# pairs by SSIM. The format is tools/webbuild's SceneScript; ADR 0012 explains the threshold.
+#
+# Each game joins its own fresh world from server.properties' seed as IncariShot, with
+# options.txt's options. The harness freezes each world as soon as its server is up, so the only
+# ticks either world runs are the ones the harness and these scenes step (tick step): the same in
+# both, so clouds, animated textures and the like line up. Loading chunks takes ticks, so a
+# teleport to somewhere new steps the world. Every scene sets its own time, weather, blocks and
+# entities, so scenes don't depend on each other. Built scenes float at y 150 and above, so they
+# don't depend on the terrain either. In a frozen world a killed entity never finishes dying, so
+# entities are cleared by moving them out of sight (up and far away, never into the void, where a
+# spectator still following one would die); particles only appear once the world ticks,
+# so their scene steps it by one tick; and overworld chunks that reload after a trip to another
+# dimension come back unlit, so the dimensions come last.
+
+threshold 0.90
+
+setup
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamemode spectator IncariShot
+    # Hide the HUD and the hand: the scenes are about the world.
+    key:F1
+
+scene terrain  Overworld terrain at noon: solid, cutout and translucent terrain, grass, fog, sky
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot 0 100 0 45 20
+    sleep:3000
+    settle
+    shot:terrain
+
+scene translucency  Water, stained glass, ice, slime and honey, with regular and improved (OIT) transparency
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot 20.5 154 34.5 0 25
+    sleep:2000
+    rcon:fill 13 149 39 27 149 53 minecraft:smooth_stone
+    rcon:fill 14 150 40 19 153 45 minecraft:glass hollow
+    rcon:fill 15 150 41 18 152 44 minecraft:water
+    rcon:setblock 21 150 41 minecraft:red_stained_glass
+    rcon:setblock 22 150 41 minecraft:lime_stained_glass
+    rcon:setblock 23 150 41 minecraft:blue_stained_glass
+    rcon:setblock 22 151 41 minecraft:yellow_stained_glass
+    rcon:fill 21 150 44 26 152 44 minecraft:light_blue_stained_glass_pane
+    rcon:setblock 21 150 47 minecraft:ice
+    rcon:setblock 23 150 47 minecraft:slime_block
+    rcon:setblock 25 150 47 minecraft:honey_block
+    rcon:setblock 25 150 42 minecraft:tinted_glass
+    sleep:2000
+    settle
+    shot:translucency
+    # F3+X switches improved transparency (the order-independent transparency passes) on and off.
+    key:F3+KeyX
+    sleep:2000
+    settle
+    shot:translucency_oit
+    key:F3+KeyX
+    sleep:1000
+
+scene entities  Mobs, an armor stand, a dropped item, block entities, shadows and a glowing outline
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot -23.5 154 35.5 0 25
+    sleep:2000
+    rcon:tp @e[type=!minecraft:player] 0 250 -400
+    rcon:fill -32 149 38 -15 149 54 minecraft:grass_block
+    rcon:summon minecraft:cow -27.5 150 43.5 {NoAI:1b,Rotation:[30f,0f]}
+    rcon:summon minecraft:sheep -24.5 150 44.5 {NoAI:1b,Color:14b,Rotation:[-20f,0f]}
+    rcon:summon minecraft:villager -20.5 150 43.5 {NoAI:1b,Rotation:[180f,0f]}
+    rcon:summon minecraft:zombie -25.5 150 47.5 {NoAI:1b,PersistenceRequired:1b,Glowing:1b,Rotation:[160f,0f]}
+    rcon:summon minecraft:armor_stand -21.5 150 47.5 {ShowArms:1b,Rotation:[200f,0f],equipment:{head:{id:"minecraft:diamond_helmet"},chest:{id:"minecraft:golden_chestplate"},mainhand:{id:"minecraft:iron_sword"}}}
+    rcon:summon minecraft:item -18.5 150 42.5 {Item:{id:"minecraft:diamond",count:1},PickupDelay:32767,Age:-32768}
+    rcon:setblock -29 150 50 minecraft:chest[facing=north]
+    rcon:setblock -28 150 50 minecraft:oak_sign[rotation=8]{front_text:{messages:["Incari","Scene","",""]}}
+    rcon:setblock -27 150 50 minecraft:white_banner[rotation=8]
+    rcon:setblock -26 150 50 minecraft:enchanting_table
+    rcon:setblock -25 150 50 minecraft:purple_shulker_box
+    rcon:setblock -24 150 50 minecraft:skeleton_skull[rotation=8]
+    rcon:setblock -23 150 50 minecraft:bell[attachment=floor,facing=north]
+    rcon:setblock -22 150 50 minecraft:decorated_pot
+    rcon:setblock -21 150 50 minecraft:lectern[has_book=true,facing=north]
+    rcon:setblock -20 150 50 minecraft:conduit
+    sleep:2000
+    settle
+    shot:entities
+
+scene particles  Particles of several kinds, fixed in place by the frozen world
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot -23.5 154 75.5 0 20
+    sleep:2000
+    rcon:fill -32 149 80 -15 149 92 minecraft:stone
+    rcon:particle minecraft:flame -27.5 151 83.5 0 0 0 0 1 force
+    rcon:particle minecraft:heart -25.5 151.5 83.5 0 0 0 0 1 force
+    rcon:particle minecraft:happy_villager -23.5 151 83.5 0 0 0 0 1 force
+    rcon:particle minecraft:end_rod -21.5 151.5 83.5 0 0 0 0 1 force
+    rcon:particle minecraft:note -19.5 151 83.5 0 0 0 0 1 force
+    rcon:particle minecraft:explosion -23.5 152 86.5 0 0 0 0 1 force
+    rcon:particle minecraft:soul_fire_flame -27.5 151 85.5 0 0 0 0 1 force
+    rcon:particle minecraft:crit -19.5 151.5 85.5 0 0 0 0 1 force
+    # The client adds particles on its next tick.
+    rcon:tick step 1
+    sleep:2000
+    settle
+    shot:particles
+
+scene sky  Sunrise and midnight: sun, moon, stars, clouds, the sky's colors
+    rcon:weather clear
+    rcon:time set 23600
+    rcon:tp IncariShot 0 110 0 -90 -10
+    sleep:2000
+    settle
+    shot:sky_sunrise
+    rcon:time set 18000
+    rcon:tp IncariShot 0 110 0 0 -60
+    sleep:2000
+    settle
+    shot:sky_midnight
+
+scene gui  The creative inventory: items, block items, text, and an enchanted item's glint; then the HUD
+    rcon:weather clear
+    rcon:time set 6000
+    # Players tick in a frozen world, and a creative player falls: stand them on a platform.
+    rcon:fill -2 149 -2 2 149 2 minecraft:smooth_stone
+    rcon:tp IncariShot 0 150 0 45 20
+    rcon:gamemode creative IncariShot
+    rcon:item replace entity IncariShot hotbar.0 with minecraft:diamond_sword
+    rcon:item replace entity IncariShot hotbar.1 with minecraft:grass_block
+    rcon:item replace entity IncariShot hotbar.2 with minecraft:oak_log
+    rcon:item replace entity IncariShot hotbar.3 with minecraft:bow
+    rcon:item replace entity IncariShot hotbar.4 with minecraft:enchanted_golden_apple
+    rcon:item replace entity IncariShot hotbar.5 with minecraft:water_bucket
+    rcon:item replace entity IncariShot hotbar.6 with minecraft:torch
+    rcon:item replace entity IncariShot hotbar.7 with minecraft:shield
+    rcon:item replace entity IncariShot hotbar.8 with minecraft:red_bed
+    sleep:2000
+    key:KeyE
+    move:0.02,0.02
+    sleep:1500
+    settle
+    shot:gui_inventory
+    key:Escape
+    # The HUD over the world: the page keeps it in a texture between refreshes (ADR 0030).
+    key:F1
+    sleep:1000
+    settle
+    shot:gui_hud
+    key:F1
+    rcon:gamemode spectator IncariShot
+    sleep:1000
+
+scene distant_terrain  A wide floor seen at a grazing angle: mipmaps and texture filtering
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot 0.5 185 90.5 0 30
+    rcon:tick step 100
+    sleep:7000
+    rcon:fill -90 180 0 90 180 180 minecraft:bricks
+    rcon:tp IncariShot 0.5 181.7 1.5 0 4
+    sleep:3000
+    settle
+    shot:distant_terrain
+    rcon:tp IncariShot 0 100 0 45 20
+    rcon:fill -90 180 0 90 180 180 minecraft:air
+
+scene post_effects  Post effects: the pause menu's blur, and a creeper's view
+    rcon:weather clear
+    rcon:time set 6000
+    rcon:tp IncariShot 0 100 0 45 20
+    sleep:2000
+    settle
+    key:Escape
+    move:0.02,0.02
+    sleep:1000
+    settle
+    shot:post_menu_blur
+    key:Escape
+    sleep:1000
+    rcon:tp @e[type=minecraft:creeper] 0 250 -400
+    rcon:summon minecraft:creeper 2.5 101 2.5 {NoAI:1b,NoGravity:1b,Rotation:[45f,20f]}
+    rcon:spectate @e[type=minecraft:creeper,limit=1] IncariShot
+    sleep:2000
+    settle
+    shot:post_creeper
+    # A teleport ends spectating; only then may the creeper leave (a spectator follows its target).
+    rcon:tp IncariShot 0 100 0 45 20
+    sleep:1000
+    rcon:tp @e[type=minecraft:creeper] 0 250 -400
+    sleep:1000
+
+scene weather  Rain over the terrain: the weather pass and its darker sky
+    rcon:weather rain
+    rcon:time set 6000
+    rcon:tp IncariShot 0 100 0 45 20
+    # Rain fades in over a few seconds of ticks.
+    rcon:tick step 200
+    sleep:12000
+    settle
+    shot:weather
+    rcon:weather clear
+
+scene dimensions  The Nether and the End: their fog, sky and terrain
+    rcon:execute in minecraft:the_nether run tp IncariShot 0 80 0 45 10
+    rcon:tick step 200
+    sleep:12000
+    settle
+    shot:nether
+    rcon:execute in minecraft:the_end run tp IncariShot 40 80 40 135 15
+    rcon:tick step 200
+    sleep:12000
+    rcon:execute in minecraft:the_end run tp @e[type=minecraft:ender_dragon] 0 250 -400
+    settle
+    shot:the_end
+    rcon:execute in minecraft:overworld run tp IncariShot 0 100 0 45 20
+    rcon:tick step 200
+    sleep:12000

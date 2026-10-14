@@ -1,0 +1,92 @@
+# The HUD editor's cost (ADR 0049), in the page's own world:
+#   ./gradlew :app-web:benchmark -Pbenchmark.singleplayer -Pbenchmark.script=hudeditor.txt
+#   -Pbenchmark.history=<a file of its own>
+# The player stands at the world's spawn with Toggle Sprint on (its line is what the editor shows).
+# Scenarios: the HUD alone; the pause menu (Potato: no blur); the HUD editor in Potato, its blurred
+# backdrop drawn ten times a second and kept (BackdropCache); the editor in Normal, blurred every
+# frame, which is what Potato would pay without the cache. The menus are reached with the keyboard
+# (Tab order in the module menu: All, Movement, GUI, Profile, Done, Edit HUD, the search, the cards),
+# and each scenario takes a screenshot in build/benchmark to show it got there.
+
+setup
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamerule send_command_feedback false
+    rcon:time set 6000
+    rcon:weather clear
+    sleep:10000
+    # Toggle Sprint on: its card is the eighth stop.
+    key:ShiftRight
+    sleep:1500
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Enter
+    sleep:500
+    shot:hudeditor-setup
+    key:Escape
+    sleep:3000
+
+scenario hud  The world at spawn with the HUD, no screen open
+    measure:20
+
+scenario pause  The pause menu over the world (Potato: no blur)
+    key:Escape
+    sleep:2000
+    shot:hudeditor-pause
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario editor_potato  The HUD editor in Potato: the blurred world drawn ten times a second and kept
+    key:ShiftRight
+    sleep:1500
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Enter
+    sleep:2000
+    shot:hudeditor-potato
+    measure:20
+    key:Escape
+    sleep:1000
+    key:Escape
+    sleep:2000
+
+scenario editor_normal  The HUD editor in Normal: the world drawn and blurred every frame
+    # The module menu's GUI entry (the third stop) switches to Normal.
+    key:ShiftRight
+    sleep:1500
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Enter
+    sleep:1000
+    # Opened again, so the Tabs start from the top.
+    key:Escape
+    sleep:1500
+    key:ShiftRight
+    sleep:1500
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Enter
+    sleep:2000
+    shot:hudeditor-normal
+    measure:20
+    key:Escape
+    sleep:1000
+    key:Escape
+    sleep:2000

@@ -1,0 +1,331 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 10:34:37 -0400
+Subject: [PATCH] decompile: Restore types the decompiler lost in entities and
+ their AI
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/EntityReference.java b/src/main/java/net/minecraft/world/entity/EntityReference.java
+index 7fe990aecc825b349f7dec5632b5f77947a9e7d7..2ec4b32b9d004895971bf903a65573315552c2c0 100644
+--- a/src/main/java/net/minecraft/world/entity/EntityReference.java
++++ b/src/main/java/net/minecraft/world/entity/EntityReference.java
+@@ -120,3 +120,3 @@
+     public static <StoredEntityType extends UniquelyIdentifyable> @Nullable EntityReference<StoredEntityType> read(final ValueInput input, final String key) {
+-        return input.read(key, codec()).orElse(null);
++        return input.read(key, EntityReference.<StoredEntityType>codec()).orElse(null);
+     }
+@@ -131,3 +131,3 @@
+                 .map(oldName -> OldUsersConverter.convertMobOwnerIfNecessary(level.getServer(), oldName))
+-                .map(EntityReference::new)
++                .map(EntityReference<StoredEntityType>::new)
+                 .orElse(null);
+diff --git a/src/main/java/net/minecraft/world/entity/SpawnPlacements.java b/src/main/java/net/minecraft/world/entity/SpawnPlacements.java
+index e1d56c60dd622a5ef2484f64b49d757287c2b54b..4da7ca79ad49706874e20a893c41b9c1191075ea 100644
+--- a/src/main/java/net/minecraft/world/entity/SpawnPlacements.java
++++ b/src/main/java/net/minecraft/world/entity/SpawnPlacements.java
+@@ -86,3 +86,3 @@
+         SpawnPlacements.Data data = DATA_BY_TYPE.get(type);
+-        return data == null || data.predicate.test(type, level, spawnReason, pos, random);
++        return data == null || ((SpawnPlacements.SpawnPredicate<T>)data.predicate).test(type, level, spawnReason, pos, random);
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/SteppedInterpolationHandler.java b/src/main/java/net/minecraft/world/entity/SteppedInterpolationHandler.java
+index 9e197f76a90e6d787b7f448ef0e453f7e33ebb98..aea182962c84f836b8c4327734e2d5b377860bec 100644
+--- a/src/main/java/net/minecraft/world/entity/SteppedInterpolationHandler.java
++++ b/src/main/java/net/minecraft/world/entity/SteppedInterpolationHandler.java
+@@ -134,2 +134,3 @@
+                     var10000 = var9;
++                    List var24;
+ 
+@@ -141,4 +142,4 @@
+ 
+-                    List totalInterpolationTicks = var24;
+-                    List<PositionStep> steps = totalInterpolationTicks;
++                    List var25 = var24;
++                    List<PositionStep> steps = var25;
+                     if (yRot == this.yRot() && xRot == this.xRot()) {
+diff --git a/src/main/java/net/minecraft/world/entity/ai/Brain.java b/src/main/java/net/minecraft/world/entity/ai/Brain.java
+index 8b6ea88f94ef22911948922421f56db72b11d0d6..f024a7aa5e7eec22178c7e37944a687ef0205538 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/Brain.java
++++ b/src/main/java/net/minecraft/world/entity/ai/Brain.java
+@@ -233,3 +233,3 @@
+     private static <U> void callVisitor(final Brain.Visitor visitor, final MemoryModuleType<U> memoryModuleType, final MemorySlot<?> slot) {
+-        slot.visit(memoryModuleType, visitor);
++        ((MemorySlot<U>)slot).visit(memoryModuleType, visitor);
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/ai/behavior/InteractWith.java b/src/main/java/net/minecraft/world/entity/ai/behavior/InteractWith.java
+index 5245f3c32f088be45aabb04893e6ebb9cbad5c7f..53b83579099542f07a55b6edb6028385d8767866 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/behavior/InteractWith.java
++++ b/src/main/java/net/minecraft/world/entity/ai/behavior/InteractWith.java
+@@ -45,3 +45,3 @@
+                         closest.ifPresent(mob -> {
+-                            target.set(mob);
++                            target.set((T)mob);
+                             lookTarget.set(new EntityTracker(mob, true));
+diff --git a/src/main/java/net/minecraft/world/entity/animal/allay/Allay.java b/src/main/java/net/minecraft/world/entity/animal/allay/Allay.java
+index 2ab353a46279fb137fdffdc21cc7565268b4f892..28ed76044821eb0a622c267b881d357f577f6a9f 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/allay/Allay.java
++++ b/src/main/java/net/minecraft/world/entity/animal/allay/Allay.java
+@@ -122,3 +122,3 @@
+     public Brain<Allay> getBrain() {
+-        return super.getBrain();
++        return (Brain<Allay>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/allay/AllayAi.java b/src/main/java/net/minecraft/world/entity/animal/allay/AllayAi.java
+index 627ff52b1921d4b0da7692dcd17acf0b1073ec57..76e33f716b858707484952187b72ecda7ba4e469 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/allay/AllayAi.java
++++ b/src/main/java/net/minecraft/world/entity/animal/allay/AllayAi.java
+@@ -70,3 +70,3 @@
+                 new Swim<>(0.8F),
+-                new AnimalPanic(2.5F),
++                new AnimalPanic<>(2.5F),
+                 new LookAtTargetSink(45, 90),
+@@ -90,3 +90,3 @@
+                 SetEntityLookTargetSometimes.create(6.0F, UniformInt.of(30, 60)),
+-                new RunOne(
++                new RunOne<>(
+                     ImmutableList.of(
+diff --git a/src/main/java/net/minecraft/world/entity/animal/armadillo/Armadillo.java b/src/main/java/net/minecraft/world/entity/animal/armadillo/Armadillo.java
+index a35e296f9ae33e6d5e6131bf222093cfd58f7afe..52a99dd2a3c2ada2861e48c79a7210135c7bdc8e 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/armadillo/Armadillo.java
++++ b/src/main/java/net/minecraft/world/entity/animal/armadillo/Armadillo.java
+@@ -137,3 +137,3 @@
+     public Brain<Armadillo> getBrain() {
+-        return super.getBrain();
++        return (Brain<Armadillo>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/axolotl/Axolotl.java b/src/main/java/net/minecraft/world/entity/animal/axolotl/Axolotl.java
+index ebac5ef5c0cf414a641bbf6339e142dd86b3bada..dbf19e3869fd44e4bf4d73f6448666ac8f144ffc 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/axolotl/Axolotl.java
++++ b/src/main/java/net/minecraft/world/entity/animal/axolotl/Axolotl.java
+@@ -533,3 +533,3 @@
+     public Brain<Axolotl> getBrain() {
+-        return super.getBrain();
++        return (Brain<Axolotl>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/camel/Camel.java b/src/main/java/net/minecraft/world/entity/animal/camel/Camel.java
+index b6f0e951502fef631bfcb807d7d647507895fb3b..1ef58c9313d12336a3c3893022e5d9021aa48653 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/camel/Camel.java
++++ b/src/main/java/net/minecraft/world/entity/animal/camel/Camel.java
+@@ -156,3 +156,3 @@
+     public Brain<Camel> getBrain() {
+-        return super.getBrain();
++        return (Brain<Camel>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/frog/Frog.java b/src/main/java/net/minecraft/world/entity/animal/frog/Frog.java
+index 2cb59f9d36128fc74a8ca2e53b0cacb5cd743bae..45f4800ab4c617fbdd93d552271bfef88ea5ec30 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/frog/Frog.java
++++ b/src/main/java/net/minecraft/world/entity/animal/frog/Frog.java
+@@ -101,3 +101,3 @@
+     public Brain<Frog> getBrain() {
+-        return super.getBrain();
++        return (Brain<Frog>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/frog/Tadpole.java b/src/main/java/net/minecraft/world/entity/animal/frog/Tadpole.java
+index a4ea745b9b40697df36edbfd4763f69fc5372e1d..f20e8914ddd4ede7b777cb637f8732ce7e6eedb5 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/frog/Tadpole.java
++++ b/src/main/java/net/minecraft/world/entity/animal/frog/Tadpole.java
+@@ -76,3 +76,3 @@
+     public Brain<Tadpole> getBrain() {
+-        return super.getBrain();
++        return (Brain<Tadpole>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/goat/Goat.java b/src/main/java/net/minecraft/world/entity/animal/goat/Goat.java
+index 0ed278d8be722712ee01b44157e0ae238ef9c4c2..7c443cdeef7545856111e332527b8370cb12948b 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/goat/Goat.java
++++ b/src/main/java/net/minecraft/world/entity/animal/goat/Goat.java
+@@ -170,3 +170,3 @@
+     public Brain<Goat> getBrain() {
+-        return super.getBrain();
++        return (Brain<Goat>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/goat/GoatAi.java b/src/main/java/net/minecraft/world/entity/animal/goat/GoatAi.java
+index b1c093a1fe7e167117e96465234bc4e055fa320c..a6ee626edf959bb9170071a3de42ee2418516e3d 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/goat/GoatAi.java
++++ b/src/main/java/net/minecraft/world/entity/animal/goat/GoatAi.java
+@@ -75,3 +75,3 @@
+                 new Swim<>(0.8F),
+-                new AnimalPanic(2.0F),
++                new AnimalPanic<>(2.0F),
+                 new LookAtTargetSink(45, 90),
+diff --git a/src/main/java/net/minecraft/world/entity/animal/golem/CopperGolem.java b/src/main/java/net/minecraft/world/entity/animal/golem/CopperGolem.java
+index cbce25e0855cbcb5bcc536e08dce63ac267e22ac..94f7f383dd434587b8fee6fb9eaeb318cb5d5b08 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/golem/CopperGolem.java
++++ b/src/main/java/net/minecraft/world/entity/animal/golem/CopperGolem.java
+@@ -155,3 +155,3 @@
+     public Brain<CopperGolem> getBrain() {
+-        return super.getBrain();
++        return (Brain<CopperGolem>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhast.java b/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhast.java
+index 46754c824bf30d79e776bd7a27c01c2c1c9e14a0..5e0246204b034eba3614a0bf5e7ea23cd972a581 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhast.java
++++ b/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhast.java
+@@ -395,3 +395,3 @@
+     public Brain<HappyGhast> getBrain() {
+-        return super.getBrain();
++        return (Brain<HappyGhast>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhastAi.java b/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhastAi.java
+index 61bb4d0d34dddcf76de96d7f50cc0999dd69ac35..5dca98453f540a37e44d6bf9fce002dfd50c709c 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhastAi.java
++++ b/src/main/java/net/minecraft/world/entity/animal/happyghast/HappyGhastAi.java
+@@ -39,3 +39,3 @@
+                 new Swim<>(0.8F),
+-                new AnimalPanic(2.0F, 0),
++                new AnimalPanic<>(2.0F, 0),
+                 new LookAtTargetSink(45, 90),
+diff --git a/src/main/java/net/minecraft/world/entity/animal/nautilus/Nautilus.java b/src/main/java/net/minecraft/world/entity/animal/nautilus/Nautilus.java
+index d08c4105232a1e396a3a05acfab76643061e9b17..18aa9d11182ab007bd915cad69a9cd7bf29a1c89 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/nautilus/Nautilus.java
++++ b/src/main/java/net/minecraft/world/entity/animal/nautilus/Nautilus.java
+@@ -46,3 +46,3 @@
+     public Brain<Nautilus> getBrain() {
+-        return super.getBrain();
++        return (Brain<Nautilus>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/nautilus/ZombieNautilus.java b/src/main/java/net/minecraft/world/entity/animal/nautilus/ZombieNautilus.java
+index 8df097df6e1f05e8b20f8c33c076d401a931728c..4e62ff055fdde8ed960b0566ba6178cac52bb356 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/nautilus/ZombieNautilus.java
++++ b/src/main/java/net/minecraft/world/entity/animal/nautilus/ZombieNautilus.java
+@@ -70,3 +70,3 @@
+     public Brain<ZombieNautilus> getBrain() {
+-        return super.getBrain();
++        return (Brain<ZombieNautilus>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/animal/sniffer/Sniffer.java b/src/main/java/net/minecraft/world/entity/animal/sniffer/Sniffer.java
+index 888152c698c9f776d10b60d8dcf7cf1a42a72851..346172e2ec5ea74b00578240e6cfac875311df9d 100644
+--- a/src/main/java/net/minecraft/world/entity/animal/sniffer/Sniffer.java
++++ b/src/main/java/net/minecraft/world/entity/animal/sniffer/Sniffer.java
+@@ -447,3 +447,3 @@
+     public Brain<Sniffer> getBrain() {
+-        return super.getBrain();
++        return (Brain<Sniffer>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/Zoglin.java b/src/main/java/net/minecraft/world/entity/monster/Zoglin.java
+index 67e528fd654e4d03e321282be425ff92869b4ee7..23e983d044dda429dc97b6796c2a0f408b385984 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/Zoglin.java
++++ b/src/main/java/net/minecraft/world/entity/monster/Zoglin.java
+@@ -224,3 +224,3 @@
+     public Brain<Zoglin> getBrain() {
+-        return super.getBrain();
++        return (Brain<Zoglin>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/breeze/Breeze.java b/src/main/java/net/minecraft/world/entity/monster/breeze/Breeze.java
+index 2502d37b25e1746d473d1bea5488fdbb8e401db7..2bef7ee52d24e769ba89b31a4f68b6773fc181e6 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/breeze/Breeze.java
++++ b/src/main/java/net/minecraft/world/entity/monster/breeze/Breeze.java
+@@ -83,3 +83,3 @@
+     public Brain<Breeze> getBrain() {
+-        return super.getBrain();
++        return (Brain<Breeze>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/creaking/Creaking.java b/src/main/java/net/minecraft/world/entity/monster/creaking/Creaking.java
+index da8bad750ffccad699e0bda7f5b20ee8abb3fc24..4c3562d9311297ff395588f1ee0350499096a997 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/creaking/Creaking.java
++++ b/src/main/java/net/minecraft/world/entity/monster/creaking/Creaking.java
+@@ -203,3 +203,3 @@
+     public Brain<Creaking> getBrain() {
+-        return super.getBrain();
++        return (Brain<Creaking>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/hoglin/Hoglin.java b/src/main/java/net/minecraft/world/entity/monster/hoglin/Hoglin.java
+index 416477efe5e9061ad79054cdc2d0f2fd560fa37d..17681962381fd6577dbf93a1727766a837626245 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/hoglin/Hoglin.java
++++ b/src/main/java/net/minecraft/world/entity/monster/hoglin/Hoglin.java
+@@ -139,3 +139,3 @@
+     public Brain<Hoglin> getBrain() {
+-        return super.getBrain();
++        return (Brain<Hoglin>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/hoglin/HoglinAi.java b/src/main/java/net/minecraft/world/entity/monster/hoglin/HoglinAi.java
+index 217cedb454db1376ffda5b347d280b79069428cd..9987e311c280484b7a600819a4890c15042e1dd3 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/hoglin/HoglinAi.java
++++ b/src/main/java/net/minecraft/world/entity/monster/hoglin/HoglinAi.java
+@@ -107,3 +107,3 @@
+                 SetEntityLookTargetSometimes.create(8.0F, UniformInt.of(30, 60)),
+-                EraseMemoryIf.<PathfinderMob>create(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
++                EraseMemoryIf.<Hoglin>create(HoglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
+             ),
+diff --git a/src/main/java/net/minecraft/world/entity/monster/piglin/Piglin.java b/src/main/java/net/minecraft/world/entity/monster/piglin/Piglin.java
+index 49f90e215efd032e31d112443ce1bb3969a2e978..cdd343191ebea21e731bd4520adcbe448f560661 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/piglin/Piglin.java
++++ b/src/main/java/net/minecraft/world/entity/monster/piglin/Piglin.java
+@@ -215,3 +215,3 @@
+     public Brain<Piglin> getBrain() {
+-        return super.getBrain();
++        return (Brain<Piglin>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinAi.java b/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinAi.java
+index 5a36d711f34e2a74050d813e4a94247317e8a191..d148f1a4d0683bb0aefd2b27744249e7f836b6f3 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinAi.java
++++ b/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinAi.java
+@@ -175,3 +175,3 @@
+             10,
+-            ImmutableList.of(
++            ImmutableList.<BehaviorControl<? super Piglin>>of(
+                 StopAttackingIfTargetInvalid.create((level, target) -> !isNearestValidAttackTarget(level, body, target)),
+@@ -201,3 +201,3 @@
+                 BehaviorBuilder.triggerIf(Piglin::isDancing, GoToTargetLocation.create(MemoryModuleType.CELEBRATE_LOCATION, 4, 0.6F)),
+-                new RunOne<LivingEntity>(
++                new RunOne<Piglin>(
+                     ImmutableList.of(
+@@ -234,3 +234,3 @@
+                 createIdleMovementBehaviors(),
+-                EraseMemoryIf.<PathfinderMob>create(PiglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
++                EraseMemoryIf.<Piglin>create(PiglinAi::wantsToStopFleeing, MemoryModuleType.AVOID_TARGET)
+             ),
+@@ -256,3 +256,3 @@
+                 ),
+-                DismountOrSkipMounting.<LivingEntity>create(8, PiglinAi::wantsToStopRiding)
++                DismountOrSkipMounting.<Piglin>create(8, PiglinAi::wantsToStopRiding)
+             ),
+diff --git a/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinBrute.java b/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinBrute.java
+index f29932934621a4d882f52f053df9f2e721e216c1..a712f4a1ccec2e6bc81ef96730c4b0f31a443638 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinBrute.java
++++ b/src/main/java/net/minecraft/world/entity/monster/piglin/PiglinBrute.java
+@@ -81,3 +81,3 @@
+     public Brain<PiglinBrute> getBrain() {
+-        return super.getBrain();
++        return (Brain<PiglinBrute>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/monster/piglin/StartHuntingHoglin.java b/src/main/java/net/minecraft/world/entity/monster/piglin/StartHuntingHoglin.java
+index 240d0a1710d2bcec69fb3001d94ad2bfcf36a102..6dad175699888f29d83665092a421ed4fe3f5f1a 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/piglin/StartHuntingHoglin.java
++++ b/src/main/java/net/minecraft/world/entity/monster/piglin/StartHuntingHoglin.java
+@@ -18,3 +18,3 @@
+                 .apply(i, (huntable, angryAt, huntedRecently, nearestPiglins) -> (level, body, timestamp) -> {
+-                    if (!body.isBaby() && !i.<List>tryGet(nearestPiglins).filter(p -> p.stream().anyMatch(StartHuntingHoglin::hasHuntedRecently)).isPresent()) {
++                    if (!body.isBaby() && !i.<List<AbstractPiglin>>tryGet(nearestPiglins).filter(p -> p.stream().anyMatch(StartHuntingHoglin::hasHuntedRecently)).isPresent()) {
+                         Hoglin target = i.get(huntable);
+@@ -23,3 +23,3 @@
+                         PiglinAi.broadcastAngerTarget(level, body, target);
+-                        i.<List>tryGet(nearestPiglins).ifPresent(p -> p.forEach(PiglinAi::dontKillAnyMoreHoglinsForAWhile));
++                        i.<List<AbstractPiglin>>tryGet(nearestPiglins).ifPresent(p -> p.forEach(PiglinAi::dontKillAnyMoreHoglinsForAWhile));
+                         return true;
+diff --git a/src/main/java/net/minecraft/world/entity/monster/warden/Warden.java b/src/main/java/net/minecraft/world/entity/monster/warden/Warden.java
+index 51920285c126113ca296d52d8ae671855062741a..e81f08356d553a14c2f3de4dd206212646cc12f6 100644
+--- a/src/main/java/net/minecraft/world/entity/monster/warden/Warden.java
++++ b/src/main/java/net/minecraft/world/entity/monster/warden/Warden.java
+@@ -381,3 +381,3 @@
+     public Brain<Warden> getBrain() {
+-        return super.getBrain();
++        return (Brain<Warden>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/npc/villager/Villager.java b/src/main/java/net/minecraft/world/entity/npc/villager/Villager.java
+index 57616139710bb8798667170ca29314edb9475b86..0f719836e6a0aa1aab8aa7c309b7d02b3df803bc 100644
+--- a/src/main/java/net/minecraft/world/entity/npc/villager/Villager.java
++++ b/src/main/java/net/minecraft/world/entity/npc/villager/Villager.java
+@@ -191,3 +191,3 @@
+     public Brain<Villager> getBrain() {
+-        return super.getBrain();
++        return (Brain<Villager>)super.getBrain();
+     }
+diff --git a/src/main/java/net/minecraft/world/entity/variant/PriorityProvider.java b/src/main/java/net/minecraft/world/entity/variant/PriorityProvider.java
+index cd8fccd681ecfc7fccf1dbfa31c200affde5d8dd..acb944fcd44ff597d66d740e7ba1efa4dd12b2a5 100644
+--- a/src/main/java/net/minecraft/world/entity/variant/PriorityProvider.java
++++ b/src/main/java/net/minecraft/world/entity/variant/PriorityProvider.java
+@@ -105,3 +105,3 @@
+     record UnpackedEntry<C, T>(T entry, int priority, PriorityProvider.SelectorCondition<C> condition) {
+-        public static final Comparator<PriorityProvider.UnpackedEntry<?, ?>> HIGHEST_PRIORITY_FIRST = Comparator.comparingInt(
++        public static final Comparator<PriorityProvider.UnpackedEntry<?, ?>> HIGHEST_PRIORITY_FIRST = Comparator.<PriorityProvider.UnpackedEntry<?, ?>>comparingInt(
+                 PriorityProvider.UnpackedEntry::priority

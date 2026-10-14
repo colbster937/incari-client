@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 4 Oct 2026 16:09:25 -0400
+Subject: [PATCH] render: Accessors to read a section copy's blocks in bulk
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/RenderSectionRegion.java b/src/main/java/net/minecraft/client/renderer/chunk/RenderSectionRegion.java
+index cca0c5e25e38003f1ba0d00f154aebb0c89034c0..0cdb2562a818ffc8c4ca8386932ac20859a047d6 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/RenderSectionRegion.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/RenderSectionRegion.java
+@@ -74,2 +74,6 @@
+ 
++    // Incari start: a section's copy, for reading its blocks in bulk
++    public SectionCopy incariSection(final int sectionX, final int sectionY, final int sectionZ) { return this.getSection(sectionX, sectionY, sectionZ); }
++    // Incari end
++
+     @Override
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionCopy.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionCopy.java
+index 967e4fcf526fdd913bac8e826bdbf231ed7dff81..e854b60c65016285c19e7f160286ab9acdf76861 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionCopy.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionCopy.java
+@@ -42,2 +42,7 @@
+ 
++    // Incari start: the copied blocks, for reading them in bulk (null: all air, or a debug world's)
++    public @Nullable PalettedContainer<BlockState> incariStates() { return this.debug ? null : this.section; }
++    public boolean incariDebug() { return this.debug; }
++    // Incari end
++
+     public @Nullable BlockEntity getBlockEntity(final BlockPos pos) {

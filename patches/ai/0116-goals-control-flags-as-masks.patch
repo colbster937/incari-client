@@ -1,0 +1,53 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 08:50:00 -0400
+Subject: [PATCH] ai: Goals' control flags as masks
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/ai/goal/Goal.java b/src/main/java/net/minecraft/world/entity/ai/goal/Goal.java
+index c50e8aea838dd27e4925445e46e16aa2d80ef363..bc46baecf8787375db8986629cfb560b0465e7b4 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/goal/Goal.java
++++ b/src/main/java/net/minecraft/world/entity/ai/goal/Goal.java
+@@ -10,2 +10,3 @@
+     private final EnumSet<Goal.Flag> flags = EnumSet.noneOf(Goal.Flag.class);
++    private int incariFlagMask; // Incari: the flags as a mask (GoalFlags)
+ 
+@@ -37,2 +38,3 @@
+         this.flags.addAll(requiredControlFlags);
++        this.incariFlagMask = incari.client.world.GoalFlags.mask(this.flags); // Incari: the flags as a mask
+     }
+@@ -48,2 +50,8 @@
+ 
++    // Incari start: the flags as a mask (GoalFlags)
++    public int incariFlagMask() {
++        return this.incariFlagMask;
++    }
++    // Incari end
++
+     protected int adjustedTickDelay(final int ticks) {
+diff --git a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java b/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
+index 706a7ce383afef9d80197afafcb6e6dab138ae29..d2ce8bf9ab190817036b1dc7e44d2f42f3793bf0 100644
+--- a/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
++++ b/src/main/java/net/minecraft/world/entity/ai/goal/GoalSelector.java
+@@ -26,2 +26,3 @@
+     private final EnumSet<Goal.Flag> disabledFlags = EnumSet.noneOf(Goal.Flag.class);
++    private int incariDisabledMask; // Incari: the disabled flags as a mask (GoalFlags)
+ 
+@@ -70,3 +71,3 @@
+         for (WrappedGoal goal : this.availableGoals) {
+-            if (goal.isRunning() && (goalContainsAnyFlags(goal, this.disabledFlags) || !goal.canContinueToUse())) {
++            if (goal.isRunning() && (incari.client.world.GoalFlags.containsAny(goal, this.disabledFlags, this.incariDisabledMask) || !goal.canContinueToUse())) { // Incari: flags as masks
+                 goal.stop();
+@@ -80,3 +81,3 @@
+         for (WrappedGoal goal : this.availableGoals) {
+-            if (!goal.isRunning() && !goalContainsAnyFlags(goal, this.disabledFlags) && goalCanBeReplacedForAllFlags(goal, this.lockedFlags) && goal.canUse()) {
++            if (!goal.isRunning() && !incari.client.world.GoalFlags.containsAny(goal, this.disabledFlags, this.incariDisabledMask) && incari.client.world.GoalFlags.canReplaceAll(goal, this.lockedFlags, NO_GOAL) && goal.canUse()) { // Incari: flags as masks
+                 for (Goal.Flag flag : goal.getFlags()) {
+@@ -114,2 +115,3 @@
+         this.disabledFlags.add(flag);
++        this.incariDisabledMask |= 1 << flag.ordinal(); // Incari: the disabled flags as a mask
+     }
+@@ -118,2 +120,3 @@
+         this.disabledFlags.remove(flag);
++        this.incariDisabledMask &= ~(1 << flag.ordinal()); // Incari: the disabled flags as a mask
+     }

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Incari's pre-commit hook: the fast checks CI would fail on. `./incari setup` installs it
+# (git config core.hooksPath tools/git-hooks). Skip once with `git commit --no-verify`.
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+tools/ci/check-repo-content.sh
+tools/ci/check-no-publishing.sh
+
+if echo "$staged" | grep -qE '\.(java|kts)$'; then
+  ./gradlew --quiet spotlessCheck checkModuleBoundaries
+fi
+if echo "$staged" | grep -qE '\.java$' && [ -d work/decompiled ]; then
+  ./incari copycheck
+fi
+if echo "$staged" | grep -qE '\.(ts|json)$|eslint\.config\.js$' && [ -d node_modules ]; then
+  npm run --silent typecheck
+  npm run --silent lint
+  npm run --silent format:check
+fi
+if echo "$staged" | grep -qE '\.(vert|frag|comp|glsl)$'; then
+  tools/ci/check-glsl.sh
+fi
+if echo "$staged" | grep -qE '^patches/'; then
+  tools/ci/check-patch-budget.sh
+  if [ -d work/client/.git ]; then
+    ./incari rebuild --check
+  fi
+fi

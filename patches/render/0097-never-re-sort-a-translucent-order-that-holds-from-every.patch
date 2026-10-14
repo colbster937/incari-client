@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 4 Oct 2026 15:11:14 -0400
+Subject: [PATCH] render: Never re-sort a translucent order that holds from
+ every camera
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+index 166e99bae17be638e9847d4a9ae42ce6a66140fc..39e2e9b38bcad26d4f073e2cd22be84478ad6f94 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+@@ -269,2 +269,5 @@
+         public void resortTransparency() {
++            // Incari start: a translucent order that holds from every camera is never sorted again
++            if (incari.client.render.terrain.SectionDraws.keepsOrder(this.getSectionMesh())) return;
++            // Incari end
+             if (this.getSectionMesh() instanceof CompiledSectionMesh mesh) {

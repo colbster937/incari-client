@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 22:32:24 -0400
+Subject: [PATCH] world: Read and write a chunk's surface without the
+ proto-chunk's per-block overhead
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+index f3807cc7b5d2313051981683ff13eb147b569af3..5d8e5d71325a04afe02db99fb1ec525705cc2e5f 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+@@ -100,2 +100,5 @@
+         final int maxY = heightAccessor.getMaxY();
++        // Incari start: the column read and written without the proto-chunk's per-block overhead
++        final incari.client.world.SurfaceWrites writes = incari.client.world.SurfaceWrites.of(protoChunk);
++        // Incari end
+         BlockColumn column = new BlockColumn() {
+@@ -103,3 +106,5 @@
+             public BlockState getBlock(final int blockY) {
+-                return protoChunk.getBlockState(columnPos.setY(blockY));
++                // Incari start: through the writer when there is one
++                return writes != null ? writes.get(columnPos.setY(blockY)) : protoChunk.getBlockState(columnPos.setY(blockY));
++                // Incari end
+             }
+@@ -109,3 +114,5 @@
+                 if (blockY >= minY && blockY <= maxY) {
+-                    protoChunk.setBlockState(columnPos.setY(blockY), state);
++                    // Incari start: through the writer when there is one
++                    if (writes != null) writes.set(columnPos.setY(blockY), state); else protoChunk.setBlockState(columnPos.setY(blockY), state);
++                    // Incari end
+                     if (!state.getFluidState().isEmpty()) {

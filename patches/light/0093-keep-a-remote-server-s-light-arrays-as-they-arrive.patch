@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 18:28:19 -0400
+Subject: [PATCH] light: Keep a remote server's light arrays as they arrive
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java b/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
+index eda8f52cdd638a7c4b2e03405dca889cee8bb406..ee6b7cfbbdaec9dc2156348d59ca82e70fc6ce67 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
+@@ -2572,3 +2572,5 @@
+                 lightEngine.queueSectionData(
+-                    layer, SectionPos.of(chunkX, sectionY, chunkZ), haveData ? new DataLayer((byte[])updates.next().clone()) : new DataLayer()
++                    // Incari start: a remote server's light kept as it arrives, not copied again (ADR 0032)
++                    layer, SectionPos.of(chunkX, sectionY, chunkZ), haveData ? new DataLayer(incari.client.memory.LightCopies.received(updates.next(), this.connection.isMemoryConnection())) : new DataLayer()
++                    // Incari end
+                 );

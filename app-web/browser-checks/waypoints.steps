@@ -1,0 +1,66 @@
+# ADR 0051: the minimap and waypoints in the page. Creates a world, turns Minimap and Waypoints on
+# from the module menu, marks where the player stands with N and names it
+# Base, walks back from it so its label, distance and beam show ahead, opens the list with U and
+# the world map with M, and checks the world's waypoints and the explored map are stored in OPFS. No server needed. Positions are for the
+# 1280x577 viewport (GUI scale 2, 640x288).
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/waypoints.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue. Then Singleplayer, Create New World with the defaults.
+click:0.5,0.945
+sleep:3000
+click:0.2,0.43
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+
+# --- The module menu: Minimap's and Waypoints' switches (the right column's second and fourth cards) ---
+key:ShiftRight
+sleep:1500
+click:0.833,0.395
+sleep:300
+click:0.833,0.756
+sleep:300
+shot:build/browser-checks/waypoints-menu.png
+key:Escape
+sleep:4000
+shot:build/browser-checks/waypoints-minimap.png
+
+# --- N: a new waypoint where the player stands, named Base and added with Enter ---
+key:KeyN
+sleep:1500
+shot:build/browser-checks/waypoints-new.png
+type:Base
+key:Enter
+sleep:800
+
+# --- Back from it: its label, distance and beam ahead ---
+down:KeyS
+sleep:2500
+up:KeyS
+sleep:1500
+shot:build/browser-checks/waypoints-ahead.png
+
+# --- U: the list ---
+key:KeyU
+sleep:1500
+shot:build/browser-checks/waypoints-list.png
+key:Escape
+sleep:2500
+
+# --- M: the world map, Base on it; M again closes it ---
+key:KeyM
+sleep:2000
+shot:build/browser-checks/waypoints-worldmap.png
+key:KeyM
+sleep:1000
+
+# --- The world's waypoints are stored ---
+until:window.incariStorage.pending() === 0
+assert:(async () => { let d = await navigator.storage.getDirectory(); for (const p of ["incari", "game", "incari", "modules", "waypoints"]) d = await d.getDirectoryHandle(p); let found = ""; for await (const [name, handle] of d.entries()) { const text = await (await handle.getFile()).text(); console.log("[check] " + name + ": " + text); found += text; } return found.includes("\"name\":\"Base\""); })()
+# --- And the explored map, after the map's half-minute save ---
+sleep:31000
+until:window.incariStorage.pending() === 0
+assert:(async () => { let d = await navigator.storage.getDirectory(); for (const p of ["incari", "game", "incari", "map"]) d = await d.getDirectoryHandle(p); let count = 0; const walk = async (dir) => { for await (const [name, handle] of dir.entries()) { if (handle.kind === "directory") await walk(handle); else if (name.endsWith(".map")) count++; } }; await walk(d); console.log("[check] map regions: " + count); return count > 0; })()

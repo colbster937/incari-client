@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 21:17:45 -0400
+Subject: [PATCH] client: Show the player beside the title screen's buttons
+
+The title screen's Edit Profile link in the top left corner gives way to
+the player's model, their name over their head and an Edit Profile button
+below, to the right of the main buttons (Incari's TitleProfile).
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+index dad2ab9b13f8b43cc938fbb88efbf80f355c326e..ee7507fe31820c1e07a621f6e2d98d8714ac6722 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+@@ -160,4 +160,4 @@
+         );
+-        // Incari start: a link to Edit Profile (the name and skin)
+-        this.addRenderableWidget(incari.client.profile.ProfileScreen.titleLink(this));
++        // Incari start: the player, beside the buttons, and Edit Profile (the name and skin)
++        incari.client.profile.TitleProfile.add(this, this::addRenderableWidget);
+         // Incari end

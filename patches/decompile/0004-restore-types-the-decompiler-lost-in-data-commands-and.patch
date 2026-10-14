@@ -1,0 +1,747 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 10:34:37 -0400
+Subject: [PATCH] decompile: Restore types the decompiler lost in data,
+ commands and networking
+
+
+diff --git a/src/main/java/net/minecraft/advancements/predicates/MinMaxBounds.java b/src/main/java/net/minecraft/advancements/predicates/MinMaxBounds.java
+index d0bfea7364378fb30fb844ae62f9ac3685cd6b84..01fb36dc5ad51ba0914d3c15eb792657089a7ff3 100644
+--- a/src/main/java/net/minecraft/advancements/predicates/MinMaxBounds.java
++++ b/src/main/java/net/minecraft/advancements/predicates/MinMaxBounds.java
+@@ -78,3 +78,3 @@
+         public static <T extends Number & Comparable<T>> MinMaxBounds.Bounds<T> any() {
+-            return new MinMaxBounds.Bounds<>(Optional.empty(), Optional.empty());
++            return new MinMaxBounds.Bounds<T>(Optional.empty(), Optional.empty());
+         }
+diff --git a/src/main/java/net/minecraft/advancements/predicates/entity/EntityFlagsPredicate.java b/src/main/java/net/minecraft/advancements/predicates/entity/EntityFlagsPredicate.java
+index bdb8a63d2995cbb373cad0ac2cc1d2060c8e24d6..cad544492ce380750bb7207a6295c15e12a75b6a 100644
+--- a/src/main/java/net/minecraft/advancements/predicates/entity/EntityFlagsPredicate.java
++++ b/src/main/java/net/minecraft/advancements/predicates/entity/EntityFlagsPredicate.java
+@@ -72,3 +72,3 @@
+                 ? false
+-                : !(this.isBaby.isPresent() && entity instanceof LivingEntity living) || living.isBaby() == this.isBaby.get();
++                : !(this.isBaby.isPresent() && entity instanceof LivingEntity livingEntity) || livingEntity.isBaby() == this.isBaby.get();
+         }
+diff --git a/src/main/java/net/minecraft/advancements/predicates/entity/PlayerPredicate.java b/src/main/java/net/minecraft/advancements/predicates/entity/PlayerPredicate.java
+index c8841b24fc9d5e438e82213445fa3cf8d7ad1e57..523f9bfdf30ee0009c67e1c8d509e86079ca4d26 100644
+--- a/src/main/java/net/minecraft/advancements/predicates/entity/PlayerPredicate.java
++++ b/src/main/java/net/minecraft/advancements/predicates/entity/PlayerPredicate.java
+@@ -258,3 +258,3 @@
+                 i -> i.group(
+-                        (App<Mu<? extends PlayerPredicate.StatMatcher<?>>, Holder<T>>)type.getRegistry()
++                        type.getRegistry()
+                             .holderByNameCodec()
+@@ -262,3 +262,3 @@
+                             .forGetter(PlayerPredicate.StatMatcher::value),
+-                        (App<Mu<? extends PlayerPredicate.StatMatcher<?>>, MinMaxBounds.Ints>)MinMaxBounds.Ints.CODEC
++                        MinMaxBounds.Ints.CODEC
+                             .optionalFieldOf("value", MinMaxBounds.Ints.ANY)
+diff --git a/src/main/java/net/minecraft/commands/execution/tasks/BuildContexts.java b/src/main/java/net/minecraft/commands/execution/tasks/BuildContexts.java
+index 049ae7bcbf7d9035a12ce872d7aa21e3da91ba44..6cd75a9e45cd0417c137fce627a4689df3fda124 100644
+--- a/src/main/java/net/minecraft/commands/execution/tasks/BuildContexts.java
++++ b/src/main/java/net/minecraft/commands/execution/tasks/BuildContexts.java
+@@ -58,3 +58,3 @@
+                     RedirectModifier<T> modifier = contextToRun.getRedirectModifier();
+-                    if (modifier instanceof CustomModifierExecutor<T> customModifierExecutor) {
++                    if (modifier instanceof CustomModifierExecutor customModifierExecutor) {
+                         customModifierExecutor.apply(originalSource, currentSources, currentStage, modifiers, ExecutionControl.create(context, frame));
+@@ -97,3 +97,3 @@
+             if (modifiers.isReturn()) {
+-                context.queueNext(new CommandQueueEntry<>(frame, FallthroughTask.instance()));
++                context.queueNext(new CommandQueueEntry<>(frame, FallthroughTask.<T>instance()));
+             }
+@@ -101,3 +101,3 @@
+             CommandContext<T> executeContext = currentStage.getTopContext();
+-            if (executeContext.getCommand() instanceof CustomCommandExecutor<T> customCommandExecutor) {
++            if (executeContext.getCommand() instanceof CustomCommandExecutor customCommandExecutor) {
+                 ExecutionControl<T> executionControl = ExecutionControl.create(context, frame);
+diff --git a/src/main/java/net/minecraft/commands/synchronization/ArgumentTypeInfos.java b/src/main/java/net/minecraft/commands/synchronization/ArgumentTypeInfos.java
+index 21051341ed7629a91438d227c913c8a3f534be22..e3d7cfca9e1d23824f17e6ac680c2cb42290d620 100644
+--- a/src/main/java/net/minecraft/commands/synchronization/ArgumentTypeInfos.java
++++ b/src/main/java/net/minecraft/commands/synchronization/ArgumentTypeInfos.java
+@@ -123,7 +123,7 @@
+         register(registry, "time", TimeArgument.class, new TimeArgument.Info());
+-        register(registry, "resource_or_tag", fixClassType(ResourceOrTagArgument.class), new ResourceOrTagArgument.Info());
+-        register(registry, "resource_or_tag_key", fixClassType(ResourceOrTagKeyArgument.class), new ResourceOrTagKeyArgument.Info());
+-        register(registry, "resource", fixClassType(ResourceArgument.class), new ResourceArgument.Info());
+-        register(registry, "resource_key", fixClassType(ResourceKeyArgument.class), new ResourceKeyArgument.Info());
+-        register(registry, "resource_selector", fixClassType(ResourceSelectorArgument.class), new ResourceSelectorArgument.Info());
++        register(registry, "resource_or_tag", fixClassType(ResourceOrTagArgument.class), new ResourceOrTagArgument.Info<>());
++        register(registry, "resource_or_tag_key", fixClassType(ResourceOrTagKeyArgument.class), new ResourceOrTagKeyArgument.Info<>());
++        register(registry, "resource", fixClassType(ResourceArgument.class), new ResourceArgument.Info<>());
++        register(registry, "resource_key", fixClassType(ResourceKeyArgument.class), new ResourceKeyArgument.Info<>());
++        register(registry, "resource_selector", fixClassType(ResourceSelectorArgument.class), new ResourceSelectorArgument.Info<>());
+         register(registry, "template_mirror", TemplateMirrorArgument.class, SingletonArgumentInfo.contextFree(TemplateMirrorArgument::templateMirror));
+diff --git a/src/main/java/net/minecraft/commands/synchronization/SuggestionProviders.java b/src/main/java/net/minecraft/commands/synchronization/SuggestionProviders.java
+index 25761ea524e4f93a3ff136ae3f2640522ee72e9b..4bd7fa38e8a0b61f61edfebb9a7ca140044dac58 100644
+--- a/src/main/java/net/minecraft/commands/synchronization/SuggestionProviders.java
++++ b/src/main/java/net/minecraft/commands/synchronization/SuggestionProviders.java
+@@ -42,3 +42,3 @@
+         } else {
+-            return new SuggestionProviders.RegisteredSuggestion(name, provider);
++            return (SuggestionProvider<S>)new SuggestionProviders.RegisteredSuggestion(name, provider);
+         }
+diff --git a/src/main/java/net/minecraft/core/Registry.java b/src/main/java/net/minecraft/core/Registry.java
+index d0c4e7e05e7e0dbb7094c8c3c7676e2d4fe4cc56..7eb593ad697a329f6b9c9c1e6b3c04659aa943d9 100644
+--- a/src/main/java/net/minecraft/core/Registry.java
++++ b/src/main/java/net/minecraft/core/Registry.java
+@@ -138,3 +138,3 @@
+     default Iterable<Holder<T>> getTagOrEmpty(final TagKey<T> id) {
+-        return DataFixUtils.orElse(this.get(id), List.<T>of());
++        return DataFixUtils.orElse(this.get(id), List.<Holder<T>>of());
+     }
+diff --git a/src/main/java/net/minecraft/core/component/DataComponentPatch.java b/src/main/java/net/minecraft/core/component/DataComponentPatch.java
+index a10a0ca460525638eea6e9fe92753fcc5a5d0886..137184338eb365a430c2ace41043599586785000 100644
+--- a/src/main/java/net/minecraft/core/component/DataComponentPatch.java
++++ b/src/main/java/net/minecraft/core/component/DataComponentPatch.java
+@@ -21,3 +21,3 @@
+     public static final DataComponentPatch EMPTY = new DataComponentPatch(Reference2ObjectMaps.emptyMap());
+-    public static final Codec<DataComponentPatch> CODEC = Codec.dispatchedMap(DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec)
++    public static final Codec<DataComponentPatch> CODEC = Codec.<DataComponentPatch.PatchKey, Object>dispatchedMap(DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec)
+         .xmap(data -> {
+diff --git a/src/main/java/net/minecraft/core/component/DataComponentType.java b/src/main/java/net/minecraft/core/component/DataComponentType.java
+index 020aebc15c1942255e9f85397c1b6137a56e8ccf..1bd3b43d10e4ce198271526a74e571cc6b3a46df 100644
+--- a/src/main/java/net/minecraft/core/component/DataComponentType.java
++++ b/src/main/java/net/minecraft/core/component/DataComponentType.java
+@@ -112,3 +112,3 @@
+             public String toString() {
+-                return Util.getRegisteredName((Registry<DataComponentType.Builder.SimpleType<T>>)BuiltInRegistries.DATA_COMPONENT_TYPE, this);
++                return Util.getRegisteredName(BuiltInRegistries.DATA_COMPONENT_TYPE, this);
+             }
+diff --git a/src/main/java/net/minecraft/core/component/TypedDataComponent.java b/src/main/java/net/minecraft/core/component/TypedDataComponent.java
+index a6db33a274bfba752df0b5644d3b5d0dca9e70ff..c9d7c96102be20b53d0ca6bd716769fdb7274244 100644
+--- a/src/main/java/net/minecraft/core/component/TypedDataComponent.java
++++ b/src/main/java/net/minecraft/core/component/TypedDataComponent.java
+@@ -13,3 +13,3 @@
+             DataComponentType<?> type = DataComponentType.STREAM_CODEC.decode(input);
+-            return decodeTyped(input, (DataComponentType<T>)type);
++            return decodeTyped(input, type);
+         }
+@@ -21,3 +21,3 @@
+         public void encode(final RegistryFriendlyByteBuf output, final TypedDataComponent<?> value) {
+-            encodeCap(output, (TypedDataComponent<T>)value);
++            encodeCap(output, value);
+         }
+diff --git a/src/main/java/net/minecraft/core/component/predicates/DataComponentPredicate.java b/src/main/java/net/minecraft/core/component/predicates/DataComponentPredicate.java
+index efff43c05a58541a18bd12103bf797548b4dc103..0b4a7eeda9bc308ec9d132c9bb85b0c9c6fd5ccd 100644
+--- a/src/main/java/net/minecraft/core/component/predicates/DataComponentPredicate.java
++++ b/src/main/java/net/minecraft/core/component/predicates/DataComponentPredicate.java
+@@ -28,3 +28,3 @@
+             singles -> singles.stream().collect(Collectors.toMap(DataComponentPredicate.Single::type, DataComponentPredicate.Single::predicate)),
+-            map -> map.entrySet().stream().map(DataComponentPredicate.Single::fromEntry).toList()
++            map -> map.entrySet().stream().<DataComponentPredicate.Single<?>>map(DataComponentPredicate.Single::fromEntry).toList()
+         );
+diff --git a/src/main/java/net/minecraft/core/registries/BuiltInRegistries.java b/src/main/java/net/minecraft/core/registries/BuiltInRegistries.java
+index 7467559548920dceb8769fed46b645a5916fa547..974f47507987169ca97689c4de177d391248fd3a 100644
+--- a/src/main/java/net/minecraft/core/registries/BuiltInRegistries.java
++++ b/src/main/java/net/minecraft/core/registries/BuiltInRegistries.java
+@@ -398,3 +398,3 @@
+         LOADERS.put(key, () -> loader.run(registry));
+-        WRITABLE_REGISTRY.register((ResourceKey<WritableRegistry<?>>)name, registry, RegistrationInfo.BUILT_IN);
++        WRITABLE_REGISTRY.register((ResourceKey<WritableRegistry<?>>)(ResourceKey)name, registry, RegistrationInfo.BUILT_IN);
+         return registry;
+diff --git a/src/main/java/net/minecraft/core/registries/codec/HolderSetCodec.java b/src/main/java/net/minecraft/core/registries/codec/HolderSetCodec.java
+index 0c530e0ca976724d5bfaecd4e1fac6eda22c67dd..bb6d4e3525145c66501234f011c37f3b34d79a58 100644
+--- a/src/main/java/net/minecraft/core/registries/codec/HolderSetCodec.java
++++ b/src/main/java/net/minecraft/core/registries/codec/HolderSetCodec.java
+@@ -66,3 +66,3 @@
+         return registry.get(key)
+-            .map(DataResult::success)
++            .<DataResult<HolderSet<E>>>map(DataResult::success)
+             .orElseGet(() -> DataResult.error(() -> "Missing tag: '" + key.location() + "' in '" + key.registry().identifier() + "'"));
+@@ -76,3 +76,3 @@
+             } else {
+-                return !named.canSerializeIn((HolderOwner<T>)maybeOwner.get())
++                return !named.canSerializeIn((HolderOwner<E>)maybeOwner.get())
+                     ? DataResult.error(() -> "HolderSet " + named + " is not valid in current registry set")
+diff --git a/src/main/java/net/minecraft/data/info/RegistryDumpReport.java b/src/main/java/net/minecraft/data/info/RegistryDumpReport.java
+index 0a5a48b1efcdd3ceedea7f24b6ec1c3933fd7f8a..a53be2a1e4e3ef5f82ed1001bd004d24e72436b6 100644
+--- a/src/main/java/net/minecraft/data/info/RegistryDumpReport.java
++++ b/src/main/java/net/minecraft/data/info/RegistryDumpReport.java
+@@ -36,3 +36,3 @@
+ 
+-        int registryId = BuiltInRegistries.REGISTRY.getId(registry);
++        int registryId = ((Registry)BuiltInRegistries.REGISTRY).getId(registry);
+         result.addProperty("protocol_id", registryId);
+diff --git a/src/main/java/net/minecraft/locale/Language.java b/src/main/java/net/minecraft/locale/Language.java
+index 2830669cb8333a234f95c393c896efa79182fe05..47cd33bce908744e64356b585853d6a8ecf82443 100644
+--- a/src/main/java/net/minecraft/locale/Language.java
++++ b/src/main/java/net/minecraft/locale/Language.java
+@@ -60,3 +60,3 @@
+                 return outputx -> logicalOrderText.visit(
+-                        (style, contents) -> StringDecomposer.iterateFormatted(contents, style, output) ? Optional.empty() : FormattedText.STOP_ITERATION,
++                        (style, contents) -> StringDecomposer.iterateFormatted(contents, style, outputx) ? Optional.empty() : FormattedText.STOP_ITERATION,
+                         Style.EMPTY
+diff --git a/src/main/java/net/minecraft/network/codec/StreamCodec.java b/src/main/java/net/minecraft/network/codec/StreamCodec.java
+index 24ddd68e52cabc0ea9959b6e4e2c888afef866e2..1f830bfb4de17264c54e5ff4132255b654e463b8 100644
+--- a/src/main/java/net/minecraft/network/codec/StreamCodec.java
++++ b/src/main/java/net/minecraft/network/codec/StreamCodec.java
+@@ -762,3 +762,3 @@
+     default <S extends B> StreamCodec<S, V> cast() {
+-        return this;
++        return (StreamCodec<S, V>)this;
+     }
+diff --git a/src/main/java/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java b/src/main/java/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
+index 8d09b599b12df41ff1f39c9945581998a23994de..82891eb7f2748051d0df35b570e795e8b1019f06 100644
+--- a/src/main/java/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
++++ b/src/main/java/net/minecraft/network/protocol/common/custom/CustomPacketPayload.java
+@@ -36,3 +36,3 @@
+                 output.writeIdentifier(type.id());
+-                StreamCodec<B, T> codec = this.findCodec(type.id);
++                StreamCodec<B, T> codec = (StreamCodec<B, T>)this.findCodec(type.id);
+                 codec.encode(output, (T)payload);
+diff --git a/src/main/java/net/minecraft/network/protocol/game/ClientboundGameRuleValuesPacket.java b/src/main/java/net/minecraft/network/protocol/game/ClientboundGameRuleValuesPacket.java
+index 1dd733cdda3a130259b9f161dc08346c231f6365..664611686ac0a081e2c9a2127cf2f3d1cc9e36f9 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/ClientboundGameRuleValuesPacket.java
++++ b/src/main/java/net/minecraft/network/protocol/game/ClientboundGameRuleValuesPacket.java
+@@ -14,3 +14,3 @@
+ public record ClientboundGameRuleValuesPacket(Map<ResourceKey<GameRule<?>>, String> values) implements Packet<ClientGamePacketListener> {
+-    public static final StreamCodec<FriendlyByteBuf, ClientboundGameRuleValuesPacket> STREAM_CODEC = ByteBufCodecs.map(
++    public static final StreamCodec<FriendlyByteBuf, ClientboundGameRuleValuesPacket> STREAM_CODEC = ByteBufCodecs.<FriendlyByteBuf, ResourceKey<GameRule<?>>, String, Map<ResourceKey<GameRule<?>>, String>>map(
+             HashMap::new, ResourceKey.streamCodec(Registries.GAME_RULE), ByteBufCodecs.STRING_UTF8
+diff --git a/src/main/java/net/minecraft/network/protocol/game/VecDelta.java b/src/main/java/net/minecraft/network/protocol/game/VecDelta.java
+index a0101180327da7c13b7dc9c6531f875a33668159..11a5ab2c3dc15117ad1ace8313c6c15402178d7e 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/VecDelta.java
++++ b/src/main/java/net/minecraft/network/protocol/game/VecDelta.java
+@@ -59,3 +59,3 @@
+                 case VecDelta.Stepped(List var20):
+-                    List var10 = var20;
++                    List<VecDelta.Stepped.DeltaStep> var10 = var20;
+ 
+diff --git a/src/main/java/net/minecraft/network/protocol/game/VecDeltaCodec.java b/src/main/java/net/minecraft/network/protocol/game/VecDeltaCodec.java
+index c32adfd4f936a45feb0286e4e576a7459ae723f9..d4f99d044caae69328763c3f5a6670af2cd28b71 100644
+--- a/src/main/java/net/minecraft/network/protocol/game/VecDeltaCodec.java
++++ b/src/main/java/net/minecraft/network/protocol/game/VecDeltaCodec.java
+@@ -55,2 +55,3 @@
+                 var10000 = var6;
++                List var14;
+ 
+diff --git a/src/main/java/net/minecraft/network/syncher/EntityDataSerializer.java b/src/main/java/net/minecraft/network/syncher/EntityDataSerializer.java
+index c23b268bb5e98a56e70ca56457ca1ed071948125..4ac8950b2e046ea3533456509112c11027d8145b 100644
+--- a/src/main/java/net/minecraft/network/syncher/EntityDataSerializer.java
++++ b/src/main/java/net/minecraft/network/syncher/EntityDataSerializer.java
+@@ -15,3 +15,3 @@
+     static <T> EntityDataSerializer<T> forValueType(final StreamCodec<? super RegistryFriendlyByteBuf, T> codec) {
+-        return () -> codec;
++        return (EntityDataSerializer.ForValueType<T>)() -> codec;
+     }
+diff --git a/src/main/java/net/minecraft/network/syncher/EntityDataSerializers.java b/src/main/java/net/minecraft/network/syncher/EntityDataSerializers.java
+index 4642e10f08a0af8ad620c4f3d8d144621a48d1f5..2e0a8177142f2c7202dd72733ff1f90c0eed4362 100644
+--- a/src/main/java/net/minecraft/network/syncher/EntityDataSerializers.java
++++ b/src/main/java/net/minecraft/network/syncher/EntityDataSerializers.java
+@@ -100,3 +100,3 @@
+     public static final EntityDataSerializer<Optional<EntityReference<LivingEntity>>> OPTIONAL_LIVING_ENTITY_REFERENCE = EntityDataSerializer.forValueType(
+-        EntityReference.streamCodec().apply(ByteBufCodecs::optional)
++        EntityReference.<LivingEntity>streamCodec().apply(ByteBufCodecs::optional)
+     );
+diff --git a/src/main/java/net/minecraft/resources/RegistryDataLoader.java b/src/main/java/net/minecraft/resources/RegistryDataLoader.java
+index 472c4da5df48e26db46597c72fd410d50defc932..a60ef33655bb22f73f675511fce1f9ed27a218ed 100644
+--- a/src/main/java/net/minecraft/resources/RegistryDataLoader.java
++++ b/src/main/java/net/minecraft/resources/RegistryDataLoader.java
+@@ -96,3 +96,3 @@
+     private static final Logger LOGGER = LogUtils.getLogger();
+-    private static final Comparator<ResourceKey<?>> ERROR_KEY_COMPARATOR = Comparator.comparing(ResourceKey::registry).thenComparing(ResourceKey::identifier);
++    private static final Comparator<ResourceKey<?>> ERROR_KEY_COMPARATOR = Comparator.<ResourceKey<?>, Identifier>comparing(ResourceKey::registry).thenComparing(ResourceKey::identifier);
+     public static final List<RegistryDataLoader.RegistryData<?>> WORLD_REGISTRIES = List.of(
+diff --git a/src/main/java/net/minecraft/server/commands/PlaceCommand.java b/src/main/java/net/minecraft/server/commands/PlaceCommand.java
+index d5091a3480d425c1707692f8fe73b328979fda0d..ef3f3d0934aed1346644ec787c36bcbdc4b93dbd 100644
+--- a/src/main/java/net/minecraft/server/commands/PlaceCommand.java
++++ b/src/main/java/net/minecraft/server/commands/PlaceCommand.java
+@@ -73,3 +73,3 @@
+                         .then(
+-                            ((RequiredArgumentBuilder)Commands.argument("feature", ResourceOrIdArgument.feature(context))
++                            (Commands.argument("feature", ResourceOrIdArgument.feature(context))
+                                     .executes(
+diff --git a/src/main/java/net/minecraft/server/dedicated/Settings.java b/src/main/java/net/minecraft/server/dedicated/Settings.java
+index 9500d9729a8a625694123bfe4c6c5032b010fca3..72fc496852c75a547926a453fc6d870f670faea2 100644
+--- a/src/main/java/net/minecraft/server/dedicated/Settings.java
++++ b/src/main/java/net/minecraft/server/dedicated/Settings.java
+@@ -115,3 +115,3 @@
+         this.properties.put(key, serializer.apply(result));
+-        return new Settings.MutableValue<>(key, result, serializer);
++        return new MutableValue<>(key, result, serializer);
+     }
+diff --git a/src/main/java/net/minecraft/server/dialog/action/StaticAction.java b/src/main/java/net/minecraft/server/dialog/action/StaticAction.java
+index 87e213d70f3070ca97f793a4eded76a94871b085..5cdac3e58ffc72377206268268ab2e8658ce6d09 100644
+--- a/src/main/java/net/minecraft/server/dialog/action/StaticAction.java
++++ b/src/main/java/net/minecraft/server/dialog/action/StaticAction.java
+@@ -16,3 +16,3 @@
+             if (action.isAllowedFromServer()) {
+-                MapCodec<ClickEvent> mapCodec = action.valueCodec();
++                MapCodec<ClickEvent> mapCodec = (MapCodec<ClickEvent>)action.valueCodec();
+                 result.put(action, mapCodec.xmap(StaticAction::new, StaticAction::value));
+diff --git a/src/main/java/net/minecraft/server/jsonrpc/IncomingRpcMethods.java b/src/main/java/net/minecraft/server/jsonrpc/IncomingRpcMethods.java
+index 7a228fa301307a3a98ba91de6bcc4a27abf24e37..357aeb4ca6302e18ac1f912d61cf6e45079a3029 100644
+--- a/src/main/java/net/minecraft/server/jsonrpc/IncomingRpcMethods.java
++++ b/src/main/java/net/minecraft/server/jsonrpc/IncomingRpcMethods.java
+@@ -357,3 +357,3 @@
+             .register(methodRegistry, "gamerules");
+-        IncomingRpcMethod.method(GameRulesService::update)
++        IncomingRpcMethod.<GameRulesService.GameRuleUpdate<?>, GameRulesService.GameRuleUpdate<?>>method(GameRulesService::update)
+             .description("Update game rule value")
+diff --git a/src/main/java/net/minecraft/server/jsonrpc/api/MethodInfo.java b/src/main/java/net/minecraft/server/jsonrpc/api/MethodInfo.java
+index 3d5766efe9d1954f7fadc043f0ae0c5e76c40d2c..432c98b4bf3144eab1c57c2ab7578b4b53b19a4f 100644
+--- a/src/main/java/net/minecraft/server/jsonrpc/api/MethodInfo.java
++++ b/src/main/java/net/minecraft/server/jsonrpc/api/MethodInfo.java
+@@ -31,3 +31,3 @@
+                     Codec.STRING.fieldOf("description").forGetter(MethodInfo::description),
+-                    paramsTypedCodec().fieldOf("params").forGetter(MethodInfo::params),
++                    MethodInfo.<Params>paramsTypedCodec().fieldOf("params").forGetter(MethodInfo::params),
+                     ResultInfo.<Result>typedCodec().optionalFieldOf("result").forGetter(MethodInfo::result)
+@@ -43,3 +43,3 @@
+     public record Named<Params, Result>(Identifier name, MethodInfo<Params, Result> contents) {
+-        public static final Codec<MethodInfo.Named<?, ?>> CODEC = typedCodec();
++        public static final Codec<MethodInfo.Named<?, ?>> CODEC = (Codec)typedCodec();
+ 
+diff --git a/src/main/java/net/minecraft/server/jsonrpc/api/Schema.java b/src/main/java/net/minecraft/server/jsonrpc/api/Schema.java
+index 289021ab72c6a90223520cd3323a62f1c2a462f8..ede7e573ea8fa3a244752925a51c14b46da4f65e 100644
+--- a/src/main/java/net/minecraft/server/jsonrpc/api/Schema.java
++++ b/src/main/java/net/minecraft/server/jsonrpc/api/Schema.java
+@@ -38,3 +38,3 @@
+ ) {
+-    public static final Codec<? extends Schema<?>> CODEC = Codec.recursive(
++    public static final Codec<? extends Schema<?>> CODEC = Codec.<Schema<?>>recursive(
+             "Schema",
+@@ -42,11 +42,11 @@
+                 i -> i.group(
+-                        (App<Mu<? extends Schema<?>>, Optional<URI>>)ReferenceUtil.REFERENCE_CODEC.optionalFieldOf("$ref").forGetter(Schema::reference),
+-                        (App<Mu<? extends Schema<?>>, List<String>>)ExtraCodecs.compactListCodec(Codec.STRING)
++                        ReferenceUtil.REFERENCE_CODEC.optionalFieldOf("$ref").forGetter(Schema::reference),
++                        ExtraCodecs.compactListCodec(Codec.STRING)
+                             .optionalFieldOf("type", List.of())
+                             .forGetter(Schema::type),
+-                        (App<Mu<? extends Schema<?>>, Optional<? extends Schema<?>>>)subCodec.optionalFieldOf("items").forGetter(Schema::items),
+-                        (App<Mu<? extends Schema<?>>, Map<String, ? extends Schema<?>>>)Codec.unboundedMap(Codec.STRING, subCodec)
++                        subCodec.optionalFieldOf("items").forGetter(Schema::items),
++                        Codec.unboundedMap(Codec.STRING, subCodec)
+                             .optionalFieldOf("properties", Map.of())
+                             .forGetter(Schema::properties),
+-                        (App<Mu<? extends Schema<?>>, List<String>>)Codec.STRING.listOf().optionalFieldOf("enum", List.of()).forGetter(Schema::enumValues)
++                        Codec.STRING.listOf().optionalFieldOf("enum", List.of()).forGetter(Schema::enumValues)
+                     )
+diff --git a/src/main/java/net/minecraft/server/jsonrpc/methods/DiscoveryService.java b/src/main/java/net/minecraft/server/jsonrpc/methods/DiscoveryService.java
+index bae718e8f9e6e9afb7816a657605a1f8270075da..2f71bd63d4037d60dfb4fe1b0a6d1ba2dae531f6 100644
+--- a/src/main/java/net/minecraft/server/jsonrpc/methods/DiscoveryService.java
++++ b/src/main/java/net/minecraft/server/jsonrpc/methods/DiscoveryService.java
+@@ -42,3 +42,3 @@
+             return RecordCodecBuilder.mapCodec(
+-                i -> i.group(Codec.unboundedMap(Codec.STRING, Schema.CODEC).fieldOf("schemas").forGetter(DiscoveryService.DiscoverComponents::schemas))
++                i -> i.group(Codec.unboundedMap(Codec.STRING, (Codec<Schema<?>>)Schema.CODEC).fieldOf("schemas").forGetter(DiscoveryService.DiscoverComponents::schemas))
+                     .apply(i, DiscoveryService.DiscoverComponents::new)
+diff --git a/src/main/java/net/minecraft/server/jsonrpc/methods/GameRulesService.java b/src/main/java/net/minecraft/server/jsonrpc/methods/GameRulesService.java
+index 2e88db7f02d3250ca4b171dc1b86cff99a3798f1..0ab5c74db5f58cfd8974a79f88affe7dd04fb3b2 100644
+--- a/src/main/java/net/minecraft/server/jsonrpc/methods/GameRulesService.java
++++ b/src/main/java/net/minecraft/server/jsonrpc/methods/GameRulesService.java
+@@ -52,8 +52,8 @@
+         private static <T> MapCodec<? extends GameRulesService.GameRuleUpdate<T>> getValueAndTypeCodec(final GameRule<T> gameRule) {
+-            return RecordCodecBuilder.mapCodec(
++            return RecordCodecBuilder.<GameRulesService.GameRuleUpdate<T>>mapCodec(
+                 i -> i.group(
+-                        (App<Mu<? extends GameRulesService.GameRuleUpdate<?>>, GameRuleType>)StringRepresentable.fromEnum(GameRuleType::values)
++                        StringRepresentable.fromEnum(GameRuleType::values)
+                             .fieldOf("type")
+                             .forGetter(r -> r.gameRule.gameRuleType()),
+-                        (App<Mu<? extends GameRulesService.GameRuleUpdate<?>>, T>)gameRule.valueCodec()
++                        gameRule.valueCodec()
+                             .fieldOf("value")
+diff --git a/src/main/java/net/minecraft/server/level/ChunkTaskPriorityQueue.java b/src/main/java/net/minecraft/server/level/ChunkTaskPriorityQueue.java
+index 5c8742dfd40d15599ebb9bd5326b801649687b7b..7d4c3df37abad310001fae002380f1dbbb2857c2 100644
+--- a/src/main/java/net/minecraft/server/level/ChunkTaskPriorityQueue.java
++++ b/src/main/java/net/minecraft/server/level/ChunkTaskPriorityQueue.java
+@@ -12,3 +12,3 @@
+     private final List<Long2ObjectLinkedOpenHashMap<List<Runnable>>> queuesPerPriority = IntStream.range(0, PRIORITY_LEVEL_COUNT)
+-        .mapToObj(priority -> new Long2ObjectLinkedOpenHashMap<>())
++        .mapToObj(priority -> new Long2ObjectLinkedOpenHashMap<List<Runnable>>())
+         .toList();
+diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+index 2e5ecc9dd5a2fe20e2ee591207cedb3212761d5d..84ce93c395e2b5c3d42b6f35ffcb1bb1836e5749 100644
+--- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
++++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
+@@ -1026,3 +1026,3 @@
+             writtenBook.remove(DataComponents.WRITABLE_BOOK_CONTENT);
+-            List<Filterable<Component>> pages = contents.stream().map(page -> this.filterableFromOutgoing(page).map(Component::literal)).toList();
++            List<Filterable<Component>> pages = contents.stream().map(page -> this.filterableFromOutgoing(page).<Component>map(Component::literal)).toList();
+             writtenBook.set(
+diff --git a/src/main/java/net/minecraft/server/packs/metadata/MetadataSectionType.java b/src/main/java/net/minecraft/server/packs/metadata/MetadataSectionType.java
+index 8333490d32e35e8f4cea3dc9cdac9d595de444f9..70859695f275e344f175d5c3d5f8ccf72e2dde0c 100644
+--- a/src/main/java/net/minecraft/server/packs/metadata/MetadataSectionType.java
++++ b/src/main/java/net/minecraft/server/packs/metadata/MetadataSectionType.java
+@@ -12,3 +12,3 @@
+         public <U> Optional<U> unwrapToType(final MetadataSectionType<U> type) {
+-            return type == this.type ? Optional.of(this.value) : Optional.empty();
++            return type == this.type ? Optional.of((U)this.value) : Optional.empty();
+         }
+diff --git a/src/main/java/net/minecraft/util/AbstractListBuilder.java b/src/main/java/net/minecraft/util/AbstractListBuilder.java
+index 191c0adf473ebe823ba83f7c4423d3eba4f43982..0a6c027e92fb8a248dbfbda20d465e42e2bbac1c 100644
+--- a/src/main/java/net/minecraft/util/AbstractListBuilder.java
++++ b/src/main/java/net/minecraft/util/AbstractListBuilder.java
+@@ -29,3 +29,3 @@
+     public ListBuilder<T> add(final T value) {
+-        this.builder = this.builder.map(b -> (T)this.append((B)b, value));
++        this.builder = this.builder.map(b -> this.append((B)b, value));
+         return this;
+diff --git a/src/main/java/net/minecraft/util/CommonLinks.java b/src/main/java/net/minecraft/util/CommonLinks.java
+index 1e1d4edc6a7dee3c79096753573a93824219f622..a17368c7174279517a30323190fc12ceccc7ce05 100644
+--- a/src/main/java/net/minecraft/util/CommonLinks.java
++++ b/src/main/java/net/minecraft/util/CommonLinks.java
+@@ -41,2 +41,3 @@
+         return URI.create(switch (reference) {
++            case NONE -> uri;
+             case EXPIRED_TRIAL -> uri + "&ref=expiredTrial";
+diff --git a/src/main/java/net/minecraft/util/CubicSpline.java b/src/main/java/net/minecraft/util/CubicSpline.java
+index 0923cf152a7feb728170b7fcbbf9b20f20a11083..8ad2da2913b3dd718c4274b873532c15438a36e6 100644
+--- a/src/main/java/net/minecraft/util/CubicSpline.java
++++ b/src/main/java/net/minecraft/util/CubicSpline.java
+@@ -62,3 +62,3 @@
+                 .xmap(
+-                    e -> e.map(CubicSpline.Constant::new, (Function<? super CubicSpline.Multipoint<I>, ? extends CubicSpline.Constant<I>>)(m -> m)),
++                    e -> e.map(CubicSpline.Constant::new, (Function<? super CubicSpline.Multipoint<I>, ? extends CubicSpline<I>>)(m -> m)),
+                     spline -> {
+@@ -152,3 +152,3 @@
+         public <R extends BoundedFloatFunction<?>> CubicSpline<R> mapCoordinates(final Function<I, R> mapper) {
+-            return this;
++            return (CubicSpline<R>)this;
+         }
+diff --git a/src/main/java/net/minecraft/util/EncoderCache.java b/src/main/java/net/minecraft/util/EncoderCache.java
+index 6ded93292f97c8f7ed4e8f360658e6a96775f018..4508e92da4211cf49f21420250ab9b1a5b6ee933 100644
+--- a/src/main/java/net/minecraft/util/EncoderCache.java
++++ b/src/main/java/net/minecraft/util/EncoderCache.java
+@@ -35,4 +35,4 @@
+             public <T> DataResult<T> encode(final A input, final DynamicOps<T> ops, final T prefix) {
+-                return EncoderCache.this.cache
+-                    .getUnchecked(new EncoderCache.Key<>(codec, input, ops))
++                return (DataResult<T>)((DataResult<Object>)EncoderCache.this.cache
++                    .getUnchecked(new EncoderCache.Key<>(codec, input, ops)))
+                     .map(value -> value instanceof Tag tag ? tag.copy() : value);
+diff --git a/src/main/java/net/minecraft/util/ExtraCodecs.java b/src/main/java/net/minecraft/util/ExtraCodecs.java
+index 3c064520a91311380f5724886c32a8c4841bf732..ec82f8c31c2f1e2ef2914be65dd12601807a82df 100644
+--- a/src/main/java/net/minecraft/util/ExtraCodecs.java
++++ b/src/main/java/net/minecraft/util/ExtraCodecs.java
+@@ -294,3 +294,3 @@
+         }), p -> ImmutableList.of(getMin.apply((I)p), getMax.apply((I)p)));
+-        Codec<I> objectCodec = RecordCodecBuilder.<Pair>create(
++        Codec<I> objectCodec = RecordCodecBuilder.<Pair<P, P>>create(
+                 i -> i.group(pointCodec.fieldOf(lowerBoundName).forGetter(Pair::getFirst), pointCodec.fieldOf(upperBoundName).forGetter(Pair::getSecond))
+diff --git a/src/main/java/net/minecraft/util/HashOps.java b/src/main/java/net/minecraft/util/HashOps.java
+index 8958b20ad1e425cd4fee7f2d405988bd3de290c1..476957cddab281b1d89ef3b9f8652c8ad4d8587d 100644
+--- a/src/main/java/net/minecraft/util/HashOps.java
++++ b/src/main/java/net/minecraft/util/HashOps.java
+@@ -55,3 +55,3 @@
+         .thenComparing(Entry.comparingByValue(HASH_COMPARATOR));
+-    private static final Comparator<Pair<HashCode, HashCode>> MAPLIKE_ENTRY_ORDER = Comparator.comparing(Pair::getFirst, HASH_COMPARATOR)
++    private static final Comparator<Pair<HashCode, HashCode>> MAPLIKE_ENTRY_ORDER = Comparator.<Pair<HashCode, HashCode>, HashCode>comparing(Pair::getFirst, HASH_COMPARATOR)
+         .thenComparing(Pair::getSecond, HASH_COMPARATOR);
+diff --git a/src/main/java/net/minecraft/util/PlaceholderLookupProvider.java b/src/main/java/net/minecraft/util/PlaceholderLookupProvider.java
+index 1f37f7aa85160d82c6740f8a22e5f56df15eeae0..11552d175b0428f47983ee626af812e6f749a4fe 100644
+--- a/src/main/java/net/minecraft/util/PlaceholderLookupProvider.java
++++ b/src/main/java/net/minecraft/util/PlaceholderLookupProvider.java
+@@ -87,3 +87,3 @@
+         public <T> HolderGetter<T> castAsLookup() {
+-            return this;
++            return (HolderGetter<T>)this;
+         }
+diff --git a/src/main/java/net/minecraft/util/SortedArraySet.java b/src/main/java/net/minecraft/util/SortedArraySet.java
+index 28431f2a7827026603eac8bad29686d02f54cabb..0833ff5aeba6cb8b4d8921709de144808ae1c548 100644
+--- a/src/main/java/net/minecraft/util/SortedArraySet.java
++++ b/src/main/java/net/minecraft/util/SortedArraySet.java
+@@ -30,3 +30,3 @@
+     public static <T extends Comparable<T>> SortedArraySet<T> create(final int initialCapacity) {
+-        return new SortedArraySet<>(initialCapacity, Comparator.naturalOrder());
++        return new SortedArraySet<>(initialCapacity, Comparator.<T>naturalOrder());
+     }
+diff --git a/src/main/java/net/minecraft/util/Util.java b/src/main/java/net/minecraft/util/Util.java
+index 5a74e9593730649fc174d87b4a3597184d2f4b0f..f0552281f421b4da1e1c078943b4e5385713430e 100644
+--- a/src/main/java/net/minecraft/util/Util.java
++++ b/src/main/java/net/minecraft/util/Util.java
+@@ -635,3 +635,3 @@
+ 
+-        for (K key : (Enum[])keyType.getEnumConstants()) {
++        for (K key : (K[])keyType.getEnumConstants()) {
+             map.put(key, function.apply(key));
+diff --git a/src/main/java/net/minecraft/util/datafix/DataFixers.java b/src/main/java/net/minecraft/util/datafix/DataFixers.java
+index e47ad9720f5ea1fd4490df7444e20ec6e18568c0..8e67be08f6b0f1b0ae7c5a5aee5d727f69cee9e4 100644
+--- a/src/main/java/net/minecraft/util/datafix/DataFixers.java
++++ b/src/main/java/net/minecraft/util/datafix/DataFixers.java
+@@ -1191,3 +1191,3 @@
+         fixerUpper.addFixer(
+-            new EntityVariantFix(v3086, "Change cat variant type", References.ENTITY, "minecraft:cat", "CatType", Util.make(new Int2ObjectOpenHashMap(), m -> {
++            new EntityVariantFix(v3086, "Change cat variant type", References.ENTITY, "minecraft:cat", "CatType", Util.make(new Int2ObjectOpenHashMap<String>(), m -> {
+                 m.defaultReturnValue("minecraft:tabby");
+@@ -1227,3 +1227,3 @@
+             new EntityVariantFix(
+-                v3087, "Change frog variant type", References.ENTITY, "minecraft:frog", "Variant", Util.make(new Int2ObjectOpenHashMap(), m -> {
++                v3087, "Change frog variant type", References.ENTITY, "minecraft:frog", "Variant", Util.make(new Int2ObjectOpenHashMap<String>(), m -> {
+                     m.put(0, "minecraft:temperate");
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/BlockEntityUUIDFix.java b/src/main/java/net/minecraft/util/datafix/fixes/BlockEntityUUIDFix.java
+index 58d2c352099fac22f379a3424e7dc527c9a32d37..60359e5fe4b1014b8e54e6e4b34eee94fb0f93b5 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/BlockEntityUUIDFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/BlockEntityUUIDFix.java
+@@ -23,3 +23,3 @@
+             .map(ownerTag -> replaceUUIDString((Dynamic<?>)ownerTag, "Id", "Id").orElse((Dynamic<?>)ownerTag))
+-            .map(ownerTag -> tag.remove("Owner").set("SkullOwner", (Dynamic<?>)ownerTag))
++            .<Dynamic<?>>map(ownerTag -> tag.remove("Owner").set("SkullOwner", (Dynamic<?>)ownerTag))
+             .result()
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/ChunkBedBlockEntityInjecterFix.java b/src/main/java/net/minecraft/util/datafix/fixes/ChunkBedBlockEntityInjecterFix.java
+index a5f8f7f3096fae5690ff6f76fa63ec4c23b77c13..ec801b187f1a12b4ab3a4c2bb55c6eba8014bdfa 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/ChunkBedBlockEntityInjecterFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/ChunkBedBlockEntityInjecterFix.java
+@@ -13,2 +13,3 @@
+ import com.mojang.datafixers.types.templates.List.ListType;
++import com.mojang.datafixers.types.templates.TaggedChoice.TaggedChoiceType;
+ import com.mojang.serialization.Dynamic;
+@@ -42,4 +43,4 @@
+                 "InjectBedBlockEntityType",
+-                this.getInputSchema().findChoiceType(References.BLOCK_ENTITY),
+-                this.getOutputSchema().findChoiceType(References.BLOCK_ENTITY),
++                (TaggedChoiceType<String>)this.getInputSchema().findChoiceType(References.BLOCK_ENTITY),
++                (TaggedChoiceType<String>)this.getOutputSchema().findChoiceType(References.BLOCK_ENTITY),
+                 ops -> v -> v
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java b/src/main/java/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java
+index 007ec6b1c00ba280067313ca706b297c37bdeaa6..9fd21d2af285d5f2fee822898999aa164c4ab704 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/ChunkProtoTickListFix.java
+@@ -184,3 +184,3 @@
+         return tag.createMap(
+-            ImmutableMap.builder()
++            ImmutableMap.<Dynamic<?>, Dynamic<?>>builder()
+                 .put(tag.createString("i"), tag.createString(type))
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/EntitySpawnerItemVariantComponentFix.java b/src/main/java/net/minecraft/util/datafix/fixes/EntitySpawnerItemVariantComponentFix.java
+index 2cebb7ee4fd38bb57f71becc65cfab1d2f986f26..badb0df0f02ee4493c73cc7f91dc4ecceda5c9c5 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/EntitySpawnerItemVariantComponentFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/EntitySpawnerItemVariantComponentFix.java
+@@ -34,5 +34,5 @@
+                 return switch (id) {
+-                    case "minecraft:salmon_bucket" -> input.updateTyped(componentsFinder, EntitySpawnerItemVariantComponentFix::fixSalmonBucket);
+-                    case "minecraft:axolotl_bucket" -> input.updateTyped(componentsFinder, EntitySpawnerItemVariantComponentFix::fixAxolotlBucket);
+-                    case "minecraft:tropical_fish_bucket" -> input.updateTyped(componentsFinder, EntitySpawnerItemVariantComponentFix::fixTropicalFishBucket);
++                    case "minecraft:salmon_bucket" -> input.updateTyped(componentsFinder, (EntitySpawnerItemVariantComponentFix.Fixer)EntitySpawnerItemVariantComponentFix::fixSalmonBucket);
++                    case "minecraft:axolotl_bucket" -> input.updateTyped(componentsFinder, (EntitySpawnerItemVariantComponentFix.Fixer)EntitySpawnerItemVariantComponentFix::fixAxolotlBucket);
++                    case "minecraft:tropical_fish_bucket" -> input.updateTyped(componentsFinder, (EntitySpawnerItemVariantComponentFix.Fixer)EntitySpawnerItemVariantComponentFix::fixTropicalFishBucket);
+                     case "minecraft:painting" -> input.updateTyped(
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/LeavesFix.java b/src/main/java/net/minecraft/util/datafix/fixes/LeavesFix.java
+index b671713c134954426b137599480ba9f7ce19bd83..dc3ae8c56eeafa56956296b1601fb7e254793c35 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/LeavesFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/LeavesFix.java
+@@ -347,3 +347,3 @@
+                 : section.update(DSL.remainderFinder(), tag -> tag.set("BlockStates", tag.createLongList(Arrays.stream(this.storage.getRaw()))))
+-                    .set(this.paletteFinder, this.palette.stream().map(b -> Pair.of(References.BLOCK_STATE.typeName(), b)).collect(Collectors.toList()));
++                    .set(this.paletteFinder, this.palette.stream().<Pair<String, Dynamic<?>>>map(b -> Pair.of(References.BLOCK_STATE.typeName(), b)).collect(Collectors.toList()));
+         }
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyLwjgl3Fix.java b/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyLwjgl3Fix.java
+index 32e0fb82906e9d8a14c143a7d890db5c5ea8dd6f..35a99a462ee23b172f1ab1d66262e58feafbd814 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyLwjgl3Fix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyLwjgl3Fix.java
+@@ -138,3 +138,3 @@
+             this.getInputSchema().getType(References.OPTIONS),
+-            input -> input.update(DSL.remainderFinder(), tag -> tag.getMapValues().map(map1 -> tag.createMap(map1.entrySet().stream().map(entry -> {
++            input -> input.update(DSL.remainderFinder(), tag -> tag.getMapValues().<com.mojang.serialization.Dynamic<?>>map(map1 -> tag.createMap(map1.entrySet().stream().map(entry -> {
+                 if (entry.getKey().asString("").startsWith("key_")) {
+diff --git a/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyTranslationFix.java b/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyTranslationFix.java
+index d66757eb31b8e0a23e2c7b24d0ad65e7a5b96f42..ab4ab4afa29efc6a12c4f253fe0d20340175bead 100644
+--- a/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyTranslationFix.java
++++ b/src/main/java/net/minecraft/util/datafix/fixes/OptionsKeyTranslationFix.java
+@@ -19,3 +19,3 @@
+             this.getInputSchema().getType(References.OPTIONS),
+-            input -> input.update(DSL.remainderFinder(), tag -> tag.getMapValues().map(map1 -> tag.createMap(map1.entrySet().stream().map(entry -> {
++            input -> input.update(DSL.remainderFinder(), tag -> tag.getMapValues().<com.mojang.serialization.Dynamic<?>>map(map1 -> tag.createMap(map1.entrySet().stream().map(entry -> {
+                 if (entry.getKey().asString("").startsWith("key_")) {
+diff --git a/src/main/java/net/minecraft/util/filefix/FileFixerUpper.java b/src/main/java/net/minecraft/util/filefix/FileFixerUpper.java
+index b88c3875dccfb393832ee9e961c1d1ba7dbfceb0..70fd50400a7fd35b96b5b2ddeed549dd850117e4 100644
+--- a/src/main/java/net/minecraft/util/filefix/FileFixerUpper.java
++++ b/src/main/java/net/minecraft/util/filefix/FileFixerUpper.java
+@@ -357,3 +357,3 @@
+                 } catch (Exception e) {
+-                    LOGGER.warn("Failed to move outdated world folder out of the way; will try to delete instead: ", ex);
++                    LOGGER.warn("Failed to move outdated world folder out of the way; will try to delete instead: ", e);
+ 
+@@ -362,4 +362,4 @@
+                     } catch (Exception e2) {
+-                        LOGGER.warn("Failed to delete outdated world folder: ", ex);
+-                        throw new FailedCleanupFileFixException(ex, tempWorldTopLevel.getFileName().toString(), fileSystemCapabilities);
++                        LOGGER.warn("Failed to delete outdated world folder: ", e);
++                        throw new FailedCleanupFileFixException(e, tempWorldTopLevel.getFileName().toString(), fileSystemCapabilities);
+                     }
+@@ -372,4 +372,4 @@
+                 } catch (Exception e) {
+-                    LOGGER.warn("Failed to move in new world folder: ", exx);
+-                    throw new FailedCleanupFileFixException(exx, tempWorldTopLevel.getFileName().toString(), fileSystemCapabilities);
++                    LOGGER.warn("Failed to move in new world folder: ", e);
++                    throw new FailedCleanupFileFixException(e, tempWorldTopLevel.getFileName().toString(), fileSystemCapabilities);
+                 }
+diff --git a/src/main/java/net/minecraft/world/attribute/EnvironmentAttributeMap.java b/src/main/java/net/minecraft/world/attribute/EnvironmentAttributeMap.java
+index 820a5c5fbc0d16a639059a3bd5ff237abd59d447..0c51e011a31218a8d63932674441776ccf6360d2 100644
+--- a/src/main/java/net/minecraft/world/attribute/EnvironmentAttributeMap.java
++++ b/src/main/java/net/minecraft/world/attribute/EnvironmentAttributeMap.java
+@@ -19,3 +19,3 @@
+     public static final Codec<EnvironmentAttributeMap> CODEC = Codec.lazyInitialized(
+-        () -> Codec.dispatchedMap(EnvironmentAttributes.CODEC, Util.memoize(EnvironmentAttributeMap.Entry::createCodec))
++        () -> Codec.<EnvironmentAttribute<?>, EnvironmentAttributeMap.Entry<?, ?>>dispatchedMap(EnvironmentAttributes.CODEC, Util.memoize(EnvironmentAttributeMap.Entry::createCodec))
+             .xmap(EnvironmentAttributeMap::new, v -> v.entries)
+diff --git a/src/main/java/net/minecraft/world/attribute/modifier/AttributeModifier.java b/src/main/java/net/minecraft/world/attribute/modifier/AttributeModifier.java
+index 5654813c67ba21a0add6211d1a595913071f6e0e..5ff3af641e3c868526cd0340d258391a73707e72 100644
+--- a/src/main/java/net/minecraft/world/attribute/modifier/AttributeModifier.java
++++ b/src/main/java/net/minecraft/world/attribute/modifier/AttributeModifier.java
+@@ -82,3 +82,3 @@
+     static <Value> AttributeModifier<Value, Value> override() {
+-        return AttributeModifier.OverrideModifier.INSTANCE;
++        return (AttributeModifier.OverrideModifier<Value>)AttributeModifier.OverrideModifier.INSTANCE;
+     }
+diff --git a/src/main/java/net/minecraft/world/attribute/modifier/FloatModifier.java b/src/main/java/net/minecraft/world/attribute/modifier/FloatModifier.java
+index 2f39dfb9f6bb2f5403e97f0002c6c0998a62cf8b..98e76ef86ade7bf00f7c60d1a01d44e97fc6b37c 100644
+--- a/src/main/java/net/minecraft/world/attribute/modifier/FloatModifier.java
++++ b/src/main/java/net/minecraft/world/attribute/modifier/FloatModifier.java
+@@ -23,7 +23,7 @@
+     };
+-    FloatModifier<Float> ADD = Float::sum;
++    FloatModifier<Float> ADD = (FloatModifier.Simple)Float::sum;
+     FloatModifier<Float> SUBTRACT = (FloatModifier.Simple)(a, b) -> a - b;
+     FloatModifier<Float> MULTIPLY = (FloatModifier.Simple)(a, b) -> a * b;
+-    FloatModifier<Float> MINIMUM = Math::min;
+-    FloatModifier<Float> MAXIMUM = Math::max;
++    FloatModifier<Float> MINIMUM = (FloatModifier.Simple)Math::min;
++    FloatModifier<Float> MAXIMUM = (FloatModifier.Simple)Math::max;
+ 
+diff --git a/src/main/java/net/minecraft/world/attribute/modifier/IntegerModifier.java b/src/main/java/net/minecraft/world/attribute/modifier/IntegerModifier.java
+index e762e68a6fffa02a3d51c89a43d01331f174f6f8..739e7fcde85a6851a153db8535c1bc279f03234c 100644
+--- a/src/main/java/net/minecraft/world/attribute/modifier/IntegerModifier.java
++++ b/src/main/java/net/minecraft/world/attribute/modifier/IntegerModifier.java
+@@ -7,7 +7,7 @@
+ public interface IntegerModifier<Argument> extends AttributeModifier<Integer, Argument> {
+-    IntegerModifier<Integer> ADD = Integer::sum;
+-    IntegerModifier<Integer> SUBTRACT = (a, b) -> a - b;
+-    IntegerModifier<Integer> MULTIPLY = (a, b) -> a * b;
+-    IntegerModifier<Integer> MINIMUM = Math::min;
+-    IntegerModifier<Integer> MAXIMUM = Math::max;
++    IntegerModifier<Integer> ADD = (IntegerModifier.Simple)Integer::sum;
++    IntegerModifier<Integer> SUBTRACT = (IntegerModifier.Simple)(a, b) -> a - b;
++    IntegerModifier<Integer> MULTIPLY = (IntegerModifier.Simple)(a, b) -> a * b;
++    IntegerModifier<Integer> MINIMUM = (IntegerModifier.Simple)Math::min;
++    IntegerModifier<Integer> MAXIMUM = (IntegerModifier.Simple)Math::max;
+ 
+diff --git a/src/main/java/net/minecraft/world/item/AdventureModePredicate.java b/src/main/java/net/minecraft/world/item/AdventureModePredicate.java
+index f8bef3745675fdc18b61e0227438e948ec6c338a..7f08eb8bbf2ad82e12c262b1e4f86fe3f06d54d1 100644
+--- a/src/main/java/net/minecraft/world/item/AdventureModePredicate.java
++++ b/src/main/java/net/minecraft/world/item/AdventureModePredicate.java
+@@ -118,3 +118,3 @@
+             .distinct()
+-            .map(block -> block.value().getName().withStyle(ChatFormatting.DARK_GRAY))
++            .<Component>map(block -> block.value().getName().withStyle(ChatFormatting.DARK_GRAY))
+             .toList();
+diff --git a/src/main/java/net/minecraft/world/item/HoneycombItem.java b/src/main/java/net/minecraft/world/item/HoneycombItem.java
+index bc405db875ce9b8a66258a562843ec52cfe88f87..430d1a4104732022daf0f773afb859467e3bf9fa 100644
+--- a/src/main/java/net/minecraft/world/item/HoneycombItem.java
++++ b/src/main/java/net/minecraft/world/item/HoneycombItem.java
+@@ -71,3 +71,3 @@
+         BlockState oldState = level.getBlockState(pos);
+-        return getWaxed(oldState).map(waxedState -> {
++        return getWaxed(oldState).<InteractionResult>map(waxedState -> {
+             Player player = context.getPlayer();
+diff --git a/src/main/java/net/minecraft/world/item/component/KineticWeapon.java b/src/main/java/net/minecraft/world/item/component/KineticWeapon.java
+index 1841b9582569ceaac2ad3cfddb153074a08a1313..434ad69d05d5db4ef81eecfee2a9362b3c9a0558 100644
+--- a/src/main/java/net/minecraft/world/item/component/KineticWeapon.java
++++ b/src/main/java/net/minecraft/world/item/component/KineticWeapon.java
+@@ -114,3 +114,3 @@
+                 )
+-                .map(a -> List.of(), e -> (Collection)e)) {
++                .<Collection<EntityHitResult>>map(a -> List.of(), e -> e)) {
+                 Entity otherEntity = hitResult.getEntity();
+diff --git a/src/main/java/net/minecraft/world/item/component/PiercingWeapon.java b/src/main/java/net/minecraft/world/item/component/PiercingWeapon.java
+index 35e7308c0058dc1467f10d644d60e4d97863e748..bbd8546aee322b5819053550d6df67b3b08bcdb3 100644
+--- a/src/main/java/net/minecraft/world/item/component/PiercingWeapon.java
++++ b/src/main/java/net/minecraft/world/item/component/PiercingWeapon.java
+@@ -82,3 +82,3 @@
+         for (EntityHitResult hitResult : ProjectileUtil.getHitEntitiesAlong(attacker, attackRange, e1 -> canHitEntity(attacker, e1), ClipContext.Block.COLLIDER)
+-            .map(a -> List.of(), e -> (Collection)e)) {
++            .<Collection<EntityHitResult>>map(a -> List.of(), e -> (Collection<EntityHitResult>)e)) {
+             hitSomething |= attacker.stabAttack(hand, hitResult.getEntity(), damage, true, this.dealsKnockback, this.dismounts);
+diff --git a/src/main/java/net/minecraft/world/item/crafting/RecipeMap.java b/src/main/java/net/minecraft/world/item/crafting/RecipeMap.java
+index 3145a254044d2d2d569dc9793b360c4ffee9e96f..28d8b31e663fe861aa1aed041980f804aead1bed 100644
+--- a/src/main/java/net/minecraft/world/item/crafting/RecipeMap.java
++++ b/src/main/java/net/minecraft/world/item/crafting/RecipeMap.java
+@@ -36,3 +36,3 @@
+     public <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> byType(final RecipeType<T> type) {
+-        return (Collection<RecipeHolder<T>>)this.byType.get(type);
++        return (Collection<RecipeHolder<T>>)(Collection)this.byType.get(type);
+     }
+diff --git a/src/main/java/net/minecraft/world/level/biome/Climate.java b/src/main/java/net/minecraft/world/level/biome/Climate.java
+index 82af2bc1fb43f868af2c3cfdb7c8baf05728b335..ffdaf9c3ad2e1ca53e86b0542ed358f8f94992cd 100644
+--- a/src/main/java/net/minecraft/world/level/biome/Climate.java
++++ b/src/main/java/net/minecraft/world/level/biome/Climate.java
+@@ -269,3 +269,3 @@
+             List<Climate.RTree.Leaf<T>> leaves = values.stream()
+-                .map(p -> new Climate.RTree.Leaf(p.getFirst(), p.getSecond()))
++                .map(p -> new Climate.RTree.Leaf<T>(p.getFirst(), p.getSecond()))
+                 .collect(Collectors.toCollection(ArrayList::new));
+diff --git a/src/main/java/net/minecraft/world/level/block/BaseEntityBlock.java b/src/main/java/net/minecraft/world/level/block/BaseEntityBlock.java
+index 62697724042251545145e5a7bd8c8f7b37d70394..e79bd4d2058fa971f6b6bcc2cbc340a2a6b9fa19 100644
+--- a/src/main/java/net/minecraft/world/level/block/BaseEntityBlock.java
++++ b/src/main/java/net/minecraft/world/level/block/BaseEntityBlock.java
+@@ -32,3 +32,3 @@
+     ) {
+-        return expected == actual ? ticker : null;
++        return expected == actual ? (BlockEntityTicker<A>)ticker : null;
+     }
+diff --git a/src/main/java/net/minecraft/world/level/block/Block.java b/src/main/java/net/minecraft/world/level/block/Block.java
+index efb8313789c38b07062964772e8c54f47e98a5bb..a8a8c017ffa5761abcb1c1e28caca59eaa90e8b0 100644
+--- a/src/main/java/net/minecraft/world/level/block/Block.java
++++ b/src/main/java/net/minecraft/world/level/block/Block.java
+@@ -609,3 +609,3 @@
+     private static <S extends StateHolder<?, S>, T extends Comparable<T>> S setValueHelper(final S state, final Property<T> property, final Object value) {
+-        return state.setValue(property, (Comparable)value);
++        return state.setValue(property, (T)value);
+     }
+diff --git a/src/main/java/net/minecraft/world/level/block/entity/TestInstanceBlockEntity.java b/src/main/java/net/minecraft/world/level/block/entity/TestInstanceBlockEntity.java
+index 4bbe92a1da1aefb9aa429ebb060bb84c14abddbe..afe935729e0dfe6860ca2354f3dafc14f452566a 100644
+--- a/src/main/java/net/minecraft/world/level/block/entity/TestInstanceBlockEntity.java
++++ b/src/main/java/net/minecraft/world/level/block/entity/TestInstanceBlockEntity.java
+@@ -109,3 +109,3 @@
+     public Component getTestName() {
+-        return this.test().map(key -> Component.literal(key.identifier().toString())).orElse(INVALID_TEST_NAME);
++        return this.test().<Component>map(key -> Component.literal(key.identifier().toString())).orElse(INVALID_TEST_NAME);
+     }
+diff --git a/src/main/java/net/minecraft/world/level/dimension/end/EnderDragonFight.java b/src/main/java/net/minecraft/world/level/dimension/end/EnderDragonFight.java
+index a6ca158f776559a1afdeb85e1a478dcbb6d41ddc..c6e92348fc1af8fb56124a36e832a0f290cf780d 100644
+--- a/src/main/java/net/minecraft/world/level/dimension/end/EnderDragonFight.java
++++ b/src/main/java/net/minecraft/world/level/dimension/end/EnderDragonFight.java
+@@ -115,3 +115,3 @@
+                 Codec.list(Codec.INT).lenientOptionalFieldOf("gateways", new ArrayList<>()).forGetter(fight -> fight.gateways),
+-                Codec.list(EntityReference.codec()).optionalFieldOf("respawn_crystals", List.of()).forGetter(fight -> fight.respawnCrystals)
++                Codec.list(EntityReference.<EndCrystal>codec()).optionalFieldOf("respawn_crystals", List.of()).forGetter(fight -> fight.respawnCrystals)
+             )
+diff --git a/src/main/java/net/minecraft/world/level/gamerules/GameRuleMap.java b/src/main/java/net/minecraft/world/level/gamerules/GameRuleMap.java
+index dd8e4f657f621074a77f496dc54b5c70adc7efa7..46964a3cf196bad1040ed7630ee26c7ac961b8ef 100644
+--- a/src/main/java/net/minecraft/world/level/gamerules/GameRuleMap.java
++++ b/src/main/java/net/minecraft/world/level/gamerules/GameRuleMap.java
+@@ -18,3 +18,3 @@
+ public final class GameRuleMap extends SavedData {
+-    public static final Codec<GameRuleMap> CODEC = Codec.dispatchedMap(BuiltInRegistries.GAME_RULE.byNameCodec(), GameRule::valueCodec)
++    public static final Codec<GameRuleMap> CODEC = Codec.<GameRule<?>, Object>dispatchedMap(BuiltInRegistries.GAME_RULE.byNameCodec(), GameRule::valueCodec)
+         .xmap(GameRuleMap::ofTrusted, GameRuleMap::map);
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/feature/MultifaceGrowthFeature.java b/src/main/java/net/minecraft/world/level/levelgen/feature/MultifaceGrowthFeature.java
+index eafd71684f8ac83fdb0554db41ebf9bbb6997de7..c1bd1fa54bf0d033f0a30b58f192e889289ee728 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/feature/MultifaceGrowthFeature.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/feature/MultifaceGrowthFeature.java
+@@ -67,3 +67,3 @@
+         } else {
+-            List var13 = this.getShuffledDirections(random);
++            List<Direction> var13 = this.getShuffledDirections(random);
+             if (this.placeGrowthIfPossible(placerBlock, level, origin, level.getBlockState(origin), random, var13)) {
+diff --git a/src/main/java/net/minecraft/world/level/storage/loot/LootContextArg.java b/src/main/java/net/minecraft/world/level/storage/loot/LootContextArg.java
+index b674d2412217a37ce8a7c8e97ae7b5481b7a2aef..dcb008318fa4cc1f2129167757c6ce9cde77a1f5 100644
+--- a/src/main/java/net/minecraft/world/level/storage/loot/LootContextArg.java
++++ b/src/main/java/net/minecraft/world/level/storage/loot/LootContextArg.java
+@@ -27,3 +27,3 @@
+     static <R> LootContextArg<R> of(final ContextKey<? extends R> contextParam) {
+-        return () -> contextParam;
++        return (LootContextArg.SimpleGetter<R>)() -> contextParam;
+     }
+diff --git a/src/main/java/net/minecraft/world/level/storage/loot/predicates/EnvironmentAttributeCheck.java b/src/main/java/net/minecraft/world/level/storage/loot/predicates/EnvironmentAttributeCheck.java
+index 28cc0d2f7bbfad51cb80955c8a67e2d741703a43..a84a0dfaa1f2233409b4da4ed5d0bbf17d7dbb1d 100644
+--- a/src/main/java/net/minecraft/world/level/storage/loot/predicates/EnvironmentAttributeCheck.java
++++ b/src/main/java/net/minecraft/world/level/storage/loot/predicates/EnvironmentAttributeCheck.java
+@@ -22,3 +22,3 @@
+     public MapCodec<EnvironmentAttributeCheck<Value>> codec() {
+-        return (MapCodec<EnvironmentAttributeCheck<Value>>)MAP_CODEC;
++        return (MapCodec<EnvironmentAttributeCheck<Value>>)(MapCodec)MAP_CODEC;
+     }

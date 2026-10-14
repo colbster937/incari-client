@@ -1,0 +1,102 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 10:34:36 -0400
+Subject: [PATCH] decompile: Restore types the decompiler lost in the client
+ and its screens
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 00a907637bea27c3f0a4f3a1f9bdf1f42948f01f..5a2e5bb721a6104be3dde617d6ed548fd7d24229 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -2570,3 +2570,3 @@
+     public CompletableFuture<Void> delayTextureReload() {
+-        return this.<CompletableFuture<Void>>submit(this::reloadResourcePacks).thenCompose(result -> (CompletionStage<Void>)result);
++        return this.<CompletableFuture<Void>>submit((java.util.function.Supplier<CompletableFuture<Void>>)this::reloadResourcePacks).thenCompose(result -> (CompletionStage<Void>)result);
+     }
+diff --git a/src/main/java/net/minecraft/client/OptionInstance.java b/src/main/java/net/minecraft/client/OptionInstance.java
+index bb142c8fed18e3544b656a87c83f4617a876281d..42a478657a7b1955b8af8318477897a52c9b290e 100644
+--- a/src/main/java/net/minecraft/client/OptionInstance.java
++++ b/src/main/java/net/minecraft/client/OptionInstance.java
+@@ -239,3 +239,3 @@
+         ) {
+-            return instance -> CycleButton.builder(instance.toString, instance::get)
++            return instance -> CycleButton.builder(instance.toString, (Supplier<T>)instance::get)
+                 .withValues(this.valueListSupplier())
+diff --git a/src/main/java/net/minecraft/client/gui/components/ChatComponent.java b/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
+index 1a5e7a925bdd0ea60d34301f7f6d385246fe25c1..1e1e3229fb3968d0c074f2c27c18e0fabf67abf7 100644
+--- a/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
++++ b/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
+@@ -457,3 +457,3 @@
+     public void openScreen(final ChatComponent.ChatMethod chatMethod, final ChatScreen.ChatConstructor<?> chat) {
+-        this.minecraft.gui.setScreen(this.createScreen(chatMethod, (ChatScreen.ChatConstructor<Screen>)chat));
++        this.minecraft.gui.setScreen(this.createScreen(chatMethod, chat));
+     }
+diff --git a/src/main/java/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java b/src/main/java/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java
+index 509428f1870402bb73a60e76e4193d026259a991..899ca71a69e023397060ea9a30c4625900a87e48 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/PresetFlatWorldScreen.java
+@@ -286,3 +286,3 @@
+                 this.name = preset.unwrapKey()
+-                    .map(key -> Component.translatable(key.identifier().toLanguageKey("flat_world_preset")))
++                    .<Component>map(key -> Component.translatable(key.identifier().toLanguageKey("flat_world_preset")))
+                     .orElse(PresetFlatWorldScreen.UNKNOWN_PRESET);
+diff --git a/src/main/java/net/minecraft/client/gui/screens/inventory/BookViewScreen.java b/src/main/java/net/minecraft/client/gui/screens/inventory/BookViewScreen.java
+index 040c4b207f9047a25056ae206d199daa78fc9aee..c8cae14cccd536cd7003fbcfc90fa5c471619304 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/inventory/BookViewScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/inventory/BookViewScreen.java
+@@ -273,3 +273,3 @@
+             WritableBookContent writableContent = itemStack.get(DataComponents.WRITABLE_BOOK_CONTENT);
+-            return writableContent != null ? new BookViewScreen.BookAccess(writableContent.getPages(filterEnabled).map(Component::literal).toList()) : null;
++            return writableContent != null ? new BookViewScreen.BookAccess(writableContent.getPages(filterEnabled).<Component>map(Component::literal).toList()) : null;
+         }
+diff --git a/src/main/java/net/minecraft/client/gui/screens/packs/PackSelectionScreen.java b/src/main/java/net/minecraft/client/gui/screens/packs/PackSelectionScreen.java
+index e31043bb25ed52a9befb2433bee737b1f7d9783b..76048f6ec0334616f7c1a28f07bba029d6d4b7b0 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/packs/PackSelectionScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/packs/PackSelectionScreen.java
+@@ -224,3 +224,3 @@
+                     } catch (IOException e) {
+-                        LOGGER.warn("Failed to copy datapack file  from {} to {}", path, targetDir, ex);
++                        LOGGER.warn("Failed to copy datapack file  from {} to {}", path, targetDir, e);
+                         showErrorToast.setTrue();
+diff --git a/src/main/java/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java b/src/main/java/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java
+index 129f1b82f274a727ef9f63ea6244dc1351e54a61..88b7b35d7af484c7cdf2145408b314789f7fc169 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/worldselection/CreateWorldScreen.java
+@@ -542,3 +542,3 @@
+                     } catch (IOException e) {
+-                        LOGGER.warn("Failed to remove temporary file {}", path, ex);
++                        LOGGER.warn("Failed to remove temporary file {}", path, e);
+                     }
+@@ -598,3 +598,3 @@
+                         LOGGER.warn("Failed to create temporary dir");
+-                        throw new UncheckedIOException(ex);
++                        throw new UncheckedIOException(e);
+                     }
+diff --git a/src/main/java/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java b/src/main/java/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java
+index c2bdc2bed306360092ff82248e34af8390c3f002..ed4c26a952db26f7f9e70f4f6c1377b109f30d22 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java
++++ b/src/main/java/net/minecraft/client/gui/screens/worldselection/WorldCreationUiState.java
+@@ -317,3 +317,3 @@
+                 .flatMap(Holder::unwrapKey)
+-                .map(key -> Component.translatable(key.identifier().toLanguageKey("generator")))
++                .<Component>map(key -> Component.translatable(key.identifier().toLanguageKey("generator")))
+                 .orElse(CUSTOM_WORLD_DESCRIPTION);
+diff --git a/src/main/java/net/minecraft/client/resources/model/ModelBakery.java b/src/main/java/net/minecraft/client/resources/model/ModelBakery.java
+index d7e314e9eb96719161572e9b494786f47d86c85f..e6e5d6e079a63ff8fbdbd6ec56f32dd4243a692d 100644
+--- a/src/main/java/net/minecraft/client/resources/model/ModelBakery.java
++++ b/src/main/java/net/minecraft/client/resources/model/ModelBakery.java
+@@ -256,3 +256,3 @@
+         public <T> T compute(final ModelBaker.SharedOperationKey<T> key) {
+-            return (T)this.operationCache.computeIfAbsent(key, this.cacheComputeFunction);
++            return (T)this.operationCache.computeIfAbsent((ModelBaker.SharedOperationKey<Object>)key, this.cacheComputeFunction);
+         }
+diff --git a/src/main/java/net/minecraft/client/resources/palette/PalettedTextureManager.java b/src/main/java/net/minecraft/client/resources/palette/PalettedTextureManager.java
+index ea07830ee3da32cb5e162a6ce87fc8b09c8a10da..f34dd7f4d5c83c177e4a609dfc35eec90ba8a2d2 100644
+--- a/src/main/java/net/minecraft/client/resources/palette/PalettedTextureManager.java
++++ b/src/main/java/net/minecraft/client/resources/palette/PalettedTextureManager.java
+@@ -56,3 +56,3 @@
+             .maximumSize(64L)
+-            .removalListener(notification -> ((Optional)notification.getValue()).ifPresent(PalettedTextureManager.BaseTexture::close))
++            .removalListener(notification -> ((Optional<PalettedTextureManager.BaseTexture>)notification.getValue()).ifPresent(PalettedTextureManager.BaseTexture::close))
+             .build(new CacheLoader<Identifier, Optional<PalettedTextureManager.BaseTexture>>() {

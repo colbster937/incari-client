@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] combat: Block with swords on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/world/item/Item.java b/src/main/java/net/minecraft/world/item/Item.java
+index 7642b58acc00eb38ecea69b2a486d9a83e76a0ac..72d3f5b0d07be18c51b74ca13af742d90ce92c68 100644
+--- a/src/main/java/net/minecraft/world/item/Item.java
++++ b/src/main/java/net/minecraft/world/item/Item.java
+@@ -204,2 +204,6 @@
+     public InteractionResult use(final Level level, final Player player, final InteractionHand hand) {
++        // Incari start: swords block on 1.8 servers
++        InteractionResult legacy = incari.client.legacy.LegacyCombat.use(player, hand);
++        if (legacy != null) return legacy;
++        // Incari end
+         ItemStack stack = player.getItemInHand(hand);
+@@ -314,2 +318,5 @@
+     public ItemUseAnimation getUseAnimation(final ItemStack itemStack) {
++        // Incari start: swords block on 1.8 servers
++        if (incari.client.legacy.LegacyCombat.blocksWith(itemStack)) return ItemUseAnimation.BLOCK;
++        // Incari end
+         Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
+@@ -325,2 +332,6 @@
+     public int getUseDuration(final ItemStack itemStack, final LivingEntity user) {
++        // Incari start: swords block on 1.8 servers
++        int legacy = incari.client.legacy.LegacyCombat.useDuration(itemStack);
++        if (legacy >= 0) return legacy;
++        // Incari end
+         Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);

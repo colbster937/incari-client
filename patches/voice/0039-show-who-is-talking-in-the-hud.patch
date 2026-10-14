@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:36:09 -0400
+Subject: [PATCH] voice: Show who is talking in the HUD
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Hud.java b/src/main/java/net/minecraft/client/gui/Hud.java
+index 35c23b1f1784381744b15753da5c79ea9dc01754..9cfdf35e1a7cb3e6b51f385658ec9bd62c4f6a60 100644
+--- a/src/main/java/net/minecraft/client/gui/Hud.java
++++ b/src/main/java/net/minecraft/client/gui/Hud.java
+@@ -236,2 +236,5 @@
+                 this.extractTitle(graphics, deltaTracker);
++                // Incari start: who is talking in voice chat
++                incari.client.eagler.VoiceOverlay.extract(graphics);
++                // Incari end
+                 this.extractChat(graphics, deltaTracker);

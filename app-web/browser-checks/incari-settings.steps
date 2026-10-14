@@ -1,0 +1,75 @@
+# ADR 0062: in a quick world (-Pbrowser.query=name=Player&world=Batch&seed=1): the pause menu's one
+# Incari Settings button and its screen, the screen recorder downloading a video (F8 twice), and
+# block-breaking sounds: each break's sound fetched, decoded and started. No server needed.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 \
+#       "-Pbrowser.query=name=Player&world=Batch&seed=1" -Pbrowser.steps=@browser-checks/incari-settings.steps
+
+downloads:build/browser-checks/downloads
+sleep:4000
+# The first-run accessibility screen: Continue (also the gesture the audio waits for).
+click:0.5,0.945
+wait:.*logged in with entity id.*
+sleep:6000
+# Every sound file fetched from now on, with its status and time.
+eval:(() => { const of = window.fetch; globalThis.fetchLog = []; window.fetch = (u, ...a) => { const t = performance.now(); return of(u, ...a).then(r => { if (String(u).includes('objects')) fetchLog.push(r.status + ' ' + Math.round(performance.now() - t) + 'ms'); return r; }, e => { fetchLog.push('ERR ' + u); throw e; }); }; return 'logging'; })()
+eval:'buffers started before: ' + incariAudio.buffersStarted
+
+# --- On a dirt floor, looking straight down: creative breaks a block a click ---
+key:KeyT
+sleep:800
+type:/fill ~-4 ~ ~-4 ~4 ~4 ~4 minecraft:air
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/fill ~-4 ~-3 ~-4 ~4 ~-1 ~4 minecraft:dirt
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/gamemode creative
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/tp @s ~ ~ ~ 0 90
+key:Enter
+sleep:1500
+click:0.5,0.5
+sleep:800
+click:0.5,0.5
+sleep:800
+click:0.5,0.5
+sleep:2000
+eval:'buffers started after breaking: ' + incariAudio.buffersStarted + ', fetches: ' + JSON.stringify(fetchLog)
+shot:build/browser-checks/batch-broken.png
+
+# --- Survival: held, the dirt's hit sounds every 4 ticks and its break ---
+key:KeyT
+sleep:800
+type:/gamemode survival
+key:Enter
+sleep:1000
+eval:globalThis.beforeHold = incariAudio.buffersStarted
+hold:0.5,0.5,4000
+sleep:1500
+eval:'buffers started while holding: ' + (incariAudio.buffersStarted - beforeHold) + ', fetches: ' + JSON.stringify(fetchLog)
+shot:build/browser-checks/batch-mined.png
+
+# --- The pause menu and Incari Settings ---
+key:Escape
+sleep:1500
+shot:build/browser-checks/batch-pause.png
+
+# --- The recorder: F8 starts, F8 stops, and the video downloads ---
+key:Escape
+sleep:1000
+key:F8
+waitfor:globalThis.incariRecorder && incariRecorder.state === 'recording'
+sleep:4000
+shot:build/browser-checks/batch-recording.png
+key:F8
+waitfor:incariRecorder.state === 'idle'
+eval:'recorder error: ' + incariRecorder.error
+download:incari-.*\.(webm|mp4)

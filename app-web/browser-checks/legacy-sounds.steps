@@ -1,0 +1,27 @@
+# F1 (2026-10-12): block sounds on a 1.8.9 server through Via. The server behind tools/wsbridge on
+# 8801 with RCON on 25611 (run/servers, INCARI_RCON_PASSWORD=incari-dev):
+#   "-Pbrowser.query=server=ws://127.0.0.1:8801&name=IncariWeb" -Pbrowser.rcon=127.0.0.1:25611
+sleep:4000
+click:0.5,0.945
+sleep:15000
+eval:(() => { const of = window.fetch; globalThis.fetchLog = []; window.fetch = (u, ...a) => { const t = performance.now(); return of(u, ...a).then(r => { if (String(u).includes('objects')) fetchLog.push(r.status + ' ' + Math.round(performance.now() - t) + 'ms'); return r; }, e => { fetchLog.push('ERR ' + u); throw e; }); }; return 'logging'; })()
+rcon:execute IncariWeb ~ ~ ~ fill ~-3 ~ ~-3 ~3 ~3 ~3 air
+rcon:execute IncariWeb ~ ~ ~ fill ~-3 ~-3 ~-3 ~3 ~-1 ~3 dirt
+rcon:execute IncariWeb ~ ~ ~ tp IncariWeb ~ ~ ~ 0 90
+rcon:gamemode 1 IncariWeb
+sleep:2000
+eval:globalThis.before = incariAudio.buffersStarted
+click:0.5,0.5
+sleep:800
+click:0.5,0.5
+sleep:800
+click:0.5,0.5
+sleep:2000
+eval:'creative breaks started ' + (incariAudio.buffersStarted - before) + ', fetches ' + JSON.stringify(fetchLog)
+rcon:gamemode 0 IncariWeb
+sleep:1500
+eval:globalThis.before = incariAudio.buffersStarted
+hold:0.5,0.5,4000
+sleep:1500
+eval:'survival mining started ' + (incariAudio.buffersStarted - before) + ', fetches ' + JSON.stringify(fetchLog)
+shot:build/browser-checks/legacy-mined.png

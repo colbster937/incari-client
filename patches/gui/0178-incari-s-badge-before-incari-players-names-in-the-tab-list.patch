@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 20:57:25 -0400
+Subject: [PATCH] gui: Incari's badge before Incari players' names in the tab
+ list
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+index 4cbc749dbf5a17b8d1d3a36c5329473e18f87bdc..f47e0bdb48900b1d8b70dded96c9a88ae2b0d348 100644
+--- a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
++++ b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+@@ -105,3 +105,5 @@
+         for (PlayerInfo info : playerInfos) {
+-            Component playerName = this.getNameForDisplay(info);
++            // Incari start: Incari's badge before Incari players' names, as on their name tags
++            Component playerName = incari.client.cosmetics.Cosmetics.tabListName(info.getProfile().id(), this.getNameForDisplay(info));
++            // Incari end
+             maxNameWidth = Math.max(maxNameWidth, this.minecraft.font.width(playerName));

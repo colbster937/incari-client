@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] movement: No swimming or crawling on servers before 1.13
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 54c72acd71b37ae70637833a7ddb6a414d2f8885..4404c17761f3db3634e3b8c70c5ac8595c5ea7e4 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -1676,2 +1676,5 @@
+     public void updateSwimming() {
++        // Incari start: no swimming on servers before 1.13
++        if (incari.client.legacy.LegacyPlayer.noSwimming(this)) return;
++        // Incari end
+         if (this.isSwimming()) {
+diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
+index b427ddc6ee22625162d14e9fbaa8de52dc79befb..deafd313710dd2f4ce55198ca04c504282efb1e4 100644
+--- a/src/main/java/net/minecraft/world/entity/player/Player.java
++++ b/src/main/java/net/minecraft/world/entity/player/Player.java
+@@ -345,2 +345,5 @@
+     protected void updatePlayerPose() {
++        // Incari start: no swimming or crawling pose on servers before 1.13
++        if (incari.client.legacy.LegacyPlayer.updatePose(this)) return;
++        // Incari end
+         if (this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.SWIMMING)) {

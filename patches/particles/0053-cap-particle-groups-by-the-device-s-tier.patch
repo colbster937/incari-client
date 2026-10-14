@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] particles: Cap particle groups by the device's tier
+
+
+diff --git a/src/main/java/net/minecraft/client/particle/ParticleGroup.java b/src/main/java/net/minecraft/client/particle/ParticleGroup.java
+index 4b9e1ed2d19814482c3eb8bb09ef753fd969b26a..9a56daa5e56cb8bc9447171bea5c68d592f066bc 100644
+--- a/src/main/java/net/minecraft/client/particle/ParticleGroup.java
++++ b/src/main/java/net/minecraft/client/particle/ParticleGroup.java
+@@ -56,12 +56,7 @@
+         int currentSize = this.particles.size();
+-        if (currentSize >= 16384) {
++        // Incari start: the cap of the device's tier, in the game's scheme
++        if (!incari.client.particle.ParticleBudget.admit(currentSize, this.engine.getRandom())) {
+             return false;
+         }
+-
+-        if (currentSize >= 12288) {
+-            float freeSpace = (16384 - currentSize) / 4096.0F;
+-            if (this.engine.getRandom().nextFloat() >= freeSpace * freeSpace) {
+-                return false;
+-            }
+-        }
++        // Incari end
+ 

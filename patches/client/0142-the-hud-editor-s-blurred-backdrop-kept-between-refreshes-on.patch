@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 15:16:25 -0400
+Subject: [PATCH] client: The HUD editor's blurred backdrop kept between
+ refreshes on Potato
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java b/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
+index 0080b0292d90d51bca11e1ad8b38d82f1120bd3b..951ae51c070245bb37f121b11bec11095be2a7f3 100644
+--- a/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
++++ b/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
+@@ -209,2 +209,5 @@
+                 RenderSystem.getDevice().createCommandEncoder().clearDepthTexture(mainRenderTarget.getDepthTexture(), 0.0);
++                // Incari start: the HUD editor's backdrop, blurred a few times a second on Potato and kept between (BackdropCache)
++                if (!incari.client.gui.BackdropCache.blur(mainRenderTarget))
++                // Incari end
+                 minecraft.gameRenderer.processBlurEffect();
+diff --git a/src/main/java/net/minecraft/client/renderer/GameRenderer.java b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+index 065719768ccb489c4938eb3fe536cc5a904c14d4..debb1be334cf7d1a15eebacd64d726b894156b56 100644
+--- a/src/main/java/net/minecraft/client/renderer/GameRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+@@ -444,2 +444,5 @@
+         this.gameRenderState.shouldRenderLevel = resourcesLoaded && advanceGameTime && this.minecraft.level != null;
++        // Incari start: between the HUD editor's backdrop refreshes on Potato, the level isn't drawn (BackdropCache)
++        if (incari.client.gui.BackdropCache.beginFrame(this.mainRenderTarget)) this.gameRenderState.shouldRenderLevel = false;
++        // Incari end
+         float worldPartialTicks = deltaTracker.getGameTimeDeltaPartialTick(false);
+@@ -515,2 +518,5 @@
+         this.renderBuffers.endFrame();
++        // Incari start: frames that reuse the HUD editor's kept backdrop use no pooled targets; they mustn't age them out (BackdropCache)
++        if (!incari.client.gui.BackdropCache.reusing())
++        // Incari end
+         this.resourcePool.endFrame();

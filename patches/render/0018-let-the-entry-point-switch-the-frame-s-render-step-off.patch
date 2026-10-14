@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 13:38:50 -0400
+Subject: [PATCH] render: Let the entry point switch the frame's render step
+ off
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index a72fd1dd71a0d0b5c4af495a27424fc822bdf97c..e04f062322dd4263116352428c67399fddef2c5f 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1307,3 +1307,7 @@
+                 profiler.pop();
+-                this.gameRenderer.render();
++                // Incari start: rendering can be switched off (the browser build can boot headless)
++                if (incari.client.platform.GraphicsBackends.isRendering()) {
++                    this.gameRenderer.render();
++                }
++                // Incari end
+             }

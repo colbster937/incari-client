@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 11:03:03 -0400
+Subject: [PATCH] realms: Skip the availability check where the platform has no
+ Realms
+
+
+diff --git a/src/main/java/com/mojang/realmsclient/RealmsAvailability.java b/src/main/java/com/mojang/realmsclient/RealmsAvailability.java
+index 4ba7e148cadc0430cc002122db67f3d306261472..2a3f6d2748d9343b05c24905c82ed901107589c3 100644
+--- a/src/main/java/com/mojang/realmsclient/RealmsAvailability.java
++++ b/src/main/java/com/mojang/realmsclient/RealmsAvailability.java
+@@ -36,3 +36,5 @@
+     private static CompletableFuture<RealmsAvailability.Result> check() {
+-        if (Minecraft.getInstance().isOfflineDeveloperMode()) {
++        // Incari start: a platform without Realms (the browser build) answers as offline developer mode does
++        if (Minecraft.getInstance().isOfflineDeveloperMode() || !incari.client.platform.OnlineServices.isRealmsAvailable()) {
++        // Incari end
+             return CompletableFuture.completedFuture(new RealmsAvailability.Result(RealmsAvailability.Type.AUTHENTICATION_ERROR));

@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 20:10:42 -0400
+Subject: [PATCH] voice: Voice chat in a panel at the pause menu's top right
+
+The pause menu's "Voice Chat..." button gives way to a panel in the
+corner, where Eagler's 1.8 client has its voice controls: the channel in
+one click, who is connected and talking, mute toggles, and a link to the
+full settings. The same hook draws an Eagler server's icons over the
+menu's buttons.
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+index 5e09adac1d8ad230b9355134dd9ae4a28fd76b8a..52546a6e322ccbe79c24d5d3893a57fad27be3ef 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+@@ -156,5 +156,2 @@
+         helper.addChild(iconButtonRow, 2, gridLayout.newCellSettings().alignHorizontallyCenter());
+-        // Incari start: voice chat's screen, on a server with Eagler voice
+-        incari.client.eagler.VoiceScreen.addPauseButton(helper, this);
+-        // Incari end
+         Optional<? extends Holder<Dialog>> additions = this.getCustomAdditions();
+@@ -183,2 +180,5 @@
+         gridLayout.visitWidgets(this::addRenderableWidget);
++        // Incari start: voice chat's panel in the top right, and an Eagler server's icons over the buttons
++        incari.client.eagler.PauseMenuHooks.addOverlays(this, this::addRenderableWidget, this::addRenderableOnly);
++        // Incari end
+     }

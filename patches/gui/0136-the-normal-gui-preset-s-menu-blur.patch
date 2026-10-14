@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 11:39:31 -0400
+Subject: [PATCH] gui: The Normal GUI preset's menu blur
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/renderer/GameRenderer.java b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+index 947508fe42c283bd1bd0fc43cb46eb51fe08f372..065719768ccb489c4938eb3fe536cc5a904c14d4 100644
+--- a/src/main/java/net/minecraft/client/renderer/GameRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+@@ -761,3 +761,5 @@
+         optionsState.ambientOcclusion = options.ambientOcclusion().get();
+-        optionsState.menuBackgroundBlurriness = options.getMenuBackgroundBlurriness();
++        // Incari start: the Normal GUI preset frosts menus even where the graphics preset turns the blur off
++        optionsState.menuBackgroundBlurriness = incari.client.ui.Look.blurRadius(options.getMenuBackgroundBlurriness());
++        // Incari end
+         optionsState.panoramaSpeed = options.panoramaSpeed().get();

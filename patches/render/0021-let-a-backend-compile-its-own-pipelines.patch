@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 09:37:40 -0400
+Subject: [PATCH] render: Let a backend compile its own pipelines
+
+
+diff --git a/src/main/java/com/mojang/renderpearl/frontend/FrontendGpuDevice.java b/src/main/java/com/mojang/renderpearl/frontend/FrontendGpuDevice.java
+index 16e4668fe8eea41ae2377eedfe397904bd367331..04b382488659ada649336291a6dfcee0e6c33aa8 100644
+--- a/src/main/java/com/mojang/renderpearl/frontend/FrontendGpuDevice.java
++++ b/src/main/java/com/mojang/renderpearl/frontend/FrontendGpuDevice.java
+@@ -50,3 +50,5 @@
+         this.encoder = new FrontendCommandEncoder(this.profiler, backend, backend.createCommandEncoder());
+-        this.pipelineBuilder = new PipelineBuilder(backend);
++        // Incari start: a backend that compiles its own pipelines (the browser's) never needs shaderc
++        this.pipelineBuilder = backend instanceof incari.client.render.PipelineCompilingBackend ? null : new PipelineBuilder(backend);
++        // Incari end
+     }
+@@ -208,2 +210,7 @@
+     ) {
++        // Incari start: a backend that compiles its own pipelines gets them directly
++        if (this.backend instanceof incari.client.render.PipelineCompilingBackend compiling) {
++            return compiling.compilePipeline(pipeline, shaderSource, executor);
++        }
++        // Incari end
+         return this.pipelineBuilder.compilePipeline(pipeline, shaderSource, executor);
+@@ -213,3 +220,7 @@
+     public void close() {
+-        this.pipelineBuilder.close();
++        // Incari start: there's no PipelineBuilder when the backend compiles its own pipelines
++        if (this.pipelineBuilder != null) {
++            this.pipelineBuilder.close();
++        }
++        // Incari end
+         this.backend.close();

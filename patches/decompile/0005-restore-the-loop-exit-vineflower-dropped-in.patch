@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:49:20 -0400
+Subject: [PATCH] decompile: Restore the loop exit Vineflower dropped in
+ IntervalSelectFunction
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/IntervalSelectFunction.java b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/IntervalSelectFunction.java
+index 43ddc0c00625d2da0d9443d47138a0ef64735a75..706fd05f31c9c43b94074c84e0870d33402d5acf 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/IntervalSelectFunction.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/IntervalSelectFunction.java
+@@ -122,3 +122,3 @@
+                     if (var12 >= var11) {
+-                        ;
++                        break;
+                     } else {

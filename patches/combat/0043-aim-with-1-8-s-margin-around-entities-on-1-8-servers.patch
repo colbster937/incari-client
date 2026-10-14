@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] combat: Aim with 1.8's margin around entities on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 4404c17761f3db3634e3b8c70c5ac8595c5ea7e4..4a8fc2a9f4ebdebdd241c68f58ad79c97d28c546 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -2659,3 +2659,5 @@
+     public float getPickRadius() {
+-        return 0.0F;
++        // Incari start: 1.8 aims with a 0.1 margin around every entity
++        return incari.client.legacy.LegacyCombat.pickRadius(0.0F);
++        // Incari end
+     }

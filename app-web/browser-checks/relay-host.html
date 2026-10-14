@@ -1,0 +1,133 @@
+<!doctype html>
+<!--
+  A stand-in for an Eagler player sharing a world through a relay (ADR 0019), for
+  relay-join.steps: opened in headless Chromium beside the game's page, it shares a "world" on the
+  relay given as ?relay=ws://..., prints its join code to the console ("incari-relay-code: ..."),
+  accepts one client over WebRTC, answers its login as a shared world's host does (1.8, with
+  Eagler's login changes), sends the join and a chat message, and keeps the connection alive.
+  Nothing of a game runs here: just enough packets for the client to reach the world and show chat.
+-->
+<meta charset="utf-8">
+<title>Incari relay host (test)</title>
+<script>
+'use strict';
+const params = new URLSearchParams(location.search);
+const relayUrl = params.get('relay') || 'ws://127.0.0.1:6699/';
+const log = (...a) => console.log('incari-relay-host:', ...a);
+
+// --- Relay messages ------------------------------------------------------------------------
+const ascii8 = (s) => [s.length, ...Array.from(s, (c) => c.charCodeAt(0))];
+const bytes16 = (s) => [s.length >> 8, s.length & 255, ...Array.from(s, (c) => c.charCodeAt(0))];
+function readRelay(buf) {
+  const b = new Uint8Array(buf); let i = 1;
+  const a8 = () => { const n = b[i++]; const s = String.fromCharCode(...b.slice(i, i + n)); i += n; return s; };
+  const a16 = () => { const n = (b[i] << 8) | b[i + 1]; i += 2; const s = String.fromCharCode(...b.slice(i, i + n)); i += n; return s; };
+  switch (b[0]) {
+    case 0x00: { const type = b[i++]; const version = b[i++]; return { id: 0, type, version, code: a8() }; }
+    case 0x01: { const n = (b[1] << 8) | b[2]; i = 3; const servers = [];
+      for (let k = 0; k < n; k++) { const t = String.fromCharCode(b[i++]); const url = a16(); const u = a8(); const p = a8();
+        servers.push(t === 'T' ? { urls: url, username: u, credential: p } : { urls: url }); }
+      return { id: 1, servers }; }
+    case 0x02: return { id: 2, client: a8() };
+    case 0x03: return { id: 3, peer: a8(), text: a16() };
+    case 0x04: return { id: 4, peer: a8(), text: a16() };
+    case 0x05: return { id: 5, client: a8() };
+    case 0x06: return { id: 6, client: a8() };
+    case 0xff: return { id: 255, code: b[1], text: (i = 2, a16()) };
+    default: return { id: b[0] };
+  }
+}
+
+// --- 1.8 packets, as the host's integrated server writes them --------------------------------
+function varint(v) { const out = []; do { let t = v & 0x7f; v >>>= 7; if (v) t |= 0x80; out.push(t); } while (v); return out; }
+function str(s) { const u = new TextEncoder().encode(s); return [...varint(u.length), ...u]; }
+function i32(v) { return [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]; }
+function f64(v) { const d = new DataView(new ArrayBuffer(8)); d.setFloat64(0, v); return [...new Uint8Array(d.buffer)]; }
+function f32(v) { const d = new DataView(new ArrayBuffer(4)); d.setFloat32(0, v); return [...new Uint8Array(d.buffer)]; }
+// A whole packet on the data channel: the "whole" kind byte, then the packet.
+function packet(id, body) { return new Uint8Array([0, ...varint(id), ...body]); }
+function readVarint(b, at) { let v = 0, s = 0, x; do { x = b[at.i++]; v |= (x & 0x7f) << s; s += 7; } while (x & 0x80); return v; }
+
+let channel = null;
+function onPacket(b) {
+  const at = { i: 0 };
+  const id = readVarint(b, at);
+  if (!onPacket.loggedIn) {
+    if (id !== 0) { log('expected Login Start, got', id); return; }
+    const n = readVarint(b, at);
+    const name = new TextDecoder().decode(b.slice(at.i, at.i + n)); at.i += n;
+    const skin = readVarint(b, at); at.i += skin;
+    const cape = readVarint(b, at); at.i += cape;
+    const protocols = readVarint(b, at); at.i += protocols;
+    const brandBytes = b.length - at.i;
+    log('login from', name, 'skin', skin, 'bytes, cape', cape, 'bytes, protocols', protocols, 'bytes, brand', brandBytes, 'bytes');
+    onPacket.loggedIn = true;
+    const uuid = '00000000-0000-3000-8000-' + Array.from(name).map((c) => c.charCodeAt(0).toString(16)).join('').padEnd(12, '0').slice(0, 12);
+    // Login Success, ending with the Eagler protocol chosen (4), as the host sends it.
+    channel.send(packet(0x02, [...str(uuid), ...str(name), 0, 4]));
+    // Join Game: entity 1, creative, overworld, peaceful, 8 players, flat, no reduced debug.
+    channel.send(packet(0x01, [...i32(1), 1, 0, 0, 8, ...str('flat'), 0]));
+    channel.send(packet(0x05, [0, 0, 0, 1, 0, 0, 0, 0])); // spawn position 0,64,0: y sits at bit 26
+    channel.send(packet(0x08, [...f64(0.5), ...f64(64), ...f64(0.5), ...f32(0), ...f32(0), 0]));
+    setTimeout(() => {
+      channel.send(packet(0x02, [...str('{"text":"incari-relay-check"}'), 0]));
+      log('sent chat');
+    }, 3000);
+    setInterval(() => channel.send(packet(0x00, varint(Date.now() & 0xffff))), 5000);
+  }
+}
+
+// --- Sharing -------------------------------------------------------------------------------
+let iceServers = [];
+const peers = new Map();
+const ws = new WebSocket(relayUrl);
+ws.binaryType = 'arraybuffer';
+ws.onopen = () => ws.send(new Uint8Array([0x00, 0x01, 0x01, ...ascii8('Incari check;0')]));
+ws.onclose = (e) => log('relay closed', e.code);
+ws.onmessage = (e) => {
+  const m = readRelay(e.data);
+  if (m.id === 0) { log('incari-relay-code:', m.code); console.log('incari-relay-code: ' + m.code); }
+  else if (m.id === 1) { iceServers = []; log('ICE servers', m.servers.length); }
+  else if (m.id === 2) { newClient(m.client); }
+  else if (m.id === 4) { const p = peers.get(m.peer); if (p) p.description(m.text); }
+  else if (m.id === 3) { const p = peers.get(m.peer); if (p) p.candidates(m.text); }
+  else if (m.id === 5) { log('client', m.client, 'succeeded'); }
+  else if (m.id === 255) { log('relay error', m.code, m.text); }
+};
+
+function newClient(id) {
+  log('new client', id);
+  const pc = new RTCPeerConnection({ iceServers });
+  const mine = [];
+  let sent = false;
+  const sendCandidates = () => {
+    if (sent) return; sent = true;
+    const json = JSON.stringify(mine);
+    ws.send(new Uint8Array([0x03, ...ascii8(id), ...bytes16(json)]));
+  };
+  pc.onicecandidate = (e) => {
+    if (e.candidate) mine.push({ sdpMLineIndex: String(e.candidate.sdpMLineIndex), candidate: e.candidate.candidate });
+    else if (peers.get(id).gotTheirs) sendCandidates();
+  };
+  pc.ondatachannel = (e) => {
+    channel = e.channel; channel.binaryType = 'arraybuffer';
+    channel.onopen = () => log('data channel open');
+    channel.onmessage = (ev) => { const b = new Uint8Array(ev.data); if (b[0] === 0) onPacket(b.slice(1)); };
+    channel.onclose = () => log('data channel closed');
+  };
+  peers.set(id, {
+    gotTheirs: false,
+    description: async (json) => {
+      await pc.setRemoteDescription(JSON.parse(json));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      ws.send(new Uint8Array([0x04, ...ascii8(id), ...bytes16(JSON.stringify(pc.localDescription))]));
+    },
+    candidates: async (json) => {
+      for (const c of JSON.parse(json)) await pc.addIceCandidate({ candidate: c.candidate, sdpMLineIndex: Number(c.sdpMLineIndex) });
+      peers.get(id).gotTheirs = true;
+      if (pc.iceGatheringState === 'complete') sendCandidates(); else setTimeout(sendCandidates, 2000);
+    },
+  });
+}
+</script>

@@ -1,0 +1,106 @@
+# Settings, servers and resource packs survive a reload. Changes an option (FOV), adds a
+# server and imports a resource pack (made by the check from scratch) through "Open Pack Folder"'s
+# file picker, reloads the page, and checks that the page loaded all three from storage and the
+# game uses them. Also: F2's screenshot is stored as a PNG. Positions are for the 1280x577
+# viewport headless Chromium gives a 1280x720 window.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.seconds=400 -Pbrowser.steps=@browser-checks/storage.steps
+
+# A new profile: nothing stored yet, and the jar comes from the network.
+sleep:4000
+assert:window.incariStorage.read('/incari/game/servers.dat').then(t => t === null)
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+shot:build/browser-checks/storage-title-before.png
+
+# --- An option: FOV, on the Options screen, dragged right of Normal ---
+click:0.42,0.782
+sleep:1500
+click:0.48,0.133
+sleep:500
+shot:build/browser-checks/storage-fov.png
+# Done saves options.txt.
+click:0.5,0.945
+sleep:1500
+waitfor:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && /\nfov:0\.[0-9]*[1-9]/.test(t))
+
+# --- A resource pack: Options, Resource Packs, Open Pack Folder, pick the pack, Yes to copy it ---
+pack:build/browser-checks/incari-check-pack.zip
+click:0.42,0.782
+sleep:1500
+click:0.376,0.598
+sleep:2000
+choose:0.376,0.945,build/browser-checks/incari-check-pack.zip
+sleep:2000
+shot:build/browser-checks/storage-pack-confirm.png
+click:0.38,0.585
+sleep:2000
+shot:build/browser-checks/storage-pack-available.png
+waitfor:window.incariStorage.read('/incari/game/resourcepacks/incari-check-pack.zip').then(t => t !== null && t.startsWith('PK'))
+# Select it: its icon's arrow, at the top of the Available list.
+move:0.19,0.277
+sleep:300
+click:0.19,0.277
+sleep:1000
+shot:build/browser-checks/storage-pack-selected.png
+# Done reloads resources with the pack, and saves it in options.txt.
+click:0.623,0.945
+wait:.*Reloading ResourceManager.*incari-check-pack.*
+sleep:4000
+waitfor:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && t.includes('file/incari-check-pack.zip'))
+key:Escape
+sleep:1500
+
+# --- A server: Multiplayer, Proceed on the safety screen, Add Server ---
+click:0.5,0.534
+sleep:1500
+click:0.376,0.688
+sleep:1500
+click:0.662,0.854
+sleep:1500
+click:0.5,0.262
+key:Control+KeyA
+type:Incari Check Server
+click:0.5,0.4
+type:ws://127.0.0.1:18199
+sleep:300
+click:0.5,0.678
+sleep:2000
+shot:build/browser-checks/storage-servers-before.png
+waitfor:window.incariStorage.read('/incari/game/servers.dat').then(t => t !== null && t.includes('Incari Check Server') && t.includes('ws://127.0.0.1:18199'))
+key:Escape
+sleep:1500
+
+# --- A screenshot (F2), stored as a PNG under screenshots/ ---
+key:F2
+sleep:2000
+waitfor:window.incariStorage.list('/incari/game/screenshots').then(p => p.length === 1 && p[0].endsWith('.png'))
+assert:window.incariStorage.list('/incari/game/screenshots').then(p => window.incariStorage.read(p[0])).then(t => t.startsWith('\ufffdPNG'))
+
+# --- Everything is stored before the reload ---
+waitfor:window.incariStorage.pending() === 0
+reload
+wait:\[Incari\] Storage: opfs, [1-9][0-9]* files.*
+wait:\[Incari\] Client jar: .* from storage.*
+# The game started with the pack (resource reloads name the packs in use).
+wait:.*Reloading ResourceManager.*incari-check-pack.*
+wait:\[Incari\] Main loop running.*
+sleep:4000
+# No accessibility screen this time: options.txt said it was done. The title screen shows the
+# pack's name for the Singleplayer button.
+shot:build/browser-checks/storage-title-after.png
+assert:window.incariStorage.read('/incari/game/options.txt').then(t => /\nfov:0\.[0-9]*[1-9]/.test(t) && t.includes('file/incari-check-pack.zip'))
+# Options shows the FOV that was set.
+click:0.42,0.782
+sleep:1500
+shot:build/browser-checks/storage-fov-after.png
+key:Escape
+sleep:1500
+# The server list has the server.
+click:0.5,0.534
+sleep:1500
+click:0.376,0.688
+sleep:2500
+shot:build/browser-checks/storage-servers-after.png
+assert:window.incariStorage.read('/incari/game/servers.dat').then(t => t !== null && t.includes('Incari Check Server'))

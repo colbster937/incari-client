@@ -1,0 +1,82 @@
+# Positional sound, measured. The page joins a vanilla 26.3 server over ws:// (as
+# server-join.steps does), floats in the sky facing south, and the server plays a mono note
+# (block.note_block.harp, heard up to 16 blocks) at known offsets. A meter on the master bus sums
+# each channel's energy; the ratios must match what the desktop's OpenAL Soft gives for the same
+# offsets (measured by :platform-desktop:openAlReference, ADR 0013):
+#   4 blocks to the right            left/right = 0.000 (0.0000 / 0.7497)
+#   30° to the left (2 left, 3.5 ahead)   right/left = 0.236 (0.2169 / 0.9192 before distance)
+#   4 blocks ahead vs 4 behind       behind/ahead = 0.679 (0.4041 / 0.5955 per ear)
+#   12 blocks ahead vs 4 ahead       far/near = 0.333 (linear: 1 - d/16)
+# README.md ("Audio") has the setup: a server with RCON behind tools/wsbridge.
+
+rcon:whitelist off
+rcon:difficulty peaceful
+rcon:time set day
+rcon:weather clear
+
+# The first-run accessibility screen: Continue, which also unlocks the sound. Quick play connects.
+sleep:4000
+click:0.5,0.945
+waitfor:incariAudio.context.state === 'running'
+rconwait:list => IncariWeb
+sleep:3000
+
+# In the sky, where nothing else makes a sound: spectator (no footsteps), at a known eye position.
+# Facing south (yaw 0): forward is +z, right is -x. The eye is 1.62 above the feet.
+rcon:gamemode spectator IncariWeb
+rcon:tp IncariWeb 0.5 200 0.5 0 0
+sleep:3000
+rcon:stopsound IncariWeb
+
+# Music is stereo and starts on its own schedule: mute every stream, now and later, so only the
+# note is measured.
+rcon:stopsound IncariWeb music
+eval:(() => { const play = HTMLMediaElement.prototype.play; HTMLMediaElement.prototype.play = function () { this.muted = true; return play.call(this); }; incariAudio.streams.forEach(e => { e.muted = true; }); return 'music muted'; })()
+# The meter: each channel of the master bus, summed over one burst of sound: from the first
+# audible block after it's armed until the level falls 30 dB below the burst's peak (by then over
+# 99.9% of the note's energy is in). The note rings for about half a second; the game plays quiet
+# sounds of its own (ambience) just after, which the burst leaves out.
+eval:(() => { const a = incariAudio, ctx = a.context; const p = ctx.createScriptProcessor(1024, 2, 2); const m = { l: 0, r: 0, now: 0, state: 'idle', runs: {} }; p.onaudioprocess = e => { const l = e.inputBuffer.getChannelData(0), r = e.inputBuffer.getChannelData(1); let sl = 0, sr = 0; for (let i = 0; i < l.length; i++) { sl += l[i] * l[i]; sr += r[i] * r[i]; } m.now = sl + sr; if (m.state === 'armed' && m.now > 1e-6) m.state = 'burst'; if (m.state === 'burst') { m.peak = Math.max(m.peak, m.now); if (m.now < m.peak * 1e-3) m.state = 'done'; else { m.l += sl; m.r += sr; } } }; const g = ctx.createGain(); g.gain.value = 0; a.master.connect(p); p.connect(g); g.connect(ctx.destination); m.arm = () => { m.l = 0; m.r = 0; m.peak = 0; m.state = 'armed'; }; m.keep = name => { m.runs[name] = { l: Math.sqrt(m.l), r: Math.sqrt(m.r) }; return name + ': left ' + m.runs[name].l.toFixed(4) + ', right ' + m.runs[name].r.toFixed(4); }; globalThis.incariMeter = m; return 'meter on'; })()
+# Quiet first: whatever was playing dies away.
+waitfor:incariMeter.now < 1e-7
+
+# 4 blocks to the right.
+waitfor:incariMeter.now < 1e-7
+eval:incariMeter.arm()
+rcon:playsound minecraft:block.note_block.harp master IncariWeb -3.5 201.625 0.5 1 1
+waitfor:incariMeter.state === 'done'
+eval:incariMeter.keep('right')
+# About 30° to the left of straight ahead: +x is left, so 2 blocks that way and 3.5 ahead. Sound
+# packets carry positions in eighths of a block, so every offset here is a multiple of one. Write
+# every coordinate with a decimal point: commands centre a whole number on its block (4 is 4.5).
+waitfor:incariMeter.now < 1e-7
+eval:incariMeter.arm()
+rcon:playsound minecraft:block.note_block.harp master IncariWeb 2.5 201.625 4.0 1 1
+waitfor:incariMeter.state === 'done'
+eval:incariMeter.keep('left30')
+# 4 blocks ahead, 4 behind, 12 ahead.
+waitfor:incariMeter.now < 1e-7
+eval:incariMeter.arm()
+rcon:playsound minecraft:block.note_block.harp master IncariWeb 0.5 201.625 4.5 1 1
+waitfor:incariMeter.state === 'done'
+eval:incariMeter.keep('ahead4')
+waitfor:incariMeter.now < 1e-7
+eval:incariMeter.arm()
+rcon:playsound minecraft:block.note_block.harp master IncariWeb 0.5 201.625 -3.5 1 1
+waitfor:incariMeter.state === 'done'
+eval:incariMeter.keep('behind4')
+waitfor:incariMeter.now < 1e-7
+eval:incariMeter.arm()
+rcon:playsound minecraft:block.note_block.harp master IncariWeb 0.5 201.625 12.5 1 1
+waitfor:incariMeter.state === 'done'
+eval:incariMeter.keep('ahead12')
+
+# The ratios, against the desktop's.
+eval:JSON.stringify(Object.fromEntries(Object.entries(incariMeter.runs).map(([k, v]) => [k, [+v.l.toFixed(4), +v.r.toFixed(4)]])))
+eval:'right: left/right ' + (incariMeter.runs.right.l / incariMeter.runs.right.r).toFixed(4) + '; left30: right/left ' + (incariMeter.runs.left30.r / incariMeter.runs.left30.l).toFixed(4) + '; behind/ahead ' + (incariMeter.runs.behind4.l / incariMeter.runs.ahead4.l).toFixed(4) + '; far/near ' + (incariMeter.runs.ahead12.l / incariMeter.runs.ahead4.l).toFixed(4)
+assert:incariMeter.runs.right.r > 0.01 && incariMeter.runs.right.l / incariMeter.runs.right.r < 0.005
+assert:Math.abs(incariMeter.runs.left30.r / incariMeter.runs.left30.l - 0.2360) < 0.01
+assert:Math.abs(incariMeter.runs.ahead4.l / incariMeter.runs.ahead4.r - 1) < 0.005
+assert:Math.abs(incariMeter.runs.behind4.l / incariMeter.runs.ahead4.l - 0.6787) < 0.01
+assert:Math.abs(incariMeter.runs.ahead12.l / incariMeter.runs.ahead4.l - 0.3333) < 0.01
+shot:build/browser-checks/audio-positional.png

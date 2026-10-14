@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 22:08:13 -0400
+Subject: [PATCH] profiler: Time frames with Incari's profiler
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index d3bbf18b8d7a7c171ce921de8d940a4f0cba9368..c0930e25a53e269be049791132b8474bb46ac957 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -914,3 +914,5 @@
+ 
+-                    try (Profiler.Scope ignored = Profiler.use(this.constructProfiler(shouldCollectFrameProfile, tickProfiler))) {
++                    // Incari start: Incari's profiler times the frame from the game's own zones
++                    try (Profiler.Scope ignored = Profiler.use(incari.client.profiler.Profiling.decorate(this.constructProfiler(shouldCollectFrameProfile, tickProfiler)))) {
++                    // Incari end
+                         this.metricsRecorder.startTick();

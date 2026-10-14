@@ -1,0 +1,41 @@
+# A real community resource pack loads. It's the one at build/community-packs/pack.zip,
+# downloaded when the check runs, never committed (the browser-checks README says how; the check
+# was run with Faithful 32x for 26.3). It's dropped on the Resource Packs screen, copied in,
+# selected, and the game reloads its resources with it; then the page is reloaded and the game
+# starts with it from storage. Positions are for the 1280x577 viewport.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.seconds=500 -Pbrowser.steps=@browser-checks/community-pack.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+# Options, Resource Packs, then the pack dropped on the screen and "Yes" to copy it.
+click:0.42,0.782
+sleep:1500
+click:0.376,0.598
+sleep:2000
+drop:0.5,0.5,build/community-packs/pack.zip
+sleep:4000
+click:0.38,0.585
+sleep:3000
+waitfor:window.incariStorage.list('/incari/game/resourcepacks').then(p => p.includes('/incari/game/resourcepacks/pack.zip'))
+move:0.19,0.277
+sleep:300
+click:0.19,0.277
+sleep:1000
+shot:build/browser-checks/community-pack-selected.png
+# Done: the game reloads its resources with the pack, which must finish without errors.
+click:0.623,0.945
+wait:.*Reloading ResourceManager.*file/pack\.zip.*
+wait:\[Incari\] Main loop running.*
+sleep:3000
+shot:build/browser-checks/community-pack-title.png
+waitfor:window.incariStorage.pending() === 0
+# After a reload the game starts with it.
+reload
+wait:\[Incari\] Client jar: .* from storage.*
+wait:.*Reloading ResourceManager.*file/pack\.zip.*
+wait:\[Incari\] Main loop running.*
+sleep:4000
+shot:build/browser-checks/community-pack-after-reload.png

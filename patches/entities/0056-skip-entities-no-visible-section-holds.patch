@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] entities: Skip entities no visible section holds
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+index cbe0fe2ba0dec60231785618161a044548fb0b25..7927775092ae78195b77f937223626e7b6de0f24 100644
+--- a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
++++ b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+@@ -300,3 +300,6 @@
+             BlockPos blockPos = entity.blockPosition();
+-            return this.level.isOutsideBuildHeight(blockPos.getY()) || this.levelRenderer.isSectionCompiledAndVisible(blockPos, chunkFadeDuration);
++            return (this.level.isOutsideBuildHeight(blockPos.getY()) || this.levelRenderer.isSectionCompiledAndVisible(blockPos, chunkFadeDuration))
++                // Incari start: skip entities no visible section holds (occlusion culling)
++                && incari.client.render.EntityOcclusion.visible(entity, this.levelRenderer, partialTicks);
++                // Incari end
+         } else {

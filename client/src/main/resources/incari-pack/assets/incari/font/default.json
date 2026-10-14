@@ -1,0 +1,12 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "incari:red_hat_display.ttf",
+      "size": 9.5,
+      "oversample": 2.0,
+      "shift": [0, 0],
+      "filter": { "uniform": false }
+    }
+  ]
+}

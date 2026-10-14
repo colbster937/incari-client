@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 01:00:20 -0400
+Subject: [PATCH] text: Draw unchanged world text with last frame's layout
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 9924f88e5165ba139550c1637b05ebc1d683246a..0946d05bd9b4fa2993ffcc49081fc5f000b35434 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -951,2 +951,5 @@
+         this.fontManager.updateOptions(this.options);
++        // Incari start: text laid out with the old glyphs goes
++        incari.client.render.TextLayouts.clear();
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/client/renderer/feature/TextFeatureRenderer.java b/src/main/java/net/minecraft/client/renderer/feature/TextFeatureRenderer.java
+index b48a8f5c74c0ed9c9b186e2f1e82ae7aefa57b98..c670c6681668b7b7cc0b8789bc68c9a514a328a9 100644
+--- a/src/main/java/net/minecraft/client/renderer/feature/TextFeatureRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/feature/TextFeatureRenderer.java
+@@ -46,5 +46,7 @@
+         if (content.outlineColor() == 0) {
+-            Font.PreparedText text = font.prepareText(
+-                content.string(), content.x(), content.y(), content.color(), content.dropShadow(), false, content.backgroundColor()
++            // Incari start: the same layout as last frame, where the text and how it's drawn haven't changed
++            Font.PreparedText text = incari.client.render.TextLayouts.prepare(
++                font, content.string(), content.x(), content.y(), content.color(), content.dropShadow(), content.backgroundColor()
+             );
++            // Incari end
+             text.visit(glyphRenderer);

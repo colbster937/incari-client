@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 15:15:39 -0400
+Subject: [PATCH] gui: Keep the HUD in a texture between refreshes
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index 3e689e6a2a8cc8d5d6d9736bbe2cedd6f115f9d7..3922f2f5b5628bed187739b9a5fd012dc0a22095 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -149,2 +149,5 @@
+         this.guiRenderState.reset();
++        // Incari start: the HUD kept in a texture between refreshes (ADR 0030)
++        incari.client.gui.HudCache.beginFrame(shouldRenderLevel && this.overlay == null && this.screen == null);
++        // Incari end
+         GuiGraphicsExtractor graphics = new GuiGraphicsExtractor(this.minecraft, this.guiRenderState, xMouse, yMouse);
+@@ -189,2 +192,9 @@
+ 
++        // Incari start: the HUD kept in a texture between refreshes (ADR 0030)
++        if (incari.client.gui.HudCache.reusing()) {
++            profiler.pop();
++            graphics.applyCursor(this.minecraft.getWindow());
++            return;
++        }
++        // Incari end
+         if (shouldRenderLevel) {
+diff --git a/src/main/java/net/minecraft/client/gui/Hud.java b/src/main/java/net/minecraft/client/gui/Hud.java
+index 9cfdf35e1a7cb3e6b51f385658ec9bd62c4f6a60..cb09877416ec50e3613574bb0d4917ba985ae278 100644
+--- a/src/main/java/net/minecraft/client/gui/Hud.java
++++ b/src/main/java/net/minecraft/client/gui/Hud.java
+@@ -225,2 +225,5 @@
+                 graphics.nextStratum();
++                // Incari start: the HUD kept in a texture between refreshes (ADR 0030)
++                if (incari.client.gui.HudCache.split(this.minecraft.gameRenderer.gameRenderState().guiRenderState)) return;
++                // Incari end
+                 this.extractHotbarAndDecorations(graphics, deltaTracker);
+diff --git a/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java b/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
+index 31771b85e536090eae4ee8adc8b09118bca8e443..0080b0292d90d51bca11e1ad8b38d82f1120bd3b 100644
+--- a/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
++++ b/src/main/java/net/minecraft/client/gui/render/GuiRenderer.java
+@@ -131,2 +131,5 @@
+         this.draw();
++        // Incari start: the HUD kept in a texture between refreshes (ADR 0030)
++        incari.client.gui.HudCache.composite();
++        // Incari end
+         profiler.popPush("endFrame");
+@@ -198,2 +201,8 @@
+ 
++            // Incari start: the HUD above the crosshair goes into its texture, not after a blur (ADR 0030)
++            if (incari.client.gui.HudCache.divided()) {
++                if (this.draws.size() > this.firstDrawIndexAfterBlur) this.executeDrawRange(() -> "Incari HUD", incari.client.gui.HudCache.target(), dynamicTransforms, this.firstDrawIndexAfterBlur, this.draws.size());
++                return;
++            }
++            // Incari end
+             if (this.draws.size() > this.firstDrawIndexAfterBlur) {

@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:59:48 -0400
+Subject: [PATCH] modules: Let modules see a spear's stab
+
+A piercing weapon's attack returned before the attack hook, so Hit & Kill
+Effects and Reach Display never saw it.
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index ed622c7ad27f79afb988acf237ccfb8298fc10f7..a349a50049e75179aa64e528553d4e6dcdf3302d 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1708,2 +1708,5 @@
+                     this.gameMode.piercingAttack(attackAnimation, piercingWeapon);
++                    // Incari start: modules see a spear's stab too (Hit & Kill Effects, Reach Display)
++                    incari.client.modules.ModuleInput.stabbed(this.player, this.hitResult);
++                    // Incari end
+                     return true;

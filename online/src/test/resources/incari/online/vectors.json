@@ -1,0 +1,139 @@
+{
+  "comment": "Shared with the online service's own tests (ADR 0058). Server hashes are SHA-256 of serverHashPrefix + normalized; proof of work hashes the 16-byte challenge then the nonce as 8 bytes big-endian.",
+  "serverHashPrefix": "incari-server-v1\n",
+  "serverHashes": [
+    {
+      "address": "play.example.com",
+      "normalized": "play.example.com",
+      "hash": "60c7ef8098b204588d5356f7ed8421d75d6e864581bb492c0ea3acdc41d30c76"
+    },
+    {
+      "address": "Play.Example.COM",
+      "normalized": "play.example.com",
+      "hash": "60c7ef8098b204588d5356f7ed8421d75d6e864581bb492c0ea3acdc41d30c76"
+    },
+    {
+      "address": "play.example.com:25565",
+      "normalized": "play.example.com",
+      "hash": "60c7ef8098b204588d5356f7ed8421d75d6e864581bb492c0ea3acdc41d30c76"
+    },
+    {
+      "address": "play.example.com.",
+      "normalized": "play.example.com",
+      "hash": "60c7ef8098b204588d5356f7ed8421d75d6e864581bb492c0ea3acdc41d30c76"
+    },
+    {
+      "address": "play.example.com:25566",
+      "normalized": "play.example.com:25566",
+      "hash": "0822754bc117883eaf02048b993e73fea4c795485f31f9a661e2c5a06e7b1dfa"
+    },
+    {
+      "address": "  mc.example.net  ",
+      "normalized": "mc.example.net",
+      "hash": "ca62db78ef8e253a3d787e2c1c9fbb26ea4e39e0301c2b927e09954711b171ab"
+    },
+    {
+      "address": "203.0.113.7:25565",
+      "normalized": "203.0.113.7",
+      "hash": "b22cba69d806e7e834d28a59c28f3afab280925ba5f97083504c709372429087"
+    },
+    {
+      "address": "[2001:db8::1]:25565",
+      "normalized": "[2001:db8::1]",
+      "hash": "5475f1ccabd33757b3468bb3edd69d42148db7d789b3b47043e14691ae92336a"
+    },
+    {
+      "address": "[2001:DB8::1]:19132",
+      "normalized": "[2001:db8::1]:19132",
+      "hash": "03ef620aa36eac75597b42336feffa9f1c7799f5046c0585b7d3a96baf234947"
+    },
+    {
+      "address": "wss://Eagler.Example.com/",
+      "normalized": "wss://eagler.example.com",
+      "hash": "caf265f24fe2e0c5cf459d1ba0fc55a51f4fed785d897edb05f43cccd2a21f05"
+    },
+    {
+      "address": "wss://eagler.example.com:443/play/?x=1",
+      "normalized": "wss://eagler.example.com/play",
+      "hash": "c6c67c1b4bd4157416b963a8e200a780135726b35ff6f44f80bd712bc9f3a43b"
+    },
+    {
+      "address": "ws://127.0.0.1:8081",
+      "normalized": "ws://127.0.0.1:8081",
+      "hash": "cbb8f3cc4f8cf4002c0f0a1567e11cd4d904f91c234503549f7717962b9991cd"
+    },
+    {
+      "address": "ws://localhost:80/",
+      "normalized": "ws://localhost",
+      "hash": "22271d8c33149e8d33d789d0e9bf3cc331b2de6530513e12ac09c5a9c07ffaa3"
+    },
+    {
+      "address": "WSS://eagler.example.com/Path#frag",
+      "normalized": "wss://eagler.example.com/Path",
+      "hash": "9d0db5ba8f7a319d62d352f6d3b0bc6be186a7c4a5a1dd6f92b7a86780090d8a"
+    },
+    {
+      "address": "relay:AbC123",
+      "normalized": "relay:AbC123",
+      "hash": "3ebe3866d320caa2bd08ffb76eb813d52103d9e01f0f67ad79253eb844124eaf"
+    },
+    {
+      "address": "RELAY: xyz9 ",
+      "normalized": "relay:xyz9",
+      "hash": "a24c4919b86a113f26e971e6b5b3f40cf6f2489c3a1b949eff9451c54f933819"
+    }
+  ],
+  "proofOfWork": [
+    {
+      "challenge": "fkxMOk0V3Jjf2djP8lQ1LQ",
+      "bits": 8,
+      "nonce": 256,
+      "hash": "0088ddcce4ad2a5bf0c292787e39305d9ccae0d6236f52d818f18a13e3d32e2f"
+    },
+    {
+      "challenge": "nO5ExBsYUor2_UYg5XVh6Q",
+      "bits": 12,
+      "nonce": 210,
+      "hash": "000a276364209952182a5caac7cfab6fa0545fe4768e01c9a972039afe648af5"
+    },
+    {
+      "challenge": "LbgcpKdxNS-cAARSw3Frzw",
+      "bits": 16,
+      "nonce": 5123,
+      "hash": "000094a57e6f276308ee5428312f225901df2047539da6673440bddae8edc760"
+    },
+    {
+      "challenge": "kDM5FBh1Dk_VY49pTV4a2Q",
+      "bits": 18,
+      "nonce": 222891,
+      "hash": "0000129b14fc1236f2c8120a173c7ce2a5072aae717f0727d058b06a98bd9d1d"
+    }
+  ],
+  "recoveryCodes": {
+    "valid": [
+      [
+        "abcd-efgh-jkmn",
+        "ABCD-EFGH-JKMN"
+      ],
+      [
+        "ABCDEFGHJKMN",
+        "ABCD-EFGH-JKMN"
+      ],
+      [
+        "0123 4567 89ab",
+        "0123-4567-89AB"
+      ],
+      [
+        "oi1l-0000-zzzz",
+        "0111-0000-ZZZZ"
+      ]
+    ],
+    "invalid": [
+      "abcd-efgh-jkm",
+      "abcd-efgh-jkmnp",
+      "abcd-efgh-jkmu",
+      "abcd-efgh-jk!n",
+      ""
+    ]
+  }
+}

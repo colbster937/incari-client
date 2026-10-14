@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 17:03:44 -0400
+Subject: [PATCH] net: Resolve WebSocket addresses without DNS or SRV lookups
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java b/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
+index e02f8e45a9b5e9c4a995cef0b24a3e0267b55bc9..70f15022312422c2e14931ac1d38bd3bc4687d72 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
++++ b/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
+@@ -21,2 +21,7 @@
+     public Optional<ResolvedServerAddress> resolveAddress(final ServerAddress address) {
++        // Incari start: a WebSocket address needs no DNS or SRV lookup
++        if (incari.client.net.WebSocketConnections.isWebSocket(address)) {
++            return incari.client.net.WebSocketConnections.resolve(address, this.addressCheck);
++        }
++        // Incari end
+         Optional<ResolvedServerAddress> resolvedAddress = this.resolver.resolve(address);

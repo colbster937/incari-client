@@ -1,0 +1,28 @@
+Incari Client
+Copyright (C) 2026 The Incari Client contributors
+
+This program is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version, with the
+additional permission below. The full license text is in LICENSE.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+
+Additional permission under GNU GPL version 3 section 7
+
+If you modify this Program, or any covered work, by linking or combining it with
+Minecraft: Java Edition (or a modified version of it, including one produced by
+decompiling it and applying this Program's patches), containing parts covered by the
+terms of the Minecraft End User License Agreement or other Mojang Studios or
+Microsoft terms, the licensors of this Program grant you additional permission to
+convey the resulting work. Corresponding Source for a non-source form of such a
+combination shall include the source code for the parts of this Program used, but need
+not include the source code for the parts of Minecraft: Java Edition used.
+
+This permission covers only the Minecraft: Java Edition parts of such a combination.
+It gives no rights in Minecraft itself, which you must obtain from Mojang Studios
+under their own terms, and it does not change the license of any other component,
+including third-party libraries under their own licenses.

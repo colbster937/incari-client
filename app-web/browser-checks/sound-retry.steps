@@ -1,0 +1,42 @@
+# F1 of the 2026-10-12 batch: sounds whose download fails at first still play. Every sound's first
+# two fetches fail as a dropped connection would; the loader's retries get the third. In a quick
+# world (-Pbrowser.query=name=Player&world=Retry&seed=1); no server needed.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=240 \
+#       "-Pbrowser.query=name=Player&world=Retry&seed=1" -Pbrowser.steps=@browser-checks/sound-retry.steps
+
+sleep:4000
+eval:(() => { const of = window.fetch; const tries = new Map(); globalThis.fetchLog = []; window.fetch = (u, ...a) => { const url = String(u); if (!url.includes('objects')) return of(u, ...a); const n = (tries.get(url) || 0) + 1; tries.set(url, n); if (n <= 2) { fetchLog.push('fail ' + n); return Promise.reject(new TypeError('Failed to fetch')); } return of(u, ...a).then(r => { fetchLog.push(r.status + ' on try ' + n); return r; }); }; return 'failing each sound twice'; })()
+# The first-run accessibility screen: Continue (also the gesture the audio waits for).
+click:0.5,0.945
+wait:.*logged in with entity id.*
+sleep:6000
+eval:globalThis.before = incariAudio.buffersStarted
+
+key:KeyT
+sleep:800
+type:/fill ~-4 ~ ~-4 ~4 ~4 ~4 minecraft:air
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/fill ~-4 ~-3 ~-4 ~4 ~-1 ~4 minecraft:stone
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/gamemode creative
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/tp @s ~ ~ ~ 0 90
+key:Enter
+sleep:1500
+click:0.5,0.5
+sleep:1500
+click:0.5,0.5
+sleep:1500
+click:0.5,0.5
+sleep:3000
+eval:'buffers started: ' + (incariAudio.buffersStarted - before) + ', fetches: ' + JSON.stringify(fetchLog)

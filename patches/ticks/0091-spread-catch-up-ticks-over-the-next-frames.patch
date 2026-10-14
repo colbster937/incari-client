@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 17:10:19 -0400
+Subject: [PATCH] ticks: Spread catch-up ticks over the next frames
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 076faaba9b350141a7596687721b21ab638d5995..c5a5c4b7b7c56b6eeaa680b913bba16f05967d51 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1182,2 +1182,5 @@
+         int ticksToDo = advanceGameTime ? this.deltaTracker.advanceGameTime(Util.getMillis()) : 0;
++        // Incari start: catch-up ticks spread over the next frames, not run back to back (ADR 0032)
++        ticksToDo = incari.client.TickPacing.ticksToRun(ticksToDo, advanceGameTime);
++        // Incari end
+         ProfilerFiller profiler = Profiler.get();

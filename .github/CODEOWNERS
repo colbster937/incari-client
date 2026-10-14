@@ -1,0 +1,19 @@
+# Changes here need a human reviewer. Agents may
+# open pull requests that touch these paths, but a person approves them.
+
+# Patches into Mojang code and the manifest of replaced classes.
+/patches/                  @incari-client
+# Graphics and networking.
+/render-*/                 @incari-client
+/tools/shaders/            @incari-client
+/net/                      @incari-client
+# Licensing, and the guards and workflow that keep the repo legal.
+/LICENSE                   @incari-client
+/LICENSE-EXCEPTION.txt     @incari-client
+/DCO.txt                   @incari-client
+/docs/adr/0002-*           @incari-client
+/.github/                  @incari-client
+/tools/ci/                 @incari-client
+/tools/copycheck/          @incari-client
+# The architecture's allowed dependencies.
+/gradle/module-boundaries.txt  @incari-client

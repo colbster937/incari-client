@@ -1,0 +1,85 @@
+# ---------------------------------------------------------------------------
+# Mojang content: NEVER commit. The repo must stay patch-only (see AGENTS.md).
+# ---------------------------------------------------------------------------
+
+# Generated workspace: downloaded jars, decompiled game source, patched tree
+/work/
+
+# Any jar (Minecraft client/server jars, libraries). Gradle wrapper is the only exception.
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar
+
+# Downloaded or extracted game assets, asset indexes, caches
+/assets-cache/
+/mojang/
+.minecraft/
+
+# Desktop dev runtime game directory (options.txt, saves, screenshots, logs)
+/run/
+crash-reports/
+logs/
+
+# ---------------------------------------------------------------------------
+# Build outputs: compiled clients contain Mojang code. Never commit or publish.
+# ---------------------------------------------------------------------------
+**/build/
+# ...except tools/build, the build CLI's own module, and source packages named "build".
+!/tools/build/
+!**/src/**/build/
+out/
+dist/
+target/
+*.wasm
+*.wasm.map
+*.teavmdbg
+/offline/
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
+.gradle/
+.kotlin/
+node_modules/
+.pnpm-store/
+.npm/
+playwright-report/
+test-results/
+blob-report/
+*.log
+
+# IDEs and editors
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.settings/
+.project
+.classpath
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# Secrets: keys and credentials live in environment variables, never git
+# ---------------------------------------------------------------------------
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+
+# Claude Code: local settings and a checkout's private notes (shared settings in
+# .claude/settings.json are fine)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Agent instructions ARE tracked, even where a global ignore rule excludes them.
+!CLAUDE.md
+!**/CLAUDE.md
+!AGENTS.md
+!**/AGENTS.md

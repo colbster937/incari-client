@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 22:21:50 -0400
+Subject: [PATCH] render: Size the terrain's heaps by the device's tier
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+index 129fa392df88f073f8d737e6f901d0e84ab06bfb..166e99bae17be638e9847d4a9ae42ce6a66140fc 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+@@ -68,7 +68,9 @@
+         GpuDevice gpuDevice = RenderSystem.getDevice();
+-        this.stagingBuffer = StagingBuffer.create("Chunk", gpuDevice, 102760448);
++        // Incari start: the terrain's heaps and staging buffer sized by the device's tier
++        this.stagingBuffer = StagingBuffer.create("Chunk", gpuDevice, incari.client.render.TerrainHeaps.stagingSize(102760448));
+         this.chunkUberBuffers = Util.makeEnumMap(ChunkSectionLayer.class, layer -> {
+             VertexFormat vertexFormat = layer.pipeline(false).getVertexFormatBinding(0);
+-            UberGpuBuffer<SectionMesh> vertexUberBuffer = new UberGpuBuffer<>(layer.label(), 32, 134217728, vertexFormat.getVertexSize(), this.stagingBuffer);
+-            UberGpuBuffer<SectionMesh> indexUberBuffer = new UberGpuBuffer<>(layer.label(), 64, 33554432, 8, this.stagingBuffer);
++            UberGpuBuffer<SectionMesh> vertexUberBuffer = new UberGpuBuffer<>(layer.label(), 32, incari.client.render.TerrainHeaps.vertexHeapSize(134217728), vertexFormat.getVertexSize(), this.stagingBuffer);
++            UberGpuBuffer<SectionMesh> indexUberBuffer = new UberGpuBuffer<>(layer.label(), 64, incari.client.render.TerrainHeaps.indexHeapSize(33554432), 8, this.stagingBuffer);
++            // Incari end
+             return new SectionRenderDispatcher.SectionUberBuffers(vertexUberBuffer, indexUberBuffer);

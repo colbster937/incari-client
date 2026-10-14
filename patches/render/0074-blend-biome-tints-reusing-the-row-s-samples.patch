@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 08:20:46 -0400
+Subject: [PATCH] render: Blend biome tints reusing the row's samples
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+index e1d64b80ea9ce8b3c308081a6a2745c803633291..047d5f2550600cbd86ea0bdb9752df3547895a9c 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+@@ -503,2 +503,3 @@
+     public void unload(final LevelChunk levelChunk) {
++        incari.client.render.TintBlend.changed(); // Incari: the biomes held changed (ADR 0027)
+         levelChunk.clearAllBlockEntities();
+@@ -509,2 +510,3 @@
+     public void onChunkLoaded(final ChunkPos pos) {
++        incari.client.render.TintBlend.changed(); // Incari: the biomes held changed (ADR 0027)
+         this.tintCaches.forEach((resolver, cache) -> cache.invalidateForChunk(pos.x(), pos.z()));
+@@ -514,2 +516,3 @@
+     public void clearTintCaches() {
++        incari.client.render.TintBlend.changed(); // Incari: the tints are made again (ADR 0027)
+         this.tintCaches.forEach((resolver, cache) -> cache.invalidateAll());
+@@ -1033,2 +1036,7 @@
+ 
++        // Incari start: the same blend, reusing the colours the last block on the row sampled (ADR 0027)
++        if (incari.client.render.TintBlend.enabled()) {
++            return incari.client.render.TintBlend.blend(this, pos, colorResolver, dist);
++        }
++        // Incari end
+         int count = (dist * 2 + 1) * (dist * 2 + 1);

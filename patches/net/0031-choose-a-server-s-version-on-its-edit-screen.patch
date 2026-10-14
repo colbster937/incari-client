@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 07:59:55 -0400
+Subject: [PATCH] net: Choose a server's version on its edit screen
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/ManageServerScreen.java b/src/main/java/net/minecraft/client/gui/screens/ManageServerScreen.java
+index 7591bf0154dba2c637300b10e7d9e64c0c53580e..ba9e0662df110be4959febba256be93d885632ac 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/ManageServerScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/ManageServerScreen.java
+@@ -54,2 +54,5 @@
+         );
++        // Incari start: the server's version (Via), under the resource pack button
++        this.addRenderableWidget(incari.client.net.ServerVersions.button(this.serverData, this.width / 2 - 100, this.height / 4 + 93));
++        // Incari end
+         this.addButton = this.addRenderableWidget(

@@ -1,0 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 19:25:17 -0400
+Subject: [PATCH] modules: Let Hit Color repaint the hurt tint
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/OverlayTexture.java b/src/main/java/net/minecraft/client/renderer/texture/OverlayTexture.java
+index cb6ca2583996afb935c2e423c136da67da349ed6..b73823f6fe6a24675688cda875662894c6a76d29 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/OverlayTexture.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/OverlayTexture.java
+@@ -29,2 +29,3 @@
+         this.texture.upload();
++        incari.client.modules.ModuleEffects.overlay(this.texture); // Incari: Hit Color
+     }

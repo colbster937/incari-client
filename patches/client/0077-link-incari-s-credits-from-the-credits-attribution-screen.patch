@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 19:35:55 -0400
+Subject: [PATCH] client: Link Incari's credits from the Credits & Attribution
+ screen
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/CreditsAndAttributionScreen.java b/src/main/java/net/minecraft/client/gui/screens/CreditsAndAttributionScreen.java
+index 5be620b821536bdd5e50e866ef1bab338cf0ff8f..aa6c4c7677333e4cae4ff1b69500ab05c0b1c5df 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/CreditsAndAttributionScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/CreditsAndAttributionScreen.java
+@@ -32,2 +32,5 @@
+         content.addChild(Button.builder(LICENSES_BUTTON, ConfirmLinkScreen.confirmLink(this, CommonLinks.LICENSES)).width(210).build());
++        // Incari start: Incari's credits and the licenses of what it adds
++        content.addChild(incari.client.credits.CreditsScreen.button(this, 210));
++        // Incari end
+         this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());

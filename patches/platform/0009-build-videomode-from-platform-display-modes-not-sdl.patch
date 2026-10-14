@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:05:35 -0400
+Subject: [PATCH] platform: Build VideoMode from platform display modes, not
+ SDL
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/platform/VideoMode.java b/src/main/java/com/mojang/blaze3d/platform/VideoMode.java
+index 248664d64cf1cb439640ea322b27e1a94b56714c..3bd14611dae5dc8698f8e310b2c965d01d4841b3 100644
+--- a/src/main/java/com/mojang/blaze3d/platform/VideoMode.java
++++ b/src/main/java/com/mojang/blaze3d/platform/VideoMode.java
+@@ -13,5 +13,2 @@
+ import org.jspecify.annotations.Nullable;
+-import org.lwjgl.sdl.SDLPixels;
+-import org.lwjgl.sdl.SDL_DisplayMode;
+-import org.lwjgl.sdl.SDL_PixelFormatDetails;
+ import org.slf4j.Logger;
+@@ -43,3 +40,5 @@
+ 
+-    private VideoMode(final int width, final int height, final int redBits, final int greenBits, final int blueBits, final float refreshRate) {
++    // Incari start: platform display modes carry fractional refresh rates (59.94 Hz)
++    public VideoMode(final int width, final int height, final int redBits, final int greenBits, final int blueBits, final float refreshRate) {
++    // Incari end
+         this.width = width;
+@@ -52,11 +51,4 @@
+ 
+-    public VideoMode(final SDL_DisplayMode mode) {
+-        this.width = mode.w();
+-        this.height = mode.h();
+-        this.refreshRate = mode.refresh_rate();
+-        SDL_PixelFormatDetails details = SDLPixels.SDL_GetPixelFormatDetails(mode.format());
+-        this.redBits = details != null ? details.Rbits() : 8;
+-        this.greenBits = details != null ? details.Gbits() : 8;
+-        this.blueBits = details != null ? details.Bbits() : 8;
+-    }
++    // Incari start: display modes come from the platform (incari.client.platform.DisplayModes), not SDL
++    // Incari end
+ 

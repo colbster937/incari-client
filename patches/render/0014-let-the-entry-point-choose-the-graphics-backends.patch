@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:06:35 -0400
+Subject: [PATCH] render: Let the entry point choose the graphics backends
+
+
+diff --git a/src/main/java/net/minecraft/client/PreferredGraphicsApi.java b/src/main/java/net/minecraft/client/PreferredGraphicsApi.java
+index aef75622c2e6eb900d65f709e337472e3b44a07f..f42ea013a39af22826f3dc50e4042a64052dae1c 100644
+--- a/src/main/java/net/minecraft/client/PreferredGraphicsApi.java
++++ b/src/main/java/net/minecraft/client/PreferredGraphicsApi.java
+@@ -3,4 +3,2 @@
+ import com.mojang.renderpearl.api.device.GpuBackend;
+-import com.mojang.renderpearl.backend.opengl.GlBackend;
+-import com.mojang.renderpearl.backend.vulkan.VulkanBackend;
+ import com.mojang.serialization.Codec;
+@@ -33,5 +31,5 @@
+     public GpuBackend[] getBackendsToTry() {
+-        GlBackend gl = new GlBackend();
+-        VulkanBackend vulkan = new VulkanBackend();
+-        return this == VULKAN ? new GpuBackend[]{vulkan, gl} : new GpuBackend[]{gl, vulkan};
++        // Incari start: the entry point installs the backends its platform can draw with
++        return incari.client.platform.GraphicsBackends.backendsToTry(this);
++        // Incari end
+     }

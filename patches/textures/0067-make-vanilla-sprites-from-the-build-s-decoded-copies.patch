@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 00:52:04 -0400
+Subject: [PATCH] textures: Make vanilla sprites from the build's decoded
+ copies
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java b/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
+index d3847e145302810fe6b32af20a345efc217379d2..d9ab9090b545c4513a5517f2ec4570b16c8b1aac 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
+@@ -85,2 +85,6 @@
+     public void increaseMipLevel(final int mipLevel) {
++        // Incari start: the build's mip levels of a vanilla sprite, where it has them
++        NativeImage[] prebuilt = incari.client.render.SpriteCache.mipLevels(this.originalImage, mipLevel);
++        if (prebuilt != null) { this.byMipLevel = prebuilt; return; }
++        // Incari end
+         try {
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
+index ccb90e67d981d154c838efc4019c3d0a703d0cc8..c4dcdbda98bd6907417a6e2b25b603f67dbb8f2d 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
+@@ -41,2 +41,6 @@
+             NativeImage image;
++            // Incari start: the build's decoded copy of a vanilla sprite, where it has one
++            NativeImage prebuilt = incari.client.render.SpriteCache.image(spriteLocation, resource);
++            if (prebuilt != null) image = prebuilt; else
++            // Incari end
+             try (InputStream is = resource.open()) {

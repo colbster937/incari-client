@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:39:00 -0400
+Subject: [PATCH] modules: Let a module turn the camera without the player
+
+The turn and camera events (ADR 0053): the mouse's turns may be kept from the player and the camera's angles changed (Freelook).
+
+diff --git a/src/main/java/net/minecraft/client/Camera.java b/src/main/java/net/minecraft/client/Camera.java
+index de5172d8ef4c63e62590fab82cd5154b436e8574..76eea5796c84d07a2af7d7ca3b0ef35694b457f8 100644
+--- a/src/main/java/net/minecraft/client/Camera.java
++++ b/src/main/java/net/minecraft/client/Camera.java
+@@ -270,2 +270,5 @@
+         this.detached = !this.minecraft.options.getCameraType().isFirstPerson();
++        // Incari start: a module may turn the camera without the player (Freelook)
++        if (incari.client.modules.ModuleCamera.camera(this.yRot, this.xRot)) this.setRotation(incari.client.modules.ModuleCamera.yaw(), incari.client.modules.ModuleCamera.pitch());
++        // Incari end
+         if (this.detached) {
+diff --git a/src/main/java/net/minecraft/client/MouseHandler.java b/src/main/java/net/minecraft/client/MouseHandler.java
+index 70d5065ad0b0ddc3eb2af6ab991601a56f1be4c7..7a6a3a2036fd9d1e662d860daaa9e43fcb20e8d8 100644
+--- a/src/main/java/net/minecraft/client/MouseHandler.java
++++ b/src/main/java/net/minecraft/client/MouseHandler.java
+@@ -345,2 +345,5 @@
+         this.minecraft.getTutorial().onMouse(xo, yo);
++        // Incari start: a module may turn the camera instead of the player (Freelook)
++        if (incari.client.modules.ModuleCamera.turn(xo, yo)) return;
++        // Incari end
+         if (this.minecraft.player != null) {

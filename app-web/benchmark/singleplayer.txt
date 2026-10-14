@@ -1,0 +1,80 @@
+# The singleplayer benchmark (ADR 0039's server in a worker): ./gradlew :app-web:benchmark
+# -Pbenchmark.singleplayer plays these scenarios in a world the page creates itself, from
+# server.properties' seed (the server benchmark's terrain), with options.txt's options but commands
+# shown in chat. Same format as benchmark.txt, but there's no server section: nothing runs before
+# the world exists, and each rcon step is typed into the game's chat as the player (who may run
+# commands: the world allows them). rconwait reads the answer from the page's console.
+#
+# Unlike the server benchmark, nothing is generated in advance: the page's own server generates
+# terrain as the camera reaches it, on the same machine as the page, which is what a player's
+# singleplayer world does. Each scenario's figures add the server worker's ticks: ticks a second
+# (20 when it keeps up), their length, the chunks it holds, and its heap.
+
+setup
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamerule spawn_patrols false
+    rcon:gamerule spawn_phantoms false
+    rcon:gamerule spawn_wandering_traders false
+    rcon:gamerule command_block_output false
+    rcon:gamerule send_command_feedback false
+    rcon:gamerule mob_drops false
+    rcon:time set 6000
+    rcon:weather clear
+    rcon:gamemode spectator @s
+    # The fly-through's engine, as in benchmark.txt: each tick, the camera moves 0.55 blocks east.
+    rcon:forceload add 0 0
+    rcon:setblock 0 318 0 minecraft:repeating_command_block{auto:1b,Command:"execute as @e[tag=incari_camera] at @s run tp @s ~0.55 ~ ~"}
+    sleep:10000
+
+# Where the world put the player: its spawn area, generated when the world was created.
+scenario spawn  At the world's spawn, where the player stands when the world opens: the server ticking the area around them, nothing new to generate
+    measure:30
+
+scenario flythrough  A straight flight east at 11 blocks a second, over terrain the page's own server generates as the camera reaches it
+    rcon:tp @s 0.5 140 0.5 -90 25
+    # The flight starts over generated terrain: the server makes the start area first.
+    rcon:gamerule send_command_feedback true
+    rconwait:execute if loaded 0 64 0 => passed
+    rconwait:execute if loaded 96 64 0 => passed
+    rcon:gamerule send_command_feedback false
+    sleep:5000
+    rcon:kill @e[tag=incari_camera]
+    rcon:summon minecraft:armor_stand 0.5 140 0.5 {Tags:["incari_camera"],Invisible:1b,Marker:1b,NoGravity:1b,Rotation:[-90f,25f]}
+    rcon:spectate @e[tag=incari_camera,limit=1] @s
+    sleep:3000
+    measure:55
+    # A teleport ends the spectating.
+    rcon:tp @s 0.5 212 -2026 0 35
+    rcon:kill @e[tag=incari_camera]
+
+scenario combat  Iron golems against waves of vindicators, pillagers and husks in an arena, the server running their AI beside the page
+    rcon:tp @s 0.5 212 -2026 0 35
+    # The arena's chunks are generated once the teleport reaches them: building before then fails.
+    # Feedback on for the waits' answers, off again for the building.
+    rcon:gamerule send_command_feedback true
+    rconwait:execute if loaded -17 199 -2017 => passed
+    rconwait:execute if loaded 17 204 -1983 => passed
+    rcon:gamerule send_command_feedback false
+    rcon:fill -17 199 -2017 17 204 -1983 minecraft:barrier outline
+    rcon:fill -16 199 -2016 16 199 -1984 minecraft:smooth_stone
+    rcon:summon minecraft:armor_stand 0.5 212 -2026 {Tags:["incari_watch"],Invisible:1b,Marker:1b,NoGravity:1b,Rotation:[0f,35f]}
+    rcon:spectate @e[tag=incari_watch,limit=1] @s
+    rcon*10:summon minecraft:iron_golem 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon:spreadplayers 0 -2000 2 14 under 203 false @e[tag=incari_fighter]
+    sleep:5000
+    measure:10
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    measure:10
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    measure:10
+    rcon:kill @e[tag=incari_fighter]
+    rcon:kill @e[tag=incari_watch]

@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 21:55:23 -0400
+Subject: [PATCH] textures: Cap atlas sizes by the device's tier
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/SpriteLoader.java b/src/main/java/net/minecraft/client/renderer/texture/SpriteLoader.java
+index be3e9cfac371fde4c875493521d13b7afb907cd8..1c4de0d15b194dacd5381c11b11dc6a59108e260 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/SpriteLoader.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/SpriteLoader.java
+@@ -47,3 +47,5 @@
+         try (Zone ignored = Profiler.get().zone(() -> "stitch " + this.location)) {
+-            int maxTextureSize = this.maxSupportedTextureSize;
++            // Incari start: the tier's largest atlas
++            int maxTextureSize = incari.client.render.AtlasBudget.maxSize(this.maxSupportedTextureSize);
++            // Incari end
+             int minTexelSize = Integer.MAX_VALUE;
+@@ -131,3 +133,5 @@
+             .thenCompose(sprites -> runSpriteSuppliers(spriteResourceLoader, (List<SpriteSource.Loader>)sprites, taskExecutor))
+-            .thenApply(resources -> this.stitch((List<SpriteContents>)resources, maxMipmapLevels, taskExecutor));
++            // Incari start: sprites that don't fit the tier's largest atlas at full resolution are halved
++            .thenApply(resources -> this.stitch(incari.client.render.AtlasBudget.fit(this.location, (List<SpriteContents>)resources, this.maxSupportedTextureSize, maxMipmapLevels), maxMipmapLevels, taskExecutor));
++            // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
+index 6f0204fca659a316dba8d04b8df3de2dc0aa4d03..ccb90e67d981d154c838efc4019c3d0a703d0cc8 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteResourceLoader.java
+@@ -67,3 +67,5 @@
+ 
+-            return new SpriteContents(spriteLocation, frameSize, image, animationInfo, additionalMetadata, textureInfo);
++            // Incari start: the atlas size cap may load it again at a lower resolution
++            return incari.client.render.AtlasBudget.loaded(spriteLocation, frameSize, image, animationInfo, additionalMetadata, textureInfo);
++            // Incari end
+         };

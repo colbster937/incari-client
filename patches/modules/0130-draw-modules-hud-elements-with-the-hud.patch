@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 22:17:55 -0400
+Subject: [PATCH] modules: Draw modules' HUD elements with the HUD
+
+Modules' HUD elements (ADR 0046) are drawn after the HUD's first
+stratum, before the chat, so in the browser they go into the HUD's
+texture with the rest (ADR 0030).
+
+diff --git a/src/main/java/net/minecraft/client/gui/Hud.java b/src/main/java/net/minecraft/client/gui/Hud.java
+index cb09877416ec50e3613574bb0d4917ba985ae278..84977420997b886d87f219ccb7a1b6dbafdf76d9 100644
+--- a/src/main/java/net/minecraft/client/gui/Hud.java
++++ b/src/main/java/net/minecraft/client/gui/Hud.java
+@@ -242,2 +242,5 @@
+                 // Incari end
++                // Incari start: modules' HUD elements
++                incari.client.modules.ModuleHud.extract(graphics);
++                // Incari end
+                 this.extractChat(graphics, deltaTracker);

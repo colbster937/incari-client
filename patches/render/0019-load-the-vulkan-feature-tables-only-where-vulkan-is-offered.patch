@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 22:45:52 -0400
+Subject: [PATCH] render: Load the Vulkan feature tables only where Vulkan is
+ offered
+
+
+diff --git a/src/main/java/net/minecraft/client/ClientBootstrap.java b/src/main/java/net/minecraft/client/ClientBootstrap.java
+index b7ab3b2813b17e836cf19cdf9a22319e002cd7f6..0d17dfa4cc4c8fa9629c2f6b68a5045cd092211d 100644
+--- a/src/main/java/net/minecraft/client/ClientBootstrap.java
++++ b/src/main/java/net/minecraft/client/ClientBootstrap.java
+@@ -30,3 +30,7 @@
+             DialogBodyHandlers.bootstrap();
+-            VulkanFeatureSets.bootstrap();
++            // Incari start: only a platform that offers Vulkan has its structs to describe
++            if (incari.client.platform.GraphicsBackends.isVulkanOffered()) {
++                VulkanFeatureSets.bootstrap();
++            }
++            // Incari end
+         }

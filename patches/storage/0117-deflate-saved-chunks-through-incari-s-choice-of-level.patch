@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 23:16:18 -0400
+Subject: [PATCH] storage: Deflate saved chunks through Incari's choice of
+ level
+
+
+diff --git a/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java b/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
+index a7aa9008ac7fc62b0d7275ab90220925b307dc90..98adfed49c78a88014ba9266a885d18d2d5c4186 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
++++ b/src/main/java/net/minecraft/world/level/chunk/storage/RegionFileVersion.java
+@@ -30,3 +30,5 @@
+         new RegionFileVersion(
+-            2, "deflate", in -> new FastBufferedInputStream(new InflaterInputStream(in)), out -> new BufferedOutputStream(new DeflaterOutputStream(out))
++            // Incari start: deflated faster in the browser
++            2, "deflate", in -> new FastBufferedInputStream(new InflaterInputStream(in)), out -> new BufferedOutputStream(incari.client.world.ChunkCompression.deflate(out))
++            // Incari end
+         )

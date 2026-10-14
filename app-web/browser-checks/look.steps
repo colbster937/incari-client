@@ -1,0 +1,52 @@
+# ADR 0048: the client's look in the page. The title screen in Potato, the options, the module
+# menu, then Normal switched on from the module menu's sidebar: the title again (snow, blur), then a
+# new world's pause menu, inventory and HUD. Red Hat Display is drawn by the browser's canvas
+# (PlatformFonts). No server needed. Positions are for the 1280x577 viewport (GUI scale 2, 640x288).
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/look.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+shot:build/browser-checks/look-potato-title.png
+
+# Options (the left half of the column's last row), and back.
+click:0.133,0.691
+sleep:1500
+shot:build/browser-checks/look-potato-options.png
+key:Escape
+sleep:1000
+
+# Modules, then the sidebar's GUI entry: Normal.
+click:0.2,0.604
+sleep:1500
+shot:build/browser-checks/look-potato-modules.png
+click:0.2,0.771
+sleep:1000
+shot:build/browser-checks/look-normal-modules.png
+key:Escape
+sleep:2000
+shot:build/browser-checks/look-normal-title.png
+
+# Singleplayer, Create New World with the defaults.
+click:0.2,0.43
+sleep:3000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+shot:build/browser-checks/look-normal-hud.png
+key:Escape
+sleep:1500
+shot:build/browser-checks/look-normal-pause.png
+key:Escape
+sleep:800
+key:KeyE
+sleep:1500
+shot:build/browser-checks/look-normal-inventory.png
+key:Escape
+sleep:800
+down:Tab
+sleep:800
+shot:build/browser-checks/look-normal-tab.png
+up:Tab

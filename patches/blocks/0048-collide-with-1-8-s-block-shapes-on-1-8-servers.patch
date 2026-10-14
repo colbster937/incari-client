@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] blocks: Collide with 1.8's block shapes on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+index 3eee59b8eb2c635605a013b982fe57731a96e162..dcdeef5b5d58e0ba1ef8b69734d057e634fce0c6 100644
+--- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -681,2 +681,6 @@
+         public VoxelShape getShape(final BlockGetter level, final BlockPos pos, final CollisionContext context) {
++            // Incari start: 1.8's shapes on 1.8 servers
++            VoxelShape legacy = incari.client.legacy.LegacyShapes.outline(this.asState(), level, pos);
++            if (legacy != null) return legacy;
++            // Incari end
+             return this.getBlock().getShape(this.asState(), level, pos, context);
+@@ -685,2 +689,6 @@
+         public VoxelShape getCollisionShape(final BlockGetter level, final BlockPos pos) {
++            // Incari start: 1.8's shapes on 1.8 servers
++            VoxelShape legacy = incari.client.legacy.LegacyShapes.collision(this.asState(), level, pos);
++            if (legacy != null) return legacy;
++            // Incari end
+             return this.cache != null ? this.cache.collisionShape : this.getCollisionShape(level, pos, CollisionContext.empty());
+@@ -689,2 +697,6 @@
+         public VoxelShape getCollisionShape(final BlockGetter level, final BlockPos pos, final CollisionContext context) {
++            // Incari start: 1.8's shapes on 1.8 servers
++            VoxelShape legacy = incari.client.legacy.LegacyShapes.collision(this.asState(), level, pos);
++            if (legacy != null) return legacy;
++            // Incari end
+             return this.getBlock().getCollisionShape(this.asState(), level, pos, context);

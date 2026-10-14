@@ -1,0 +1,15 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 08:19:26 -0400
+Subject: [PATCH] render: Sort translucent quads with a radix sort
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/vertex/VertexSorting.java b/src/main/java/com/mojang/blaze3d/vertex/VertexSorting.java
+index 2af62659ba56c612455aa9c72c1d98374302542f..5f6c331bfc7c4e9fd9cb97f7c28abaf6838f9236 100644
+--- a/src/main/java/com/mojang/blaze3d/vertex/VertexSorting.java
++++ b/src/main/java/com/mojang/blaze3d/vertex/VertexSorting.java
+@@ -29,3 +29,3 @@
+ 
+-            IntArrays.mergeSort(indices, (o1, o2) -> Floats.compare(keys[o2], keys[o1]));
++            incari.client.render.QuadSort.sortDescending(keys, indices); // Incari: the same order by a radix sort (ADR 0027)
+             return indices;

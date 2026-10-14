@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 11:35:50 -0400
+Subject: [PATCH] online: Open Incari's chat menu with the Friends key
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 9cfadb59ace9e77fd7f0de50dda0aa230cada850..ed622c7ad27f79afb988acf237ccfb8298fc10f7 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -2374,2 +2374,5 @@
+     private boolean toggleFriendsScreen() {
++        // Incari start: the Friends key opens Incari's chat menu (Mojang's friends need a Microsoft account)
++        if (incari.client.online.ChatMenu.toggle(this)) return true;
++        // Incari end
+         if (!this.isDemo() && !this.isOfflineDeveloperMode()) {

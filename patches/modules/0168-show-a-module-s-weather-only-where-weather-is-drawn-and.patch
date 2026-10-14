@@ -1,0 +1,107 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:45:32 -0400
+Subject: [PATCH] modules: Show a module's weather only where weather is drawn
+ and heard
+
+Weather Changer (ADR 0053) changed the client level's rain and thunder
+themselves, which the game also decides by: Riptide worked only in the
+shown rain. The level's weather stays the server's; the weather renderer,
+the sky, the fog, the weather's environment attributes and the rain's
+splashes and sounds ask what's shown instead, and Snow makes no rain
+splashes or sounds.
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+index 0dc59b287c2c223a9dc7ea21aa97fd528b91e0a2..c458b0e6bb7bb92884d28c9668729c4ad7a297ce 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+@@ -343,3 +343,5 @@
+         int weatherRadius = this.minecraft.options.weatherRadius().get();
+-        float rainLevel = this.getRainLevel(1.0F);
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        float rainLevel = incari.client.modules.ModuleSky.shownRain(this, 1.0F);
++        // Incari end
+         if (!(rainLevel <= 0.0F)) {
+@@ -359,3 +361,5 @@
+                     && heightmapPosition.getY() >= cameraPosition.getY() - 10
+-                    && this.getPrecipitationAt(heightmapPosition) == Biome.Precipitation.RAIN) {
++                    // Incari start: no rain's splashes and sound where a module shows snow
++                    && incari.client.modules.ModuleSky.precipitation(this.getPrecipitationAt(heightmapPosition)) == Biome.Precipitation.RAIN) {
++                    // Incari end
+                     rainParticlePosition = heightmapPosition.below();
+diff --git a/src/main/java/net/minecraft/client/renderer/SkyRenderer.java b/src/main/java/net/minecraft/client/renderer/SkyRenderer.java
+index ed46dffd9a26ff766b01b16d2d2e994efa339331..cd0d13e75d8476be877f635f7387159bfac8a616 100644
+--- a/src/main/java/net/minecraft/client/renderer/SkyRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/SkyRenderer.java
+@@ -118,3 +118,5 @@
+                 state.starAngle = attributeProbe.getValue(EnvironmentAttributes.STAR_ANGLE, partialTicks) * (float) (Math.PI / 180.0);
+-                state.rainBrightness = 1.0F - level.getRainLevel(partialTicks);
++                // Incari start: a module may show other weather on the client (Weather Changer)
++                state.rainBrightness = 1.0F - incari.client.modules.ModuleSky.shownRain(level, partialTicks);
++                // Incari end
+                 state.starBrightness = attributeProbe.getValue(EnvironmentAttributes.STAR_BRIGHTNESS, partialTicks);
+diff --git a/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java b/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
+index 0c0958c3947ffe8d711e2d11bc45a2bf3c75de9f..02369cb4b35328793cf930dbd5cf2d5c0d329bad 100644
+--- a/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
+@@ -68,3 +68,5 @@
+     public void extractRenderState(final ClientLevel level, final float partialTicks, final Vec3 cameraPos, final WeatherRenderState renderState) {
+-        renderState.intensity = level.getRainLevel(partialTicks);
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        renderState.intensity = incari.client.modules.ModuleSky.shownRain(level, partialTicks);
++        // Incari end
+         if (!(renderState.intensity <= 0.0F)) {
+diff --git a/src/main/java/net/minecraft/client/renderer/fog/environment/AtmosphericFogEnvironment.java b/src/main/java/net/minecraft/client/renderer/fog/environment/AtmosphericFogEnvironment.java
+index 61c173d7f9c25543d3e89c1e1eb00436c531d83c..fd35b798177c4cc891d372292a11814ab0a678ea 100644
+--- a/src/main/java/net/minecraft/client/renderer/fog/environment/AtmosphericFogEnvironment.java
++++ b/src/main/java/net/minecraft/client/renderer/fog/environment/AtmosphericFogEnvironment.java
+@@ -44,3 +44,5 @@
+         Vector3fc skyColor = camera.attributeProbe().getValue(EnvironmentAttributes.SKY_COLOR, partialTicks);
+-        skyColor = applyWeatherDarken(skyColor, level.getRainLevel(partialTicks), level.getThunderLevel(partialTicks));
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        skyColor = applyWeatherDarken(skyColor, incari.client.modules.ModuleSky.shownRain(level, partialTicks), incari.client.modules.ModuleSky.shownThunder(level, partialTicks));
++        // Incari end
+         float skyFogEnd = Math.min(camera.attributeProbe().getValue(EnvironmentAttributes.SKY_FOG_END_DISTANCE, partialTicks) / 16.0F, renderDistance);
+@@ -94,3 +96,5 @@
+         float skyLightLevelMultiplier = Mth.clamp((level.getLightEngine().getLayerListener(LightLayer.SKY).getLightValue(blockPos) - 8.0F) / 7.0F, 0.0F, 1.0F);
+-        float targetRainFogMultiplier = level.getRainLevel(partialTicks) * skyLightLevelMultiplier * (rainsInBiome ? 1.0F : 0.5F);
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        float targetRainFogMultiplier = incari.client.modules.ModuleSky.shownRain(level, partialTicks) * skyLightLevelMultiplier * (rainsInBiome ? 1.0F : 0.5F);
++        // Incari end
+         this.rainFogMultiplier = this.rainFogMultiplier + (targetRainFogMultiplier - this.rainFogMultiplier) * deltaTicks * 0.2F;
+diff --git a/src/main/java/net/minecraft/world/attribute/WeatherAttributes.java b/src/main/java/net/minecraft/world/attribute/WeatherAttributes.java
+index 6d207a6359cd33ed0807087d98fdb0393a7b70f3..6c41ec0f8fc8ff907d6278c074b09c039fbace19 100644
+--- a/src/main/java/net/minecraft/world/attribute/WeatherAttributes.java
++++ b/src/main/java/net/minecraft/world/attribute/WeatherAttributes.java
+@@ -75,3 +75,5 @@
+                 public float rainLevel() {
+-                    return level.getRainLevel(1.0F);
++                    // Incari start: a module may show other weather on the client (Weather Changer)
++                    return incari.client.modules.ModuleSky.shownRain(level, 1.0F);
++                    // Incari end
+                 }
+@@ -80,3 +82,5 @@
+                 public float thunderLevel() {
+-                    return level.getThunderLevel(1.0F);
++                    // Incari start
++                    return incari.client.modules.ModuleSky.shownThunder(level, 1.0F);
++                    // Incari end
+                 }
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index f09dbba50d2c801c31166c712a289a0a702225ff..8c4eac77220f01d20598603aea64ec81daaa546a 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -928,5 +928,3 @@
+     public float getThunderLevel(final float a) {
+-        // Incari start: a module may show other weather on the client (Weather Changer)
+-        return incari.client.modules.ModuleSky.thunder(this, Mth.lerp(a, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(a));
+-        // Incari end
++        return Mth.lerp(a, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(a);
+     }
+@@ -940,5 +938,3 @@
+     public float getRainLevel(final float a) {
+-        // Incari start: a module may show other weather on the client (Weather Changer)
+-        return incari.client.modules.ModuleSky.rain(this, Mth.lerp(a, this.oRainLevel, this.rainLevel));
+-        // Incari end
++        return Mth.lerp(a, this.oRainLevel, this.rainLevel);
+     }

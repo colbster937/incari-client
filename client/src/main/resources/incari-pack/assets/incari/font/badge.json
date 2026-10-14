@@ -1,0 +1,5 @@
+{
+  "providers": [
+    { "type": "bitmap", "file": "incari:font/badge.png", "ascent": 8, "height": 9, "chars": [""] }
+  ]
+}

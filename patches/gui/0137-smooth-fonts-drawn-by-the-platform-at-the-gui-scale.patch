@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 11:55:18 -0400
+Subject: [PATCH] gui: Smooth fonts drawn by the platform, at the GUI scale
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 44a4026b5257eb23b588eb0c564aec9efb760760..d4cd82a2ee9709513a91d27b8f46c2b8a3df75bb 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1449,2 +1449,5 @@
+         this.window.setGuiScale(guiScale);
++        // Incari start: smooth fonts are drawn again at the new scale
++        incari.client.ui.SmoothFont.guiScale(guiScale, this::updateFontOptions);
++        // Incari end
+         if (this.gui.screen() != null) {
+diff --git a/src/main/java/net/minecraft/client/gui/font/providers/TrueTypeGlyphProviderDefinition.java b/src/main/java/net/minecraft/client/gui/font/providers/TrueTypeGlyphProviderDefinition.java
+index 9a573fc1aaa1953095da2a6d4afe93dd771d5bfd..a6031ed9c13ae98e8919586acbcf23a6f5c0cedd 100644
+--- a/src/main/java/net/minecraft/client/gui/font/providers/TrueTypeGlyphProviderDefinition.java
++++ b/src/main/java/net/minecraft/client/gui/font/providers/TrueTypeGlyphProviderDefinition.java
+@@ -49,2 +49,6 @@
+     private GlyphProvider load(final ResourceManager resourceManager) throws IOException {
++        // Incari start: the platform draws TrueType fonts (the browser has no FreeType), at the GUI scale
++        GlyphProvider smooth = incari.client.ui.SmoothFont.load(resourceManager, this.location, this.size, this.shift.x, this.shift.y, this.skip);
++        if (smooth != null) return smooth;
++        // Incari end
+         FT_Face face = null;

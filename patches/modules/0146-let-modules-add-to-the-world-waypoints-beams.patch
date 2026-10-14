@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 20:19:50 -0400
+Subject: [PATCH] modules: Let modules add to the world, waypoints' beams
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+index 1cab59c8fb172f0fed7e6b5794e65c3f49d14428..854128f55d3b27558da38506f73f8fe4181f0bae 100644
+--- a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+@@ -334,2 +334,5 @@
+         levelRenderState.particlesRenderState.submit(submitNodeCollector, levelRenderState.cameraRenderState);
++        // Incari start: what modules add to the world, waypoints' beams (ADR 0051)
++        incari.client.modules.ModuleWorld.submit(poseStack, submitNodeCollector, levelRenderState.cameraRenderState);
++        // Incari end
+         if (renderOutline) {

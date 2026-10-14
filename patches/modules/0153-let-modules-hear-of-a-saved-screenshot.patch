@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:55:29 -0400
+Subject: [PATCH] modules: Let modules hear of a saved screenshot
+
+The screenshot event (ADR 0054): once F2's picture is written, modules hear of it on the game thread (Screenshot Manager copies it).
+
+diff --git a/src/main/java/net/minecraft/client/Screenshot.java b/src/main/java/net/minecraft/client/Screenshot.java
+index c392cb42b2d90a67475973ebb9bf42445d4a45fc..28bef63397b1b6e82e5e37b74548c392cbdcaf95 100644
+--- a/src/main/java/net/minecraft/client/Screenshot.java
++++ b/src/main/java/net/minecraft/client/Screenshot.java
+@@ -57,2 +57,5 @@
+                                 image.writeToFile(file);
++                                // Incari start: modules hear of it (Screenshot Manager)
++                                incari.client.modules.ModuleScreenshots.saved(file);
++                                // Incari end
+                                 Component component = Component.literal(file.getName())

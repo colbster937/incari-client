@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] entities: Draw entity models instanced
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java b/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
+index 3e3446626ea959ebb8f9de704a1913ef4b1dd7f8..ba86a77b7da4c5d355864d23b472bfc4411eaec2 100644
+--- a/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
+@@ -16,2 +16,34 @@
+     private final PoseStack poseStack = new PoseStack();
++    // Incari start: entity models drawn instanced
++    private final incari.client.render.entity.ModelBatches instanced = new incari.client.render.entity.ModelBatches();
++
++    @Override
++    public void finishPrepare(final FeatureFrameContext context) {
++        this.instanced.upload();
++    }
++
++    @Override
++    public void executeGroup(
++        final FeatureFrameContext context,
++        final net.minecraft.client.renderer.oit.@Nullable OitStage stage,
++        final com.mojang.renderpearl.api.commands.RenderPass renderPass,
++        final int groupIndex,
++        final List<ModelFeatureRenderer.Submit<?>> submits,
++        final boolean strictlyOrdered
++    ) {
++        super.executeGroup(context, stage, renderPass, groupIndex, submits, strictlyOrdered);
++        this.instanced.draw(groupIndex, stage, renderPass);
++    }
++
++    @Override
++    public void finishExecute(final FeatureFrameContext context) {
++        super.finishExecute(context);
++        this.instanced.endFrame();
++    }
++
++    @Override
++    public void close() {
++        this.instanced.close();
++    }
++    // Incari end
+ 
+@@ -19,2 +51,3 @@
+     protected void buildGroup(final FeatureFrameContext context, final List<ModelFeatureRenderer.Submit<?>> submits) {
++        this.instanced.beginGroup(); // Incari: entity models drawn instanced
+         for (ModelFeatureRenderer.Submit<?> submit : submits) {
+@@ -25,2 +58,7 @@
+     private <S> void prepareModel(final ModelFeatureRenderer.Submit<S> submit) {
++        // Incari start: entity models drawn instanced
++        if (this.instanced.take(submit)) {
++            return;
++        }
++        // Incari end
+         this.poseStack.last().set(submit.pose());

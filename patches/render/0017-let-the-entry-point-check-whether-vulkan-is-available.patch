@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 13:37:08 -0400
+Subject: [PATCH] render: Let the entry point check whether Vulkan is available
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 35571cc31b3e18bb5d0e3643681b25fc81045081..a72fd1dd71a0d0b5c4af495a27424fc822bdf97c 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -476,3 +476,5 @@
+         if (preferredGraphicsBackend == PreferredGraphicsApi.DEFAULT) {
+-            this.backendCreationException = VulkanBackend.checkBackendAvailable();
++            // Incari start: the entry point supplies the Vulkan check (the browser build has no Vulkan)
++            this.backendCreationException = incari.client.platform.GraphicsBackends.checkVulkanAvailable();
++            // Incari end
+         }

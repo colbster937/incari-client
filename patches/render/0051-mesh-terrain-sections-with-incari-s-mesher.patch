@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] render: Mesh terrain sections with Incari's mesher
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/SectionBufferBuilderPack.java b/src/main/java/net/minecraft/client/renderer/SectionBufferBuilderPack.java
+index 53bb03ecf6d0c313dec78b3c7d34bc79ab0674b8..2d35772d07d877f94006aaa1c8b020ebfb3454a2 100644
+--- a/src/main/java/net/minecraft/client/renderer/SectionBufferBuilderPack.java
++++ b/src/main/java/net/minecraft/client/renderer/SectionBufferBuilderPack.java
+@@ -11,3 +11,5 @@
+     private final Map<ChunkSectionLayer, ByteBufferBuilder> buffers = Util.makeEnumMap(
+-        ChunkSectionLayer.class, layer -> new ByteBufferBuilder(layer.bufferSize())
++        // Incari start: small buffers where Incari's mesher only copies finished meshes into them
++        ChunkSectionLayer.class, layer -> new ByteBufferBuilder(incari.client.render.mesher.Meshing.sectionBufferSize(layer.bufferSize()))
++        // Incari end
+     );
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionCompiler.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionCompiler.java
+index 5b04118b7f826e44e76817064a2314915719743c..8ff1f10b0c2db47dcc00d18b4eed7d78c37a85d5 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionCompiler.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionCompiler.java
+@@ -50,2 +50,5 @@
+         this.blockColors = blockColors;
++        // Incari start: Incari's mesher meshes with the same models and settings
++        incari.client.render.mesher.Meshing.compilerCreated(this, ambientOcclusion, cutoutLeaves, blockModelSet, fluidModelSet, blockColors);
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+index 4ac2487d579d6446efb0292d4d2d827d510dacf2..129fa392df88f073f8d737e6f901d0e84ab06bfb 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+@@ -428,4 +428,5 @@
+                 try (Zone ignored = Profiler.get().zone("Compile Section")) {
+-                    results = SectionRenderDispatcher.this.sectionCompiler
+-                        .compile(sectionPos, this.region, RenderSection.this.createVertexSorting(sectionPos, cameraPos), buffers);
++                    // Incari start: mesh with Incari's mesher (in workers in the browser)
++                    results = incari.client.render.mesher.Meshing.compile(SectionRenderDispatcher.this.sectionCompiler, sectionPos, this.region, cameraPos, RenderSection.this.createVertexSorting(sectionPos, cameraPos), buffers);
++                    // Incari end
+                 }
+@@ -509,3 +510,5 @@
+ 
+-                    ByteBufferBuilder.Result indexBuffer = state.buildSortedIndexBuffer(buffers.buffer(ChunkSectionLayer.TRANSLUCENT), vertexSorting);
++                    // Incari start: sort with Incari's mesher (in workers in the browser)
++                    ByteBufferBuilder.Result indexBuffer = incari.client.render.mesher.Meshing.sortedIndices(state, buffers.buffer(ChunkSectionLayer.TRANSLUCENT), vertexSorting, cameraPos, sectionNode);
++                    // Incari end
+                     if (indexBuffer == null) {

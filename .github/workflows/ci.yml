@@ -1,0 +1,121 @@
+# CI for the Incari repo. It builds and tests, and never publishes anything: every Incari build
+# contains Mojang code (CONTRIBUTING.md). tools/ci/check-no-publishing.sh enforces that on this file.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guards:
+    name: Repo guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: No Mojang content or builds tracked
+        run: tools/ci/check-repo-content.sh
+      - name: No workflow publishes builds
+        run: tools/ci/check-no-publishing.sh
+      - name: Every commit is signed off (DCO)
+        if: github.event_name == 'pull_request'
+        run: tools/ci/check-dco.sh "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+      - name: Patch budget
+        run: tools/ci/check-patch-budget.sh
+      - name: Install glslang
+        run: sudo apt-get install -y --no-install-recommends glslang-tools
+      - name: Shaders validate
+        run: tools/ci/check-glsl.sh
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+      - name: Types, lint, format and tests
+        run: npm run check
+
+  java:
+    name: Java, patches and vendor build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v5
+      # Downloads the pinned jar from Mojang and decompiles it inside the runner. The result stays
+      # in work/ on the runner and is never cached or uploaded.
+      - name: Fresh clone to patched tree
+        run: ./incari setup
+      - name: Patches round-trip
+        run: ./incari rebuild --check
+      # Formatting, Error Prone and NullAway, module boundaries, ArchUnit and unit tests, and the
+      # full client compiled from the patched tree. That includes the tests that parse
+      # app-web/download-budget.properties; the size check itself (:app-web:checkDownloadSize) runs
+      # where the browser build is compiled, which needs more memory (a 20 GB heap) than a hosted
+      # runner has.
+      - name: Build and check
+        run: ./gradlew check
+      # Translates every shader the game can compile to GLSL ES 3.00 for the WebGL2 backend, and has
+      # glslang compile and link each program (required in CI). Seconds, unlike the browser build.
+      # The output holds translated Mojang shaders: it stays on the runner and is never uploaded.
+      - name: Install glslang
+        run: sudo apt-get install -y --no-install-recommends glslang-tools
+      - name: Shaders translate for WebGL2
+        run: ./gradlew :app-web:shaders
+      - name: No Incari code copied from the game
+        run: ./incari copycheck
+
+  # The performance report (ADR 0021). The browser build needs more memory (a 20 GB heap)
+  # and a GPU than a hosted runner has, so this runs on a self-hosted runner labelled incari-perf
+  # (docs/benchmark.md sets one up), and only once the repository variable
+  # INCARI_PERF_RUNNER is 'true'. Never for pull requests from forks, whose code would run on that
+  # machine. The build, the world and every render stay on the runner; only the figures reach the
+  # job summary, which is the pull request's performance report. A figure that regressed past its
+  # rule against the runner's baseline (app-web/benchmark/baseline.properties) fails the job.
+  perf:
+    name: Performance report
+    if: >-
+      vars.INCARI_PERF_RUNNER == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, incari-perf]
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+      # The page's scripts are TypeScript, stripped by Node.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 26
+      # The game, decompiled and patched, and its asset index, in work/ on the runner only.
+      - name: Fresh clone to patched tree
+        run: ./incari setup
+      - name: Asset index
+        run: ./incari assets
+      # Compiles the browser build (build/teavm/, never uploaded) and measures the download. The
+      # release build: what players get, and what the budgets are about (ADR 0025).
+      - name: Download size
+        run: ./gradlew :app-web:checkDownloadSize -PdownloadSize.noBrotli -Pteavm.release
+      - name: Benchmark
+        run: >-
+          ./gradlew :app-web:benchmark -Pbenchmark.skipBuild -Pteavm.release
+          -Pbenchmark.machine=${{ vars.INCARI_PERF_MACHINE || 'desktop' }}

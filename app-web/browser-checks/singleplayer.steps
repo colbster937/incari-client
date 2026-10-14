@@ -1,0 +1,90 @@
+# ADR 0038, ADR 0039: singleplayer, its server in a worker (or on the page with
+# -Pbrowser.query=name=Player&singleplayer=page). Creates a world with the defaults, plays in it,
+# turns Allow Commands on in World Options and runs a command, saves and quits; checks that every saved chunk inflates with the browser's own DecompressionStream; plays the world again;
+# downloads it through Edit World's folder button, drops the download on the world list (a second
+# copy is imported), and opens Delete. No server needed. Positions are for the 1280x577 viewport.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=400 -Pbrowser.steps=@browser-checks/singleplayer.steps
+
+downloads:build/browser-checks/downloads
+sleep:4000
+# The first-run accessibility screen: Continue. Then Singleplayer; with no worlds yet it opens
+# Create New World, and Create takes the defaults.
+click:0.5,0.945
+sleep:3000
+click:0.5,0.449
+sleep:4000
+shot:build/browser-checks/singleplayer-create.png
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+shot:build/browser-checks/singleplayer-world.png
+
+# --- World Options: Allow Commands on, Apply; then a command works ---
+key:Escape
+sleep:1500
+click:0.583,0.561
+sleep:2000
+shot:build/browser-checks/singleplayer-world-options.png
+click:0.376,0.414
+sleep:500
+click:0.375,0.945
+sleep:2000
+key:Escape
+sleep:1000
+key:KeyT
+sleep:800
+type:/time set day
+key:Enter
+wait:.*\[CHAT\] Set minecraft:overworld to time marker minecraft:day.*
+sleep:1000
+key:Escape
+sleep:1500
+
+# --- Save and Quit to Title, then every saved chunk reads back whole ---
+click:0.5,0.643
+wait:.*Saving chunks for level 'ServerLevel\[New World\]'/minecraft:the_nether.*
+sleep:4000
+until:window.incariStorage.pending() === 0
+assert:(async () => { const root = await navigator.storage.getDirectory(); let d = root; for (const p of ["incari", "game", "saves", "New World", "dimensions", "minecraft", "overworld"]) d = await d.getDirectoryHandle(p); let ok = 0, bad = 0; for (const sub of ["region", "entities"]) { const s = await d.getDirectoryHandle(sub); for await (const [, h] of s.entries()) { const buf = await (await h.getFile()).arrayBuffer(); const v = new DataView(buf); for (let i = 0; i < 1024; i++) { const off = v.getUint32(i * 4); if (!off) continue; const pos = (off >>> 8) * 4096; const len = v.getUint32(pos); try { await new Response(new Blob([new Uint8Array(buf, pos + 5, len - 1)]).stream().pipeThrough(new DecompressionStream("deflate"))).arrayBuffer(); ok++; } catch (e) { bad++; } } } } console.log("[check] saved chunks: " + ok + " whole, " + bad + " broken"); return ok > 0 && bad === 0; })()
+
+# --- Play it again from the world list ---
+click:0.5,0.449
+sleep:3000
+shot:build/browser-checks/singleplayer-list.png
+click:0.5,0.235
+sleep:500
+click:0.375,0.854
+wait:.*logged in with entity id.*
+sleep:5000
+key:Escape
+sleep:1500
+click:0.5,0.643
+wait:.*Saving chunks for level 'ServerLevel\[New World\]'/minecraft:the_nether.*
+sleep:4000
+
+# --- Edit World, Open World Folder: the page downloads the world as a zip ---
+click:0.5,0.449
+sleep:3000
+click:0.5,0.235
+sleep:500
+click:0.313,0.937
+sleep:2000
+click:0.5,0.436
+download:New World\.zip
+sleep:1000
+key:Escape
+sleep:2000
+
+# --- The zip dropped on the world list comes in as a second world ---
+drop:0.5,0.5,build/browser-checks/downloads/New World.zip
+waitfor:window.incariStorage.list('/incari/game/saves/New World (1)').then(l => l.includes('/incari/game/saves/New World (1)/level.dat'))
+sleep:1000
+shot:build/browser-checks/singleplayer-imported.png
+
+# --- Delete asks first ---
+click:0.5,0.235
+sleep:500
+click:0.437,0.937
+sleep:2000
+shot:build/browser-checks/singleplayer-delete.png

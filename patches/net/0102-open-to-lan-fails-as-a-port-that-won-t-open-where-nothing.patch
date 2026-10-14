@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 22:30:42 -0400
+Subject: [PATCH] net: Open to LAN fails as a port that won't open where
+ nothing can listen
+
+
+diff --git a/src/main/java/net/minecraft/server/network/ServerConnectionListener.java b/src/main/java/net/minecraft/server/network/ServerConnectionListener.java
+index 830424a4313c82f4c63bba829081e6a27acfcbad..80afc45e0504b8bc3857e892c16953106fdab61f 100644
+--- a/src/main/java/net/minecraft/server/network/ServerConnectionListener.java
++++ b/src/main/java/net/minecraft/server/network/ServerConnectionListener.java
+@@ -58,2 +58,5 @@
+     public void startTcpServerListener(final @Nullable InetAddress address, final int port) throws IOException {
++        // Incari start: a page can't listen for connections; fail as a port that won't open does
++        incari.client.net.LanHosting.checkCanListen();
++        // Incari end
+         synchronized (this.channels) {

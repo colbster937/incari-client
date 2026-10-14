@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 16:33:26 -0400
+Subject: [PATCH] lightmap: Fullbright's night vision strength
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/LightmapRenderStateExtractor.java b/src/main/java/net/minecraft/client/renderer/LightmapRenderStateExtractor.java
+index a70fb1efe140f92eb9d46bc219d132e5e2b460e7..9cef71a1b3b477610d9b1f0908c592c1f906f2e1 100644
+--- a/src/main/java/net/minecraft/client/renderer/LightmapRenderStateExtractor.java
++++ b/src/main/java/net/minecraft/client/renderer/LightmapRenderStateExtractor.java
+@@ -81,2 +81,6 @@
+ 
++                // Incari start: Fullbright lights the world as night vision would
++                renderState.nightVisionEffectIntensity = incari.client.modules.ModuleEffects.nightVision(renderState.nightVisionEffectIntensity);
++                // Incari end
++
+                 renderState.nightVisionColor = camera.attributeProbe().getValue(EnvironmentAttributes.NIGHT_VISION_COLOR, partialTicks);

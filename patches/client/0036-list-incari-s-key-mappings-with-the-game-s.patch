@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:36:09 -0400
+Subject: [PATCH] client: List Incari's key mappings with the game's
+
+
+diff --git a/src/main/java/net/minecraft/client/Options.java b/src/main/java/net/minecraft/client/Options.java
+index 788fde49f4ca324c5f5bbca470ecda26c243f971..d228919efbcf89feec9607e0605a6e93b7ffac4c 100644
+--- a/src/main/java/net/minecraft/client/Options.java
++++ b/src/main/java/net/minecraft/client/Options.java
+@@ -801,3 +801,6 @@
+             this.keyHotbarSlots,
+-            this.debugKeys
++            this.debugKeys,
++            // Incari start: Incari's key mappings (voice chat's push to talk)
++            incari.client.IncariKeys.all()
++            // Incari end
+         )

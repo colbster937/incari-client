@@ -1,0 +1,26 @@
+# The loader page. The loading screen reads the build manifest, shows the steps, and goes at
+# the game's first frame; the service worker takes the page on its first visit and keeps the build,
+# so a reload loads the module through it. No server needed.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.steps=@browser-checks/loader.steps
+
+# (The check waits for the game's loop before the first step, so the loader's own lines are past.)
+until:window.incariBuild !== undefined && /^[0-9a-f]{64}$/.test(window.incariBuild.id) && window.incariBuild.pack !== null
+# The first frame is drawn: the screen has gone.
+until:document.getElementById('incari-loader').hidden === true
+# The service worker controls the page, and the module went through it.
+until:navigator.serviceWorker.controller !== null
+holds:performance.getEntriesByType('resource').some(e => e.name.includes('incari.wasm?v=') && e.workerStart > 0)
+# It's cached under its version (stored while the page compiled it; 157 MB can take a moment).
+sleep:5000
+until:caches.open('incari-build-v1').then(c => c.keys()).then(k => k.some(r => r.url.includes('incari.wasm?v=')))
+until:caches.open('incari-build-v1').then(c => c.keys()).then(k => k.some(r => r.url.includes('incari.pack?v=')))
+
+# A returning player: the module comes from the service worker's cache.
+reload
+wait:\[Incari\] Loader: build [0-9a-f]+ .*
+wait:\[Incari\] Asset pack: 2 files, from storage.*
+wait:\[Incari\] Main loop running.*
+holds:performance.getEntriesByType('resource').some(e => e.name.includes('incari.wasm?v=') && e.workerStart > 0)
+until:document.getElementById('incari-loader').hidden === true
+shot:build/browser-checks/loader.png

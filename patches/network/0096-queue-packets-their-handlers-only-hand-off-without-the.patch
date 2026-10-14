@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 21:19:00 -0400
+Subject: [PATCH] network: Queue packets their handlers only hand off without
+ the round trip
+
+
+diff --git a/src/main/java/net/minecraft/network/Connection.java b/src/main/java/net/minecraft/network/Connection.java
+index 8022d63a8589af65e5d030c7c442a13666dea5b6..a03cfeb079892c8b5c52021c0fe5e9c907601bab 100644
+--- a/src/main/java/net/minecraft/network/Connection.java
++++ b/src/main/java/net/minecraft/network/Connection.java
+@@ -152,4 +152,10 @@
+                 try {
++                    // Incari start: a packet its handler only hands to the game's thread is queued without the round trip (ADR 0033)
++                    if (!incari.client.net.PacketHandoff.handOff(packet, packetListener))
++                    // Incari end
+                     genericsFtw(packet, packetListener);
+                 } catch (RunningOnDifferentThreadException var5) {
++                    // Incari start
++                    incari.client.net.PacketHandoff.handedOff(packet, packetListener);
++                    // Incari end
+                 } catch (RejectedExecutionException ignored) {

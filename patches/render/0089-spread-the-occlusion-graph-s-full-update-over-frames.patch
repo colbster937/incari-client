@@ -1,0 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 01:34:45 -0400
+Subject: [PATCH] render: Spread the occlusion graph's full update over frames
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java b/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
+index 0b6a4ea85a87f3fa9b6f02b70b6eadb682f808e0..cfe81efcc6f4fcbc6fcf78e9893bfe2b5a39cc47 100644
+--- a/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
++++ b/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
+@@ -268,2 +268,3 @@
+         while (!queue.isEmpty()) {
++            incari.client.render.GraphUpdates.node(); // Incari: the full update spread over frames (ADR 0031)
+             SectionOcclusionGraph.Node node = queue.poll();

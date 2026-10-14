@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:06:21 -0400
+Subject: [PATCH] threads: Let the platform run or size the background executor
+
+
+diff --git a/src/main/java/net/minecraft/util/Util.java b/src/main/java/net/minecraft/util/Util.java
+index f0552281f421b4da1e1c078943b4e5385713430e..60d1eb2e431ef9395924897dda3cf1d71a4626f8 100644
+--- a/src/main/java/net/minecraft/util/Util.java
++++ b/src/main/java/net/minecraft/util/Util.java
+@@ -200,3 +200,9 @@
+     private static TracingExecutor makeExecutor(final String name) {
+-        int threads = maxAllowedExecutorThreads();
++        // Incari start: the platform runs the pool itself (the browser: between frames), or decides how many threads it has (0 runs tasks inline)
++        ExecutorService platformPool = incari.client.platform.ClientPlatform.get().threads().backgroundExecutor(name);
++        if (platformPool != null) {
++            return new TracingExecutor(platformPool);
++        }
++        int threads = incari.client.platform.ClientPlatform.get().threads().backgroundThreads(maxAllowedExecutorThreads());
++        // Incari end
+         ExecutorService executor;

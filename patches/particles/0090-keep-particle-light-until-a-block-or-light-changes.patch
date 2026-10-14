@@ -1,0 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 02:07:18 -0400
+Subject: [PATCH] particles: Keep particle light until a block or light changes
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+index 7927775092ae78195b77f937223626e7b6de0f24..1f49f9350d45dacf189177e662dcc633c481134f 100644
+--- a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
++++ b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+@@ -596,2 +596,3 @@
+     private void setSectionDirty(final int sectionX, final int sectionY, final int sectionZ, final boolean playerChanged) {
++        incari.client.particle.ParticleLight.changed(); // Incari: particle light kept until a block or light changes (ADR 0031)
+         this.sectionUpdateTracker.setDirty(sectionX, sectionY, sectionZ, playerChanged);

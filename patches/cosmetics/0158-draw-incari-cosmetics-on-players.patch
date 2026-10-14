@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 19:04:57 -0400
+Subject: [PATCH] cosmetics: Draw Incari cosmetics on players
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/entity/player/AvatarRenderer.java b/src/main/java/net/minecraft/client/renderer/entity/player/AvatarRenderer.java
+index 1fd159147ffcf439c2fe034e32f5c9ce24fd4bd3..40f06650667e528b073ce26a47bda9dd382bc634 100644
+--- a/src/main/java/net/minecraft/client/renderer/entity/player/AvatarRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/entity/player/AvatarRenderer.java
+@@ -64,2 +64,3 @@
+         this.addLayer(new BeeStingerLayer<>(this, context));
++        this.addLayer(incari.client.cosmetics.Cosmetics.layer(this)); // Incari: cosmetics (ADR 0061)
+     }
+@@ -187,2 +188,3 @@
+         }
++        incari.client.cosmetics.Cosmetics.extract(entity, state); // Incari: cosmetics (ADR 0061)
+     }
+diff --git a/src/main/java/net/minecraft/client/renderer/entity/state/AvatarRenderState.java b/src/main/java/net/minecraft/client/renderer/entity/state/AvatarRenderState.java
+index 5fd4ec9d03015bbb8897e95a346432cc639f153d..cf81b2044dcc71722a6cecef12ea343d04310920 100644
+--- a/src/main/java/net/minecraft/client/renderer/entity/state/AvatarRenderState.java
++++ b/src/main/java/net/minecraft/client/renderer/entity/state/AvatarRenderState.java
+@@ -32,2 +32,3 @@
+     public final ItemStackRenderState heldOnHead = new ItemStackRenderState();
++    public incari.client.cosmetics.Worn incariWorn = incari.client.cosmetics.Worn.NONE; // Incari: cosmetics (ADR 0061)
+ 

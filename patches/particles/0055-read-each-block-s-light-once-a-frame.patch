@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] particles: Read each block's light once a frame
+
+
+diff --git a/src/main/java/net/minecraft/client/particle/Particle.java b/src/main/java/net/minecraft/client/particle/Particle.java
+index 916808027072f07e9d963b966528875789b72c84..60ae82da4872b00518b3c6aee54834b8706cb9bc 100644
+--- a/src/main/java/net/minecraft/client/particle/Particle.java
++++ b/src/main/java/net/minecraft/client/particle/Particle.java
+@@ -187,4 +187,5 @@
+     protected int getLightCoords(final float a) {
+-        BlockPos pos = BlockPos.containing(this.x, this.y, this.z);
+-        return this.level.hasChunkAt(pos) ? LightCoordsUtil.getLightCoords(this.level, pos) : 15728640;
++        // Incari start: each block's light read once a frame for all the particles in it
++        return incari.client.particle.ParticleLight.at(this.level, this.x, this.y, this.z);
++        // Incari end
+     }

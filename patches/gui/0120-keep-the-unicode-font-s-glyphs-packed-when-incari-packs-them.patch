@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 00:35:08 -0400
+Subject: [PATCH] gui: Keep the Unicode font's glyphs packed when Incari packs
+ them
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/font/providers/UnihexProvider.java b/src/main/java/net/minecraft/client/gui/font/providers/UnihexProvider.java
+index 86c204697d89170e0b91eed4a7aba6edb2e8eecc..c9e27c60544fc1dc12422f820e4643e4983b7e4c 100644
+--- a/src/main/java/net/minecraft/client/gui/font/providers/UnihexProvider.java
++++ b/src/main/java/net/minecraft/client/gui/font/providers/UnihexProvider.java
+@@ -43,2 +43,5 @@
+     private final CodepointMap<UnihexProvider.Glyph> glyphs;
++    // Incari start: the glyphs packed into arrays instead, when they are
++    private incari.client.memory.@Nullable PackedUnihex packed;
++    // Incari end
+ 
+@@ -50,2 +53,5 @@
+     public @Nullable UnbakedGlyph getGlyph(final int codepoint) {
++        // Incari start: made from the packed arrays
++        if (this.packed != null) return this.packed.get(codepoint, UnihexProvider.Glyph::new);
++        // Incari end
+         return this.glyphs.get(codepoint);
+@@ -55,2 +61,5 @@
+     public IntSet getSupportedGlyphs() {
++        // Incari start: the packed arrays' codepoints
++        if (this.packed != null) return this.packed.codepoints();
++        // Incari end
+         return this.glyphs.keySet();
+@@ -255,2 +264,9 @@
+                 });
++                // Incari start: the glyphs packed, and their objects let go
++                if (incari.client.memory.PackedUnihex.isEnabled()) {
++                    UnihexProvider packed = new UnihexProvider(new CodepointMap<>(UnihexProvider.Glyph[]::new, UnihexProvider.Glyph[][]::new));
++                    packed.packed = incari.client.memory.PackedUnihex.pack(glyphs, UnihexProvider.Glyph::contents, UnihexProvider.Glyph::left, UnihexProvider.Glyph::right);
++                    return packed;
++                }
++                // Incari end
+                 return new UnihexProvider(glyphs);

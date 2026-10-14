@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 23:16:27 -0400
+Subject: [PATCH] worldgen: Take the surface rules' first positional draw
+ without making the random
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java b/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
+index 7aa4e52d4d526925525fa5f88069218d1be2f737..0b62501f52e5199737ffd2dd80c0bf1c8065b9f3 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
+@@ -138,2 +138,12 @@
+ 
++        // Incari start: the seeds a position's random is made with, for incari.client.world.PositionalRandoms
++        public long incariSeedAt(final int x, final int y, final int z) {
++            return Mth.getSeed(x, y, z) ^ this.seedLo;
++        }
++
++        public long incariSeedHi() {
++            return this.seedHi;
++        }
++        // Incari end
++
+         @VisibleForTesting
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+index eaa5ebc7308ae4a39cc19d99737809f00c65cd84..54df8adf43538f09f4e0adec9284a1e91e531104 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+@@ -220,3 +220,5 @@
+         double noiseValue = this.surfaceNoise.get(blockX, 0.0, blockZ);
+-        return (int)(noiseValue * 2.75 + 3.0 + this.noiseRandom.at(blockX, 0, blockZ).nextDouble() * 0.25);
++        // Incari start: the first draw without making the random
++        return (int)(noiseValue * 2.75 + 3.0 + incari.client.world.PositionalRandoms.nextDoubleAt(this.noiseRandom, blockX, 0, blockZ) * 0.25);
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/condition/VerticalGradientCondition.java b/src/main/java/net/minecraft/world/level/levelgen/material/condition/VerticalGradientCondition.java
+index fe68d13f80bf9358e30939ea257a0bbe84dc42df..eac77b6efe8f561a6af0b0e6f50aa96ac0a97f17 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/condition/VerticalGradientCondition.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/condition/VerticalGradientCondition.java
+@@ -44,4 +44,5 @@
+                 double probability = Mth.map(blockY, trueAtAndBelow, falseAtAndAbove, 1.0, 0.0);
+-                RandomSource random = randomFactory.at(this.context.blockX(), blockY, this.context.blockZ());
+-                return random.nextFloat() < probability;
++                // Incari start: the first draw without making the random
++                return incari.client.world.PositionalRandoms.nextFloatAt(randomFactory, this.context.blockX(), blockY, this.context.blockZ()) < probability;
++                // Incari end
+             }

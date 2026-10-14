@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 4 Oct 2026 16:07:48 -0400
+Subject: [PATCH] render: Drop kept tint biomes only near a chunk that came or
+ went
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+index d7611718193851a0f5b2e02120fdf5f3ea1293a0..0dc59b287c2c223a9dc7ea21aa97fd528b91e0a2 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+@@ -503,3 +503,3 @@
+     public void unload(final LevelChunk levelChunk) {
+-        incari.client.render.TintBlend.changed(); // Incari: the biomes held changed (ADR 0027)
++        incari.client.render.TintBlend.chunkChanged(levelChunk.getPos().x(), levelChunk.getPos().z()); // Incari: the biomes held changed (ADR 0027, 0034)
+         levelChunk.clearAllBlockEntities();
+@@ -510,3 +510,3 @@
+     public void onChunkLoaded(final ChunkPos pos) {
+-        incari.client.render.TintBlend.changed(); // Incari: the biomes held changed (ADR 0027)
++        incari.client.render.TintBlend.chunkChanged(pos.x(), pos.z()); // Incari: the biomes held changed (ADR 0027, 0034)
+         this.tintCaches.forEach((resolver, cache) -> cache.invalidateForChunk(pos.x(), pos.z()));

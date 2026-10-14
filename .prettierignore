@@ -1,0 +1,13 @@
+# Prettier formats Incari's TypeScript and the files that configure it. Everything else has its
+# own formatter (Java: Spotless) or isn't reformatted at all (the vendor tree, patches, docs).
+*
+!*/
+!app-web/src/**/*.ts
+!platform-web/src/**/*.ts
+!platform-web/src/**/*.js
+!package.json
+!tsconfig.json
+!.prettierrc.json
+work/
+node_modules/
+**/build/

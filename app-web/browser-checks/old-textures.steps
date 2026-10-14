@@ -1,0 +1,63 @@
+# ADR 0055: the built-in packs and Old Textures in the page. Programmer Art and High Contrast are
+# fetched at start and listed in the Resource Packs screen. Selecting Programmer Art there reloads
+# the resources with its zip and turns Old Textures on; turning the module off and on in the module
+# menu takes the pack out and puts it back. Then a new world in the old textures. No server
+# needed. Positions are for the 1280x577 viewport (GUI scale 2, 640x288).
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/old-textures.steps
+
+# The packs' fetch is logged before the steps start ("Assets: fetched 2 files (705 KB)"); the
+# reload with programmer_art below shows its zip was there.
+sleep:4000
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+# Options (the left half of the column's last row), Resource Packs.
+click:0.133,0.691
+sleep:1500
+click:0.376,0.598
+sleep:2500
+shot:build/browser-checks/old-textures-packs.png
+# Programmer Art's icon (the second available pack) moves it to Selected; Done reloads with it.
+move:0.195,0.41
+sleep:300
+click:0.195,0.41
+sleep:1000
+shot:build/browser-checks/old-textures-selected.png
+click:0.623,0.945
+wait:.*Reloading ResourceManager.*programmer_art.*
+sleep:8000
+assert:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && t.includes('"programmer_art"'))
+waitfor:window.incariStorage.read('/incari/game/incari/modules/profiles/Default.json').then(t => t !== null && JSON.parse(t).modules.oldtextures.enabled === true)
+# Back to the title screen.
+key:Escape
+sleep:2000
+shot:build/browser-checks/old-textures-title.png
+
+# The module menu: Old Textures off takes the pack out.
+click:0.2,0.604
+sleep:1500
+click:0.40,0.125
+sleep:600
+type:Old Textures
+sleep:400
+shot:build/browser-checks/old-textures-module.png
+click:0.545,0.215
+wait:.*Reloading ResourceManager.*
+sleep:8000
+assert:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && !t.includes('"programmer_art"'))
+# And on again puts it back.
+click:0.545,0.215
+wait:.*Reloading ResourceManager.*programmer_art.*
+sleep:8000
+assert:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && t.includes('"programmer_art"'))
+key:Escape
+sleep:1500
+
+# Singleplayer, Create New World with the defaults, in the old textures.
+click:0.2,0.43
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:10000
+shot:build/browser-checks/old-textures-world.png

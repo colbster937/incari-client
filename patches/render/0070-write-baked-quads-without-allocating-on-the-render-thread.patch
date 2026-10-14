@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 01:08:20 -0400
+Subject: [PATCH] render: Write baked quads without allocating on the render
+ thread
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java b/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
+index b5e22d99bbcd123c671af1b6f9e7b545295b46b1..88ae09e0112ab2e0ea597c35ed03fe55bb665115 100644
+--- a/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
++++ b/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
+@@ -189,2 +189,9 @@
+ 
++    // Incari start: write baked quads without five vectors each (items in the world)
++    @Override
++    public void putBakedQuad(final PoseStack.Pose pose, final net.minecraft.client.resources.model.geometry.BakedQuad quad, final QuadInstance instance) {
++        if (!incari.client.render.VertexMath.putBakedQuad(this, pose, quad, instance)) VertexConsumer.super.putBakedQuad(pose, quad, instance);
++    }
++    // Incari end
++
+     @Override

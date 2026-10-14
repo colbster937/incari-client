@@ -1,0 +1,10 @@
+# ADR 0062: the host of a shared world. Run beside share-guest.steps and the local relay
+# (README.md, "Shared worlds, hosted"): the quick world is shared on the relay as soon as it's open
+# (?share=), the code goes to the console, and a guest joins.
+sleep:4000
+click:0.5,0.945
+wait:.*The world is shared on .* with the code .*
+shot:build/browser-checks/share-host-shared.png
+wait:.*\[CHAT\] Guest joined the game.*
+sleep:90000
+shot:build/browser-checks/share-host-guest.png

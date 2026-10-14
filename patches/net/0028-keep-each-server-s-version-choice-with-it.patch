@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 07:59:41 -0400
+Subject: [PATCH] net: Keep each server's version choice with it
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerData.java b/src/main/java/net/minecraft/client/multiplayer/ServerData.java
+index d7c040d9696f2652ac626b6a7dfcfeee9cbcb260..d341e525944cc6a230b66473898a20b870d2835a 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerData.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerData.java
+@@ -35,2 +35,5 @@
+     private ServerData.State state = ServerData.State.INITIAL;
++    // Incari start: the version the player chose for this server (Via), saved with it
++    public int incariVersion = incari.client.net.ServerVersions.AUTO;
++    // Incari end
+ 
+@@ -52,2 +55,5 @@
+ 
++        // Incari start: the chosen version
++        incari.client.net.ServerVersions.write(this, tag);
++        // Incari end
+         return tag;
+@@ -68,2 +74,5 @@
+         server.acceptedCodeOfConduct = tag.getIntOr("acceptedCodeOfConduct", 0);
++        // Incari start: the chosen version
++        incari.client.net.ServerVersions.read(server, tag);
++        // Incari end
+         return server;
+@@ -113,2 +122,5 @@
+         this.type = other.type;
++        // Incari start: the chosen version
++        this.incariVersion = other.incariVersion;
++        // Incari end
+     }

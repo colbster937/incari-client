@@ -1,0 +1,5 @@
+{
+  "providers": [
+    { "type": "ttf", "file": "incari:michroma.ttf", "size": 18, "oversample": 2.0 }
+  ]
+}

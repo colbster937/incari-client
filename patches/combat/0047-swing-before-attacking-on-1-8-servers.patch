@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] combat: Swing before attacking on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index c4d07d478932b8b541be74a41cfa29cd17e86e42..d3bbf18b8d7a7c171ce921de8d940a4f0cba9368 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1685,2 +1685,5 @@
+ 
++                // Incari start: 1.8 clients swing before they attack or dig
++                boolean swung = incari.client.legacy.LegacyCombat.swingFirst(this.player, attackAnimation);
++                // Incari end
+                 switch (this.hitResult.getType()) {
+@@ -1710,2 +1713,5 @@
+ 
++                // Incari start: not again if it swung first (1.8 servers)
++                if (!swung)
++                // Incari end
+                 this.player.swing(InteractionHand.MAIN_HAND, attackAnimation, false);

@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:05:57 -0400
+Subject: [PATCH] platform: Read modifier keys and the cursor position through
+ the platform
+
+
+diff --git a/src/main/java/net/minecraft/client/MouseHandler.java b/src/main/java/net/minecraft/client/MouseHandler.java
+index 07751df566499d9c3b6b9c3573af21e489c83506..2fd7b4bb27d63fd16221421c8844086e022eb51f 100644
+--- a/src/main/java/net/minecraft/client/MouseHandler.java
++++ b/src/main/java/net/minecraft/client/MouseHandler.java
+@@ -30,5 +30,2 @@
+ import org.jspecify.annotations.Nullable;
+-import org.lwjgl.sdl.SDLMouse;
+-import org.lwjgl.sdl.SDLVideo;
+-import org.lwjgl.system.MemoryStack;
+ import org.slf4j.Logger;
+@@ -376,17 +373,7 @@
+         if (!this.mouseGrabbed) {
+-            try (MemoryStack stack = MemoryStack.stackPush()) {
+-                FloatBuffer x = stack.mallocFloat(1);
+-                FloatBuffer y = stack.mallocFloat(1);
+-                IntBuffer windowX = stack.mallocInt(1);
+-                IntBuffer windowY = stack.mallocInt(1);
+-                SDLMouse.SDL_GetGlobalMouseState(x, y);
+-                if (SDLVideo.SDL_GetWindowPosition(this.minecraft.getWindow().handle(), windowX, windowY)) {
+-                    this.xpos = x.get(0) - windowX.get(0);
+-                    this.ypos = y.get(0) - windowY.get(0);
+-                } else {
+-                    SDLMouse.SDL_GetMouseState(x, y);
+-                    this.xpos = x.get(0);
+-                    this.ypos = y.get(0);
+-                }
+-            }
++            // Incari start: the cursor position comes from the platform
++            double[] position = incari.client.platform.PlatformInputHooks.cursorPosition(this.minecraft.getWindow());
++            this.xpos = position[0];
++            this.ypos = position[1];
++            // Incari end
+         }
+diff --git a/src/main/java/net/minecraft/client/input/InputQuirks.java b/src/main/java/net/minecraft/client/input/InputQuirks.java
+index e9182b3c01a7fff28abc6b227921cc87f692e2db..6dc7b5ca723b0a3f307eb76f1f7397ad8ef4a9ee 100644
+--- a/src/main/java/net/minecraft/client/input/InputQuirks.java
++++ b/src/main/java/net/minecraft/client/input/InputQuirks.java
+@@ -5,3 +5,2 @@
+ import net.minecraft.util.Util;
+-import org.lwjgl.sdl.SDLKeyboard;
+ 
+@@ -19,3 +18,5 @@
+     public static boolean isQuitShortcutDown() {
+-        int modifiers = SDLKeyboard.SDL_GetModState();
++        // Incari start: modifier state from the platform
++        int modifiers = incari.client.platform.PlatformInputHooks.modifiers();
++        // Incari end
+         return ON_OSX ? (modifiers & 3072) != 0 && InputConstants.isKeyDown(20) : (modifiers & 768) != 0 && InputConstants.isKeyDown(61);

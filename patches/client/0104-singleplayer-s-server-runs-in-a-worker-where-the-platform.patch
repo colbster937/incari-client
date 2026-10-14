@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 6 Oct 2026 23:28:27 -0400
+Subject: [PATCH] client: Singleplayer's server runs in a worker where the
+ platform has one
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index c5a5c4b7b7c56b6eeaa680b913bba16f05967d51..44a4026b5257eb23b588eb0c564aec9efb760760 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1241,3 +1241,6 @@
+         boolean var28 = this.pause;
+-        this.pause = this.hasSingleplayerServer() && this.gui.isPausing() && !this.singleplayerServer.isPublished();
++        this.pause = this.hasSingleplayerServer() && this.gui.isPausing() && !this.singleplayerServer.isPublished()
++            // Incari start: a world whose server runs in a worker pauses as an integrated server's does (ADR 0039)
++            || incari.client.singleplayer.WorkerWorlds.pauses(this);
++            // Incari end
+         if (!var28 && this.pause) {
+@@ -1619,3 +1622,6 @@
+     public void pauseGame(final boolean suppressPauseMenuIfWeReallyArePausing) {
+-        boolean canGameReallyBePaused = this.hasSingleplayerServer() && !this.singleplayerServer.isPublished();
++        boolean canGameReallyBePaused = this.hasSingleplayerServer() && !this.singleplayerServer.isPublished()
++            // Incari start: a world whose server runs in a worker can pause (ADR 0039)
++            || incari.client.singleplayer.WorkerWorlds.running();
++            // Incari end
+         this.gui.setPauseScreen(suppressPauseMenuIfWeReallyArePausing, canGameReallyBePaused);
+@@ -2058,2 +2064,12 @@
+         // Incari end
++        // Incari start: the world's server runs in a worker where the platform has one (ADR 0039)
++        if (incari.client.singleplayer.WorkerWorlds.load(this, levelSourceAccess, packRepository, worldStem, gameRules, newWorld)) {
++            Connection workerConnection = incari.client.singleplayer.WorkerWorlds.takeConnection();
++            if (workerConnection != null) {
++                this.isLocalServer = true;
++                this.pendingConnection = workerConnection;
++            }
++            return;
++        }
++        // Incari end
+         this.disconnectWithProgressScreen();
+@@ -2201,2 +2217,6 @@
+ 
++            // Incari start: a world whose server runs in a worker saves and stops there (ADR 0039)
++            incari.client.singleplayer.WorkerWorlds.stopAndWait(this);
++            // Incari end
++
+             this.setScreenAndShow(screen);

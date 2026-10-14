@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# The Incari build CLI. Builds the tool with Gradle (fast when nothing changed), then runs it.
+# `./incari help` lists the commands.
+set -eu
+
+root=$(cd "$(dirname "$0")" && pwd)
+
+case "${1:-}" in
+  survey) module=survey ;;
+  copycheck) module=copycheck ;;
+  *) module=build ;;
+esac
+
+"$root/gradlew" --quiet --console=plain -p "$root" ":tools:$module:installDist"
+
+# The tool finds the repo from the caller's directory, so it works from any subfolder.
+export INCARI_BUILD_OPTS="${INCARI_BUILD_OPTS:-} -Dincari.cwd=$(pwd)"
+export INCARI_SURVEY_OPTS="${INCARI_SURVEY_OPTS:-} -Dincari.cwd=$(pwd)"
+export INCARI_COPYCHECK_OPTS="${INCARI_COPYCHECK_OPTS:-} -Dincari.cwd=$(pwd)"
+
+# The survey and copycheck are their own programs; the command name isn't an argument to them.
+if [ "$module" != build ]; then
+  shift
+fi
+exec "$root/tools/$module/build/install/incari-$module/bin/incari-$module" "$@"

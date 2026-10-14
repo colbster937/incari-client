@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:13:56 -0400
+Subject: [PATCH] modules: Let modules see how far a hit reached
+
+The attack event (ADR 0052): the distance from the player's eyes to where the crosshair met the target, for Reach Display.
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 651c962414c02675b99bab4d818162ded371391f..9cfadb59ace9e77fd7f0de50dda0aa230cada850 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1719,2 +1719,5 @@
+                             this.gameMode.attack(this.player, ((EntityHitResult)this.hitResult).getEntity());
++                            // Incari start: modules see the hit's reach (Reach Display)
++                            incari.client.modules.ModuleInput.attacked(this.player, this.hitResult);
++                            // Incari end
+                         }

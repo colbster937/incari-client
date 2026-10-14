@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 22:19:08 -0400
+Subject: [PATCH] client: Report Incari's brand to servers and the F3 screen
+
+
+diff --git a/src/main/java/net/minecraft/client/ClientBrandRetriever.java b/src/main/java/net/minecraft/client/ClientBrandRetriever.java
+index 33bed39442bf679f36629abe53f4791e889ad225..3b269648ed9eb4a59800e9188d5d8a95f63e9741 100644
+--- a/src/main/java/net/minecraft/client/ClientBrandRetriever.java
++++ b/src/main/java/net/minecraft/client/ClientBrandRetriever.java
+@@ -6,3 +6,5 @@
+     public static String getClientModName() {
+-        return "vanilla";
++        // Incari start: report Incari's brand to servers and the F3 screen
++        return "incariclient";
++        // Incari end
+     }

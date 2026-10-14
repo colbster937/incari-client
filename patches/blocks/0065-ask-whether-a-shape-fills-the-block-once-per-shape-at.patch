@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 23:16:03 -0400
+Subject: [PATCH] blocks: Ask whether a shape fills the block once per shape at
+ bootstrap
+
+
+diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+index c184f3cd81cefa738f82d8ce9a9a70626f687665..8541a39dac02e8b0432e7c9a74ad4dec9e7d46f3 100644
+--- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -520,3 +520,5 @@
+             this.occlusionShape = this.canOcclude ? this.owner.getOcclusionShape(this.asState()) : Shapes.empty();
+-            this.solidRender = Block.isShapeFullBlock(this.occlusionShape);
++            // Incari start: asked once per shape at bootstrap
++            this.solidRender = incari.client.memory.BlockStateSharing.isFullBlock(this.occlusionShape);
++            // Incari end
+             if (this.occlusionShape.isEmpty()) {
+@@ -992,3 +994,5 @@
+ 
+-                this.isCollisionShapeFullBlock = Block.isShapeFullBlock(state.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
++                // Incari start: asked once per shape at bootstrap
++                this.isCollisionShapeFullBlock = incari.client.memory.BlockStateSharing.isFullBlock(state.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
++                // Incari end
+             }

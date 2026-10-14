@@ -1,0 +1,71 @@
+# The browser build joins a vanilla 26.3 server over ws://, through the dev bridge
+# (tools/wsbridge on 127.0.0.1:8817), plays, changes dimension there and back, is transferred to
+# the same server (disconnecting and reconnecting by itself), is kicked, and joins again through
+# the multiplayer screen. Each check reads the page's console, the clipboard (F3+C copies the
+# client's own position and dimension), or the server's answer over RCON. The page runs with
+# ?server=ws://127.0.0.1:8817&name=IncariWeb; README.md ("Server join") has the setup and command.
+
+# A fresh 26.3 server has its whitelist on; and on a server that has run a while, night falls and
+# mobs can kill the player mid-check.
+rcon:whitelist off
+rcon:difficulty peaceful
+rcon:time set day
+
+# The first-run accessibility screen: Continue. Quick play connects after it.
+sleep:4000
+click:0.5,0.945
+wait:.*Connecting to 127\.0\.0\.1, 8817.*
+
+# --- Joined: the server lists the player, and a system message reaches the client's chat ---
+rconwait:list => IncariWeb
+# The teleports below land in rock, lava or the air: in creative nothing there can kill the player,
+# which would otherwise be saved dead and fail the next run's teleports.
+rcon:gamemode creative IncariWeb
+sleep:3000
+rcon:tellraw IncariWeb "incari-check-chat"
+wait:.*\[CHAT\] incari-check-chat.*
+shot:build/browser-checks/server-joined.png
+
+# --- To the Nether and back, as the client itself sees it ---
+clipboard:-
+rcon:execute in minecraft:the_nether run tp IncariWeb 0 100 0
+rconwait:data get entity IncariWeb Dimension => the_nether
+sleep:4000
+key:F3+KeyC
+waitfor:navigator.clipboard.readText().then(text => text.startsWith('/execute in minecraft:the_nether '))
+shot:build/browser-checks/server-nether.png
+rcon:execute in minecraft:overworld run tp IncariWeb 0 -60 0
+rconwait:data get entity IncariWeb Dimension => overworld
+sleep:4000
+key:F3+KeyC
+waitfor:navigator.clipboard.readText().then(text => text.startsWith('/execute in minecraft:overworld '))
+
+# --- Transfer: the server names a ws:// address; the client disconnects and reconnects itself ---
+rcon:transfer "ws://127.0.0.1:8817" 25565 IncariWeb
+wait:.*Client disconnected with reason: Transferred to another server.*
+wait:.*Connecting to 127\.0\.0\.1, 8817.*
+rconwait:list => IncariWeb
+sleep:3000
+rcon:tellraw IncariWeb "incari-check-transferred"
+wait:.*\[CHAT\] incari-check-transferred.*
+
+# --- Disconnect and reconnect: kicked, back to the server list, Direct Connection ---
+rcon:kick IncariWeb incari-check-kick
+wait:.*Client disconnected with reason: incari-check-kick.*
+rconwait:list => There are 0
+sleep:1000
+shot:build/browser-checks/server-kicked.png
+# "Back to Server List", then "Direct Connection" (the list itself is empty: the check's browser
+# starts with a new profile, so there's no stored servers.dat).
+click:0.5,0.598
+sleep:2000
+click:0.5,0.854
+sleep:1500
+type:ws://127.0.0.1:8817
+key:Enter
+wait:.*Connecting to 127\.0\.0\.1, 8817.*
+rconwait:list => IncariWeb
+sleep:3000
+rcon:tellraw IncariWeb "incari-check-rejoined"
+wait:.*\[CHAT\] incari-check-rejoined.*
+shot:build/browser-checks/server-rejoined.png

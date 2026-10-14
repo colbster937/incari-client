@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 22:54:48 -0400
+Subject: [PATCH] singleplayer: Say a world in a worker is shared through a
+ relay, not on a port
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java b/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
+index 0f277cba6561ae5b6a84218ab336b06991240ba1..0e8c6f75ff334974d119b3251067ccbbe56323e0 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
+@@ -637,2 +637,5 @@
+                 : Component.translatable("menu.multiplayerOptions.publish.started.online");
++            // Incari start: a world in a worker is shared through a relay, not on a port (ADR 0062)
++            if (incari.client.singleplayer.WorkerWorlds.publishedMessage() != null) message = incari.client.singleplayer.WorkerWorlds.publishedMessage();
++            // Incari end
+             this.sendPublishMessage(message);

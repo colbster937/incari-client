@@ -1,0 +1,15 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 08:07:03 -0400
+Subject: [PATCH] modules: The minimap redraws a chunk only when the game marks
+ it changed
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+index 1f49f9350d45dacf189177e662dcc633c481134f..624df09ad217a6fc09ee956a9c926700b2d9371a 100644
+--- a/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
++++ b/src/main/java/net/minecraft/client/renderer/extract/LevelExtractor.java
+@@ -597,2 +597,3 @@
+         incari.client.particle.ParticleLight.changed(); // Incari: particle light kept until a block or light changes (ADR 0031)
++        incari.client.modules.MapTerrain.sectionChanged(sectionX, sectionZ); // Incari: the minimap redraws only changed chunks
+         this.sectionUpdateTracker.setDirty(sectionX, sectionY, sectionZ, playerChanged);

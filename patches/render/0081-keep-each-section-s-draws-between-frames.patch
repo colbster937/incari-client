@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 07:51:32 -0400
+Subject: [PATCH] render: Keep each section's draws between frames
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/vertex/UberGpuBuffer.java b/src/main/java/com/mojang/blaze3d/vertex/UberGpuBuffer.java
+index ad78869113d09f529bcc707abbf3d9aded3abe57..4090b7e7c15154a2f045ed139769286b23dafce7 100644
+--- a/src/main/java/com/mojang/blaze3d/vertex/UberGpuBuffer.java
++++ b/src/main/java/com/mojang/blaze3d/vertex/UberGpuBuffer.java
+@@ -96,2 +96,5 @@
+                             this.allocationMap.put(entry.getKey(), allocation);
++                            // Incari start: a section's kept draws are read again (ADR 0030)
++                            incari.client.render.terrain.SectionDraws.moved(entry.getKey());
++                            // Incari end
+                             runCallbackUnchecked(entry.getKey(), entry.getValue());
+@@ -139,2 +142,5 @@
+         if (allocation != null) {
++            // Incari start: a section's kept draws are read again (ADR 0030)
++            incari.client.render.terrain.SectionDraws.moved(allocationKey);
++            // Incari end
+             for (Pair<TlsfAllocator, UberGpuBuffer.UberGpuBufferHeap> node : this.nodes) {
+diff --git a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+index a5c013a66a0b3ae6c1c75467cacec46e2e8883d4..1cab59c8fb172f0fed7e6b5794e65c3f49d14428 100644
+--- a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+@@ -894,2 +894,5 @@
+     public ChunkSectionsToRender prepareChunkRendersIndirect(final Matrix4fc modelViewMatrix, final boolean respectTranslucentOrder) {
++        // Incari start: the draw list from each section's kept draws, quads facing away left out (ADR 0030)
++        if (incari.client.render.terrain.TerrainDrawLists.enabled()) return incari.client.render.terrain.TerrainDrawLists.prepare(this.sectionRenderDispatcher, this.visibleSections, modelViewMatrix, respectTranslucentOrder, this.optionsRenderState.chunkSectionFadeInTime, this.levelRenderState.cameraRenderState.pos);
++        // Incari end
+         EnumMap<ChunkSectionLayer, List<LevelRenderer.ChunkDrawGroup>> drawGroups = new EnumMap<>(ChunkSectionLayer.class);
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/CompiledSectionMesh.java b/src/main/java/net/minecraft/client/renderer/chunk/CompiledSectionMesh.java
+index 46b753ce8d5e7b23229e938650a4ae72ec3e453c..f275dec2abfc8c416601e31aec30f1754c6c8df1 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/CompiledSectionMesh.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/CompiledSectionMesh.java
+@@ -33,2 +33,5 @@
+     private final long compileTaskStartTimeNs;
++    // Incari start: the mesh's draws kept between frames (ADR 0030)
++    public final incari.client.render.terrain.SectionDraws incariDraws;
++    // Incari end
+ 
+@@ -45,2 +48,5 @@
+         this.compileTaskStartTimeNs = compileTaskStartTimeNs;
++        // Incari start: the mesh's draws kept between frames (ADR 0030)
++        this.incariDraws = incari.client.render.terrain.SectionDraws.of(results);
++        // Incari end
+     }

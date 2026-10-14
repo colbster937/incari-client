@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 01:21:55 -0400
+Subject: [PATCH] text: Write a glyph's four vertices in one call
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java b/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
+index 88ae09e0112ab2e0ea597c35ed03fe55bb665115..ce31815ec9e8361dd682214d8e5179a42ec62911 100644
+--- a/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
++++ b/src/main/java/com/mojang/blaze3d/vertex/BufferBuilder.java
+@@ -189,2 +189,15 @@
+ 
++    // Incari start: a whole vertex of position, color, texture and maybe light, in one call (ADR 0031: glyph quads)
++    public void incariVertex(final float x, final float y, final float z, final int color, final float u, final float v, final int light) {
++        long pointer = this.beginVertex();
++        this.elementsToFill = 0;
++        putVec3f(pointer + this.elements[0].offset(), x, y, z);
++        putRgba(pointer + this.elements[1].offset(), color);
++        MemoryUtil.memPutFloat(pointer + this.elements[2].offset(), u);
++        MemoryUtil.memPutFloat(pointer + this.elements[2].offset() + 4L, v);
++        if (this.elements[4] != null) putPackedUv(pointer + this.elements[4].offset(), light);
++    }
++    public VertexFormat incariFormat() { return this.format; }
++    // Incari end
++
+     // Incari start: write baked quads without five vectors each (items in the world)
+diff --git a/src/main/java/net/minecraft/client/gui/font/glyphs/BakedSheetGlyph.java b/src/main/java/net/minecraft/client/gui/font/glyphs/BakedSheetGlyph.java
+index ba382d15e8788b86750dd93247af17b4cfc76fc2..ef01df8b6d810dee1619cf3b339b2af9218a3eea 100644
+--- a/src/main/java/net/minecraft/client/gui/font/glyphs/BakedSheetGlyph.java
++++ b/src/main/java/net/minecraft/client/gui/font/glyphs/BakedSheetGlyph.java
+@@ -133,2 +133,5 @@
+         float extraThickness = extraThickness(bold);
++        // Incari start: the four vertices in one call (ADR 0031)
++        if (incari.client.render.GlyphQuads.put(builder, pose, x0 + shearY0 - extraThickness, y0 - extraThickness, x0 + shearY1 - extraThickness, y1 + extraThickness, x1 + shearY1 + extraThickness, y1 + extraThickness, x1 + shearY0 + extraThickness, y0 - extraThickness, z, color, this.u0, this.v0, this.u1, this.v1, packedLightCoords)) return;
++        // Incari end
+         builder.addVertex(pose, x0 + shearY0 - extraThickness, y0 - extraThickness, z).setColor(color).setUv(this.u0, this.v0).setLight(packedLightCoords);

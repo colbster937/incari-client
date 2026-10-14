@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 22:46:20 -0400
+Subject: [PATCH] gui: Draw the screen recorder's REC with the profiler's
+ overlay
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index ea0ee39979b3a7b58b694cd75ebaef826d70ccf6..7fa65ecef9ed81313fc726ca6c364dc3cb44f864 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -213,4 +213,4 @@
+ 
+-        // Incari start: the profiler's overlay
+-        incari.client.profiler.ProfilerOverlay.extract(graphics);
++        // Incari start: the profiler's overlay and the screen recorder's REC (ADR 0062)
++        incari.client.gui.TopOverlays.extract(graphics);
+         // Incari end

@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 11:56:07 -0400
+Subject: [PATCH] client: Incari's own resource pack
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index d4cd82a2ee9709513a91d27b8f46c2b8a3df75bb..651c962414c02675b99bab4d818162ded371391f 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -398,3 +398,10 @@
+         );
+-        this.resourcePackRepository = new PackRepository(clientPackSource, this.downloadedPackSource.createRepositorySource(), directoryPacks);
++        this.resourcePackRepository = new PackRepository(
++            clientPackSource,
++            this.downloadedPackSource.createRepositorySource(),
++            directoryPacks,
++            // Incari start: Incari's own pack (its font), always on top
++            incari.client.ui.IncariPack.SOURCE
++            // Incari end
++        );
+         this.vanillaPackResources = clientPackSource.getVanillaPack();

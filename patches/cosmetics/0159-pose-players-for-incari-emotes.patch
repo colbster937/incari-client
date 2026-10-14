@@ -1,0 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 19:04:58 -0400
+Subject: [PATCH] cosmetics: Pose players for Incari emotes
+
+
+diff --git a/src/main/java/net/minecraft/client/model/player/PlayerModel.java b/src/main/java/net/minecraft/client/model/player/PlayerModel.java
+index 14cf7a1feca86df1c3c205fe6f58810c2867b329..fcea6ffe49b7c1210a1cb812e704e618172bda4b 100644
+--- a/src/main/java/net/minecraft/client/model/player/PlayerModel.java
++++ b/src/main/java/net/minecraft/client/model/player/PlayerModel.java
+@@ -120,2 +120,3 @@
+         super.setupAnim(state);
++        incari.client.cosmetics.Cosmetics.pose(this, state); // Incari: emotes (ADR 0061)
+     }

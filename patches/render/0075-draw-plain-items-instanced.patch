@@ -1,0 +1,57 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 18:08:43 -0400
+Subject: [PATCH] render: Draw plain items instanced
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/feature/ItemFeatureRenderer.java b/src/main/java/net/minecraft/client/renderer/feature/ItemFeatureRenderer.java
+index 99833587cb756821468b123411a90313ab7c23f6..08fd172150a945e20aae31f22d06e82fa3990509 100644
+--- a/src/main/java/net/minecraft/client/renderer/feature/ItemFeatureRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/feature/ItemFeatureRenderer.java
+@@ -22,2 +22,34 @@
+     private final QuadInstance quadInstance = new QuadInstance();
++    // Incari start: plain items drawn instanced (ADR 0027)
++    private final incari.client.render.entity.ModelBatches instanced = new incari.client.render.entity.ModelBatches();
++
++    @Override
++    public void finishPrepare(final FeatureFrameContext context) {
++        this.instanced.upload();
++    }
++
++    @Override
++    public void executeGroup(
++        final FeatureFrameContext context,
++        final net.minecraft.client.renderer.oit.@org.jspecify.annotations.Nullable OitStage stage,
++        final com.mojang.renderpearl.api.commands.RenderPass renderPass,
++        final int groupIndex,
++        final List<ItemFeatureRenderer.Submit> submits,
++        final boolean strictlyOrdered
++    ) {
++        super.executeGroup(context, stage, renderPass, groupIndex, submits, strictlyOrdered);
++        this.instanced.draw(groupIndex, stage, renderPass);
++    }
++
++    @Override
++    public void finishExecute(final FeatureFrameContext context) {
++        super.finishExecute(context);
++        this.instanced.endFrame();
++    }
++
++    @Override
++    public void close() {
++        this.instanced.close();
++    }
++    // Incari end
+ 
+@@ -25,2 +57,3 @@
+     protected void buildGroup(final FeatureFrameContext context, final List<ItemFeatureRenderer.Submit> submits) {
++        this.instanced.beginGroup(); // Incari: plain items drawn instanced (ADR 0027)
+         for (ItemFeatureRenderer.Submit submit : submits) {
+@@ -31,2 +64,7 @@
+     private void prepareSubmit(final ItemFeatureRenderer.Submit submit) {
++        // Incari start: plain items drawn instanced (ADR 0027)
++        if (this.instanced.takeItem(submit)) {
++            return;
++        }
++        // Incari end
+         if (submit.outlineColor() != 0) {

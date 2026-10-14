@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 22:38:10 -0400
+Subject: [PATCH] startup: Let the loading screen fade out faster
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/LoadingOverlay.java b/src/main/java/net/minecraft/client/gui/screens/LoadingOverlay.java
+index 938cfd92435863ef37a63ad6bfb4a0d7c394d22e..735b1b5fff4a3c384e0621682256af42b4fda4c3 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/LoadingOverlay.java
++++ b/src/main/java/net/minecraft/client/gui/screens/LoadingOverlay.java
+@@ -72,3 +72,5 @@
+ 
+-        float fadeOutAnim = this.fadeOutStart > -1L ? (float)(now - this.fadeOutStart) / 1000.0F : -1.0F;
++        // Incari start: the fade may be shorter (the browser's title screen takes input sooner)
++        float fadeOutAnim = this.fadeOutStart > -1L ? (float)(now - this.fadeOutStart) / incari.client.startup.LoadingFade.halfMillis() : -1.0F;
++        // Incari end
+         float fadeInAnim = this.fadeInStart > -1L ? (float)(now - this.fadeInStart) / 500.0F : -1.0F;

@@ -1,0 +1,170 @@
+# Keyboard, mouse, text, clipboard, key names, fullscreen, resize and drops, on the title
+# screen and its menus. Positions are for the 1280x577
+# viewport headless Chromium gives a 1280x720 window.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.steps=@browser-checks/input.steps
+
+# A French (AZERTY) layout, as Chrome's Keyboard Map API would report it, for every load from now on.
+init:(function() { var fr = {KeyQ: 'a', KeyW: 'z', KeyA: 'q', KeyZ: 'w', KeyM: ',', Semicolon: 'm', Digit1: '&', Digit2: 'é', Minus: ')', BracketLeft: '^'}; var kb = navigator.keyboard; if (kb) kb.getLayoutMap = function() { return Promise.resolve(new Map(Object.entries(fr))); }; })();
+# The reloaded page's start (the first page's heartbeats may still be queued before it).
+wait:\[Incari\] Client jar.*
+wait:\[Incari\] Main loop running.*
+sleep:4000
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+shot:build/browser-checks/title.png
+
+# --- Nothing on the title screen holds the mouse, so leaving asks nothing ---
+assert:!document.getElementById('incari-canvas').__incariGuard
+
+# --- Fullscreen in and out with F11 ---
+key:F11
+waitfor:document.fullscreenElement === document.getElementById('incari-canvas')
+sleep:1000
+assert:document.getElementById('incari-canvas').width === screen.width
+shot:build/browser-checks/fullscreen.png
+key:F11
+waitfor:!document.fullscreenElement
+sleep:1000
+assert:document.getElementById('incari-canvas').width === innerWidth
+# Leaving from the browser's side (Escape, the browser's own controls) turns the game's option off,
+# so the next F11 enters again rather than doing nothing.
+key:F11
+waitfor:!!document.fullscreenElement
+eval:document.exitFullscreen()
+waitfor:!document.fullscreenElement
+sleep:1000
+key:F11
+waitfor:!!document.fullscreenElement
+eval:document.exitFullscreen()
+waitfor:!document.fullscreenElement
+sleep:1000
+
+# --- Resize and density ---
+resize:960,540
+waitfor:document.getElementById('incari-canvas').width === 960 && document.getElementById('incari-canvas').height === 540
+sleep:1000
+shot:build/browser-checks/resized.png
+# A denser display: the backing store follows the device-pixel size the browser reports. (Headless
+# Chromium's emulated density reports the CSS size here, as its compositor does the scaling; a real
+# 2x display reports twice it, which the unit tests cover.)
+resize:640,360,2
+waitfor:devicePixelRatio === 2 && document.getElementById('incari-canvas').clientWidth === 640
+waitfor:new Promise(r => { const c = document.getElementById('incari-canvas'); const o = new ResizeObserver(es => { const d = es[0].devicePixelContentBoxSize[0]; o.disconnect(); r(c.width === d.inlineSize && c.height === d.blockSize); }); o.observe(c, {box: 'device-pixel-content-box'}); })
+sleep:1000
+shot:build/browser-checks/dense.png
+resize:1280,577
+waitfor:document.getElementById('incari-canvas').width === 1280 && document.getElementById('incari-canvas').height === 577
+sleep:1500
+# Clicks land where the game drew after all that: Multiplayer, then Proceed on the safety screen.
+click:0.5,0.534
+sleep:1500
+shot:build/browser-checks/multiplayer-warning.png
+click:0.376,0.688
+sleep:1500
+# Add Server.
+click:0.662,0.854
+sleep:1500
+
+# --- Text: typing, selection, copy and paste, an input method ---
+# The name field has the focus, so the page's text input element has it too.
+assert:document.activeElement === document.getElementById('incari-canvas-text')
+key:Control+KeyA
+type:Hello Incari
+clipboard:
+key:Control+KeyA
+key:Control+KeyC
+waitfor:navigator.clipboard.readText().then(t => t === 'Hello Incari')
+clipboard: & pasted
+key:End
+key:Control+KeyV
+# Shift+Left twice selects the last two characters, and Backspace deletes them.
+down:ShiftLeft
+key:ArrowLeft
+key:ArrowLeft
+up:ShiftLeft
+key:Backspace
+# An input method: a composition shows in the field, then commits.
+compose:にほ
+sleep:500
+shot:build/browser-checks/composing.png
+insert:日本
+type:!
+key:Control+KeyA
+key:Control+KeyX
+waitfor:navigator.clipboard.readText().then(t => t === 'Hello Incari & past日本!')
+sleep:500
+shot:build/browser-checks/cut.png
+# Tab moves to the address field; the browser mustn't move its own focus.
+key:Tab
+type:localhost
+key:Control+KeyA
+key:Control+KeyC
+waitfor:navigator.clipboard.readText().then(t => t === 'localhost')
+assert:document.activeElement === document.getElementById('incari-canvas-text')
+# Escape leaves the screen, and text input with it.
+key:Escape
+sleep:800
+key:Escape
+sleep:800
+waitfor:document.activeElement !== document.getElementById('incari-canvas-text')
+
+# --- Key names in the player's layout, and binding a key ---
+# Options, Controls, Key Binds.
+click:0.42,0.782
+sleep:1500
+click:0.623,0.432
+sleep:1500
+click:0.623,0.161
+sleep:1500
+# With AZERTY, strafe left is Q and walking forward Z; the rest keep their US names.
+shot:build/browser-checks/key-binds.png
+# Bind "Walk Forward" to the key right of Tab: AZERTY's A.
+click:0.617,0.64
+sleep:500
+key:KeyQ
+sleep:800
+shot:build/browser-checks/key-bound.png
+# Back to W, which the Reset button next to it does.
+click:0.722,0.64
+sleep:800
+key:Escape
+sleep:800
+key:Escape
+sleep:800
+
+# --- F3 and browser shortcuts: the game gets them, the browser does nothing ---
+# (On the Options screen, where these keys change nothing in the game.)
+# A mark on the page that a reload or navigation would wipe.
+eval:window.__incariCheckMark = 1
+# F3 shows the debug screen here too, memory lines and all; the game keeps running under it, and a
+# second F3 hides it.
+key:F3
+sleep:1500
+shot:build/browser-checks/debug-screen.png
+wait:\[Incari\] Main loop running.*
+key:F3
+sleep:500
+# Not Ctrl+W or Ctrl+T: Chromium keeps those outside fullscreen whatever the page does (sent here,
+# Ctrl+W closes the tab). The leave-page prompt and Keyboard Lock are on the manual checklist.
+key:F5
+key:Alt+ArrowLeft
+sleep:1000
+assert:window.__incariCheckMark === 1
+assert:document.activeElement === document.getElementById('incari-canvas')
+shot:build/browser-checks/after-shortcuts.png
+
+# --- A dropped file ---
+# Resource Packs, then a file dropped on it: the game asks whether to copy it in.
+click:0.376,0.598
+sleep:2000
+drop:0.5,0.5,browser-checks/README.md
+sleep:2000
+shot:build/browser-checks/dropped.png
+# "No". Leaving the pack screen reloads resources, which restarts the sound engine, and that
+# crashes the browser build today (the old sound thread ends with an IllegalMonitorStateException;
+# audio has checks of its own): the script stops here.
+click:0.62,0.585
+sleep:1000
+shot:build/browser-checks/packs.png

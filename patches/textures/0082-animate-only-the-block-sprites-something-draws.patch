@@ -1,0 +1,71 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 07:51:32 -0400
+Subject: [PATCH] textures: Animate only the block sprites something draws
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java b/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
+index d9ab9090b545c4513a5517f2ec4570b16c8b1aac..475ecb570a34405a471c46fdc9549ca630f50d87 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/SpriteContents.java
+@@ -378,2 +378,8 @@
+ 
++        // Incari start: draw the current frame though it didn't change this tick (ADR 0030)
++        public void incariRedraw() {
++            this.isDirty = true;
++        }
++        // Incari end
++
+         public void drawToAtlas(final RenderPass renderPass, final GpuBufferSlice ubo) {
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/TextureAtlas.java b/src/main/java/net/minecraft/client/renderer/texture/TextureAtlas.java
+index ecc446aa05c36f9ab3c52b85a7d77fc731d8ccd6..e972301bfdea564c798f73e516e5fa182be915df 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/TextureAtlas.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/TextureAtlas.java
+@@ -132,2 +132,5 @@
+         }
++        // Incari start: animate only the block sprites something draws (ADR 0030)
++        incari.client.render.AnimatedSprites.atlasBuilt(this, this.sprites, this.animatedTexturesStates, this.mipViews);
++        // Incari end
+ 
+@@ -241,3 +244,5 @@
+ 
+-            this.uploadAnimationFrames();
++            // Incari start: animate only the block sprites something draws (ADR 0030)
++            if (!incari.client.render.AnimatedSprites.upload(this, this.animatedTexturesStates)) this.uploadAnimationFrames();
++            // Incari end
+         }
+@@ -286,2 +291,5 @@
+         this.animatedTexturesStates = List.of();
++        // Incari start: animate only the block sprites something draws (ADR 0030)
++        incari.client.render.AnimatedSprites.atlasCleared(this);
++        // Incari end
+         this.texturesByName = Map.of();
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/TextureAtlasSprite.java b/src/main/java/net/minecraft/client/renderer/texture/TextureAtlasSprite.java
+index dadf4974ded93b48bf2def353c530100dad59d78..ac2104b25a0a358616b9ddc1cfce2e87d83121f1 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/TextureAtlasSprite.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/TextureAtlasSprite.java
+@@ -37,2 +37,6 @@
+ 
++    // Incari start: the blocks atlas's id for an animated sprite, else -1 (ADR 0030)
++    public int incariAnimatedId = -1;
++    // Incari end
++
+     public int getX() {
+@@ -46,2 +50,5 @@
+     public float getU0() {
++        // Incari start: note an animated sprite as drawn (ADR 0030)
++        if (this.incariAnimatedId >= 0) incari.client.render.AnimatedSprites.used(this.incariAnimatedId);
++        // Incari end
+         return this.u0;
+@@ -50,2 +57,5 @@
+     public float getU1() {
++        // Incari start: note an animated sprite as drawn (ADR 0030)
++        if (this.incariAnimatedId >= 0) incari.client.render.AnimatedSprites.used(this.incariAnimatedId);
++        // Incari end
+         return this.u1;
+@@ -67,2 +77,5 @@
+     public float getU(final float offset) {
++        // Incari start: note an animated sprite as drawn (ADR 0030)
++        if (this.incariAnimatedId >= 0) incari.client.render.AnimatedSprites.used(this.incariAnimatedId);
++        // Incari end
+         float diff = this.u1 - this.u0;

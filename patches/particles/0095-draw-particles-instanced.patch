@@ -1,0 +1,52 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 18:28:19 -0400
+Subject: [PATCH] particles: Draw particles instanced
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer.java b/src/main/java/net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer.java
+index de0109be355920bb3563b30470839ecc23f6d03b..345a6f7028c86d63d1f00cde4b15d94ae22ac220 100644
+--- a/src/main/java/net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/feature/QuadParticleFeatureRenderer.java
+@@ -43,2 +43,5 @@
+                             );
++                            // Incari start: drawn instanced where the backend can (ADR 0032)
++                            if (!incari.client.particle.ParticleInstancing.take(particles, layer, draw))
++                            // Incari end
+                             particles.buildLayer(layer, stagedVertexBuffer.getVertexBuilder(draw));
+@@ -59,2 +62,5 @@
+         this.dynamicTransforms = RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrixCopy());
++        // Incari start: the instanced particles uploaded (ADR 0032)
++        incari.client.particle.ParticleInstancing.upload();
++        // Incari end
+     }
+@@ -86,2 +92,7 @@
+         for (Entry<SingleQuadParticle.Layer, StagedVertexBuffer.Draw> entry : group.layers.entrySet()) {
++            // Incari start: a layer taken to draw instanced, at the game's draw's place (ADR 0032)
++            if (incari.client.particle.ParticleInstancing.draw(entry.getValue(), renderPass, stage != null ? getOitPipeline(stage, entry.getKey()) : entry.getKey().pipeline(), group.textures.get(entry.getKey()))) {
++                continue;
++            }
++            // Incari end
+             StagedVertexBuffer.ExecuteInfo executeInfo = stagedBuffer.getExecuteInfo(entry.getValue());
+@@ -108,2 +119,5 @@
+     public void finishExecute(final FeatureFrameContext context) {
++        // Incari start
++        incari.client.particle.ParticleInstancing.endFrame();
++        // Incari end
+         this.groups.clear();
+diff --git a/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java b/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
+index dd79477da9d3cf253931b479d35439e0fa128e8c..d194c3a779977661e14815c4045d1b3f8522d476 100644
+--- a/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
++++ b/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
+@@ -63,2 +63,11 @@
+ 
++    // Incari start: a layer's particles as kept, to draw them instanced (ADR 0032)
++    public void incariParticles(final SingleQuadParticle.Layer layer, final incari.client.particle.ParticleInstancing.Sink sink) {
++        QuadParticleRenderState.Storage storage = this.particles.get(layer);
++        if (storage != null) {
++            sink.accept(storage.floatValues, storage.intValues, storage.currentParticleIndex);
++        }
++    }
++    // Incari end
++
+     public Set<SingleQuadParticle.Layer> layers() {

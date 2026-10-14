@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 08:50:00 -0400
+Subject: [PATCH] worldgen: Build a chunk's terrain in a helper worker when
+ there is one
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/Beardifier.java b/src/main/java/net/minecraft/world/level/levelgen/Beardifier.java
+index 7041d673e6f6b7b629d325fee770e640f75725a1..33856a03f3c7a80dda8e1ff9a959256125c08f33 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/Beardifier.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/Beardifier.java
+@@ -110,2 +110,16 @@
+ 
++    // Incari start: what it holds, to send to a helper worker
++    public List<Beardifier.Rigid> pieces() {
++        return this.pieces;
++    }
++
++    public List<JigsawJunction> junctions() {
++        return this.junctions;
++    }
++
++    public @Nullable BoundingBox affectedBox() {
++        return this.affectedBox;
++    }
++    // Incari end
++
+     @Override
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java b/src/main/java/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
+index d49cbc488d2ce0908bd60c11f902bac3fe0c9005..4ec1e02327beaeb29df4bde3df510ca393e37944 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator.java
+@@ -105,3 +105,3 @@
+     ) {
+-        Beardifier beardifier = Beardifier.forStructuresInChunk(structureManager, chunk.getPos());
++        Beardifier beardifier = incari.client.world.RemoteTerrain.beardifier(structureManager, chunk.getPos()); // Incari: the helper's comes with its job
+         return new NoiseChunk(randomState, beardifier, this.settings.value(), this.globalFluidPicker.get(), blender, chunkVolume(chunk, noiseSettings));
+@@ -367,2 +367,6 @@
+     ) {
++        // Incari start: the terrain step in a helper worker when there is one
++        CompletableFuture<ChunkAccess> elsewhere = incari.client.world.RemoteTerrain.buildTerrain(this, chunk, blender, structureManager, carverBiomeRegion);
++        if (elsewhere != null) return elsewhere;
++        // Incari end
+         NoiseSettings noiseSettings = this.settings.value().noiseSettings().clampToHeightAccessor(chunk.getHeightAccessorForGeneration());

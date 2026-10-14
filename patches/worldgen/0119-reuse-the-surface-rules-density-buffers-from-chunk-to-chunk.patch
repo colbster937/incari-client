@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 23:16:27 -0400
+Subject: [PATCH] worldgen: Reuse the surface rules' density buffers from chunk
+ to chunk
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialRuleContext.java b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialRuleContext.java
+index 9d4a0cf7b67731c610ed85c14abc5a9d9e151184..f0652d6e899e14e8a073a5dd628a8b63f83e7e92 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialRuleContext.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialRuleContext.java
+@@ -201,3 +201,5 @@
+         if (prefill) {
+-            DensityBuffer buffer = DensityBuffer.createUnpooled(this.expectedVolume.size());
++            // Incari start: the last chunk's buffer, reused
++            DensityBuffer buffer = incari.client.world.SurfaceBuffers.take(this.expectedVolume.size());
++            // Incari end
+             sampler.sampleVolume(buffer, this.expectedVolume);
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+index 54df8adf43538f09f4e0adec9284a1e91e531104..6ad4d6cc092212bb5f155957f2c2f78b882c02dd 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+@@ -144,2 +144,5 @@
+         // Incari end
++        // Incari start: the rules' density buffers taken again from the first
++        incari.client.world.SurfaceBuffers.begin();
++        // Incari end
+         RuleEvaluator rule = ruleSource.compile(context);

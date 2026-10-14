@@ -1,0 +1,229 @@
+# ADRs 0052-0054: the fifteen new modules in the page. Creates a world, turns each on from the
+# module menu (its search narrows the grid to the one card, whose switch is the first card's), then
+# shows the HUD, the crosshair and cooldown after a swing, Freelook with Left Alt held, F2 and the
+# pause menu's Screenshots button, and the gallery. No server needed. Positions are for the
+# 1280x577 viewport (GUI scale 2, 640x288).
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/newmodules.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue. Then Singleplayer, Create New World with the defaults.
+click:0.5,0.945
+sleep:3000
+click:0.2,0.43
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+
+# --- Keystrokes ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Keystrokes
+sleep:400
+shot:build/browser-checks/newmodules-search.png
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- CPS ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:CPS
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- FPS Display ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:FPS Display
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Reach Display ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Reach Display
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Coordinates ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Coordinates
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Shield & Totem ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Shield & Totem
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Cooldown Indicator ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Cooldown Indicator
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- 1.7 Animations ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:1.7 Animations
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Freelook ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Freelook
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Crosshair Editor ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Crosshair Editor
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Low Shield ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Low Shield
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Weather Changer ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Weather Changer
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Theme Editor ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Theme Editor
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Screenshot Manager ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Screenshot Manager
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+# --- Shulker Tooltips ---
+key:ShiftRight
+sleep:1200
+click:0.40,0.125
+sleep:600
+type:Shulker Tooltips
+sleep:400
+click:0.545,0.215
+sleep:300
+key:Escape
+sleep:800
+
+key:ShiftRight
+sleep:1500
+shot:build/browser-checks/newmodules-menu.png
+key:Escape
+sleep:2000
+
+# --- The HUD, the crosshair, a swing's cooldown ---
+down:KeyW
+sleep:300
+click:0.5,0.5
+sleep:150
+shot:build/browser-checks/newmodules-hud.png
+up:KeyW
+sleep:1500
+
+# --- Freelook: Left Alt held ---
+down:AltLeft
+sleep:600
+shot:build/browser-checks/newmodules-freelook.png
+up:AltLeft
+sleep:800
+
+# --- F2, then the pause menu with its Screenshots button ---
+key:F2
+sleep:2500
+key:Escape
+sleep:1500
+shot:build/browser-checks/newmodules-pause.png
+until:window.incariStorage.pending() === 0
+assert:(async () => { let d = await navigator.storage.getDirectory(); for (const p of ["incari", "game", "screenshots"]) d = await d.getDirectoryHandle(p); let count = 0; for await (const [name] of d.entries()) { if (name.endsWith(".png")) count++; } console.log("[check] screenshots: " + count); return count > 0; })()

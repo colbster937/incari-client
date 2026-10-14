@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 08:00:03 -0400
+Subject: [PATCH] skins: Open Edit Profile from skin customisation
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/options/SkinCustomizationScreen.java b/src/main/java/net/minecraft/client/gui/screens/options/SkinCustomizationScreen.java
+index 46a67070b0bf5bd2afac52d0ae105dfc16870abb..5274680e9246747e19aba1abd4428f85da788ea0 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/options/SkinCustomizationScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/options/SkinCustomizationScreen.java
+@@ -30,2 +30,5 @@
+         widgets.add(this.options.mainHand().createButton(this.options));
++        // Incari start: Edit Profile (the name and skin)
++        widgets.add(incari.client.profile.ProfileScreen.button(this));
++        // Incari end
+         this.list.addSmall(widgets);

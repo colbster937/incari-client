@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 22:08:13 -0400
+Subject: [PATCH] profiler: Draw the profiler's overlay over every screen
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index 3fd7c2d6e118c66a04b946dcb2dc9d2e121c10ae..1aee24f0c727e621ca0290613db514d05b2e6dfe 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -203,2 +203,5 @@
+ 
++        // Incari start: the profiler's overlay
++        incari.client.profiler.ProfilerOverlay.extract(graphics);
++        // Incari end
+         this.hud.extractDeferredSubtitles();

@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 18:28:19 -0400
+Subject: [PATCH] light: Bring the visible light maps up to date in place
+
+
+diff --git a/src/main/java/net/minecraft/world/level/lighting/DataLayerStorageMap.java b/src/main/java/net/minecraft/world/level/lighting/DataLayerStorageMap.java
+index 81a50ae62892852babb2ee39936f23227782df63..15b1e4c083516375cd96eca05c0a0a1d9f893df8 100644
+--- a/src/main/java/net/minecraft/world/level/lighting/DataLayerStorageMap.java
++++ b/src/main/java/net/minecraft/world/level/lighting/DataLayerStorageMap.java
+@@ -21,2 +21,11 @@
+ 
++    // Incari start: the light maps brought up to date in place on one thread (ADR 0032)
++    public Long2ObjectOpenHashMap<DataLayer> incariLayers() {
++        return this.map;
++    }
++
++    public void incariCopyColumnsFrom(final DataLayerStorageMap<?> source) {
++    }
++    // Incari end
++
+     public DataLayer copyDataLayer(final long sectionNode) {
+diff --git a/src/main/java/net/minecraft/world/level/lighting/LayerLightSectionStorage.java b/src/main/java/net/minecraft/world/level/lighting/LayerLightSectionStorage.java
+index 2342c9527207e623cd4835dcd49e87f3d1605df2..97186d3a2c2d9c01a2f45d783ed6d1b6550a4106 100644
+--- a/src/main/java/net/minecraft/world/level/lighting/LayerLightSectionStorage.java
++++ b/src/main/java/net/minecraft/world/level/lighting/LayerLightSectionStorage.java
+@@ -264,2 +264,5 @@
+         if (!this.changedSections.isEmpty()) {
++            // Incari start: on one thread the visible map is brought up to date in place, not copied whole (ADR 0032)
++            if (!incari.client.memory.LightCopies.updateInPlace(this.visibleSectionData, this.updatingSectionData, this.changedSections)) {
++            // Incari end
+             M copy = this.updatingSectionData.copy();
+@@ -267,2 +270,5 @@
+             this.visibleSectionData = copy;
++            // Incari start
++            }
++            // Incari end
+             this.changedSections.clear();
+diff --git a/src/main/java/net/minecraft/world/level/lighting/SkyLightSectionStorage.java b/src/main/java/net/minecraft/world/level/lighting/SkyLightSectionStorage.java
+index cf80a034c8f7e77c59a30023b20deb424f5e4f40..961d8155d65c423e8427ce7f52c8086bae5f47fc 100644
+--- a/src/main/java/net/minecraft/world/level/lighting/SkyLightSectionStorage.java
++++ b/src/main/java/net/minecraft/world/level/lighting/SkyLightSectionStorage.java
+@@ -160,2 +160,13 @@
+         }
++
++        // Incari start: the columns copied as copy() copies them, into this map (ADR 0032)
++        @Override
++        public void incariCopyColumnsFrom(final DataLayerStorageMap<?> source) {
++            SkyLightSectionStorage.SkyDataLayerStorageMap from = (SkyLightSectionStorage.SkyDataLayerStorageMap)source;
++            this.topSections.clear();
++            this.topSections.putAll(from.topSections);
++            this.topSections.defaultReturnValue(from.currentLowestY);
++            this.currentLowestY = from.currentLowestY;
++        }
++        // Incari end
+     }

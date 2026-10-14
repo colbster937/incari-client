@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:55:29 -0400
+Subject: [PATCH] modules: Let a module show a container's contents as a grid
+
+Shulker Tooltips (ADR 0054): the tooltip's image a grid of the items inside, drawn by Incari, and the game's lines of names left out meanwhile.
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java b/src/main/java/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java
+index eb7c7f8ae87ded37fb49c226080ad74ef8bb09c4..2a59178cb02222e41ac080827b0ae3bd9952cd02 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java
++++ b/src/main/java/net/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent.java
+@@ -17,2 +17,5 @@
+             case ClientActivePlayersTooltip.ActivePlayersTooltip activePlayersTooltip -> new ClientActivePlayersTooltip(activePlayersTooltip);
++            // Incari start: a container's contents as a grid (Shulker Tooltips)
++            case incari.client.modules.ModuleTooltips.Preview preview -> incari.client.modules.ModuleTooltips.client(preview);
++            // Incari end
+             default -> throw new IllegalArgumentException("Unknown TooltipComponent");
+diff --git a/src/main/java/net/minecraft/world/item/ItemStack.java b/src/main/java/net/minecraft/world/item/ItemStack.java
+index f7be0a48eec5003a6ab6b84cc5d80d16b53c6f17..2ab91bbaf5e9e86852013c13d86b1c9734275f43 100644
+--- a/src/main/java/net/minecraft/world/item/ItemStack.java
++++ b/src/main/java/net/minecraft/world/item/ItemStack.java
+@@ -215,3 +215,5 @@
+     public Optional<TooltipComponent> getTooltipImage() {
+-        return this.getItem().getTooltipImage(this);
++        // Incari start: a module may show a container's contents as a grid (Shulker Tooltips)
++        return incari.client.modules.ModuleTooltips.image(this, this.getItem().getTooltipImage(this));
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/world/item/component/ItemContainerContents.java b/src/main/java/net/minecraft/world/item/component/ItemContainerContents.java
+index ef76a02b1394de08db4e79ba661eac02b3dcdd22..2afca759b6644c9c2e25b878f0c4d175027f88fa 100644
+--- a/src/main/java/net/minecraft/world/item/component/ItemContainerContents.java
++++ b/src/main/java/net/minecraft/world/item/component/ItemContainerContents.java
+@@ -177,2 +177,5 @@
+     ) {
++        // Incari start: not while a module shows the contents as a grid (Shulker Tooltips)
++        if (incari.client.modules.ModuleTooltips.hidesLines(this)) return;
++        // Incari end
+         int lineCount = 0;

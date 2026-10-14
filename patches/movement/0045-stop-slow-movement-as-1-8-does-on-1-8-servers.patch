@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] movement: Stop slow movement as 1.8 does on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index ad1cb823151fb7e62f861b02337a64900c35929e..dcb7d6fae467a18f7e590d6e755cce93a4ce29e9 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -3078,2 +3078,5 @@
+ 
++        // Incari start: 1.8's cut-off for slow movement, on 1.8 servers
++        if (incari.client.legacy.LegacyMovement.cutsLikeOld(this)) { Vec3 cut = incari.client.legacy.LegacyMovement.cut(movement); dx = cut.x; dy = cut.y; dz = cut.z; }
++        // Incari end
+         this.setDeltaMovement(dx, dy, dz);

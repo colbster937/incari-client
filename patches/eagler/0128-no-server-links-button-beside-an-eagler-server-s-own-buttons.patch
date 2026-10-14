@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 21:17:53 -0400
+Subject: [PATCH] eagler: No Server Links button beside an Eagler server's own
+ buttons
+
+An EaglerXServer that sends its pause menu gives the player its links
+there; the game's Server Links button repeated them.
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+index 02aeb84f1c331aa080a5041fbc7e137d8b13884d..e351fdd577916f207930496a87754ece221066bb 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+@@ -203,2 +203,7 @@
+         ServerLinks serverLinks = this.minecraft.player.connection.serverLinks();
++        // Incari start: no Server Links button where an Eagler server's own buttons take its place
++        if (incari.client.eagler.PauseMenuHooks.replacesServerLinks()) {
++            return Optional.empty();
++        }
++        // Incari end
+         return !serverLinks.isEmpty() ? dialogRegistry.get(Dialogs.SERVER_LINKS) : Optional.empty();

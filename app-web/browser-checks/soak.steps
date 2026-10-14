@@ -1,0 +1,900 @@
+# A 30-minute session on a vanilla server that keeps the client loading terrain, and the
+# threading audit's gate: no frame in which the render thread spent 50 ms or more waiting (blocking
+# calls on it; the page's frame monitor, platform-web's Dom.installFrameMonitor, adds up each frame's
+# waits). Frames over 50 ms from work (meshing, packets), with or without a short wait in them, are
+# reported, not failed: that's the benchmark's job.
+# Every minute the player is sent to fresh terrain and turns full circle, and the mouse moves with
+# each turn so the game never counts the player as idle (it throttles to 30 and then 10 fps); the
+# page's counts are printed as it goes. Setup as for server-join.steps (README.md, "Server join"); run with
+#
+#   INCARI_RCON_PASSWORD=<password> ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl \
+#       "-Pbrowser.query=server=ws://127.0.0.1:8817&name=IncariWeb" -Pbrowser.rcon=127.0.0.1:25592 \
+#       -Pbrowser.seconds=2100 -Pbrowser.steps=@browser-checks/soak.steps
+
+rcon:whitelist off
+rcon:difficulty peaceful
+rcon:time set day
+rcon:gamerule doDaylightCycle false
+rcon:gamerule doWeatherCycle false
+
+# The first-run accessibility screen: Continue. Quick play connects after it.
+sleep:4000
+click:0.5,0.945
+wait:.*Connecting to 127\.0\.0\.1, 8817.*
+rconwait:list => IncariWeb
+sleep:5000
+# Counted from here: the join itself is loading, not play.
+eval:(function() { var f = window.__incariFrames; f.frames = 0; f.waiting = 0; f.waitStalls = 0; f.worstWait = 0; f.slow = 0; f.slowWaiting = 0; f.worst = 0; f.worstWaiting = 0; return 'counting'; })()
+# Minute 1
+rcon:spreadplayers 2000 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 2
+rcon:spreadplayers 2700 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 3
+rcon:spreadplayers 3400 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 4
+rcon:spreadplayers 4100 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 5
+rcon:spreadplayers 4800 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 6
+rcon:spreadplayers 5500 2000 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 7
+rcon:spreadplayers 2000 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 8
+rcon:spreadplayers 2700 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 9
+rcon:spreadplayers 3400 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 10
+rcon:spreadplayers 4100 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 11
+rcon:spreadplayers 4800 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 12
+rcon:spreadplayers 5500 2700 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 13
+rcon:spreadplayers 2000 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 14
+rcon:spreadplayers 2700 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 15
+rcon:spreadplayers 3400 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 16
+rcon:spreadplayers 4100 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 17
+rcon:spreadplayers 4800 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 18
+rcon:spreadplayers 5500 3400 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 19
+rcon:spreadplayers 2000 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 20
+rcon:spreadplayers 2700 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 21
+rcon:spreadplayers 3400 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 22
+rcon:spreadplayers 4100 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 23
+rcon:spreadplayers 4800 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 24
+rcon:spreadplayers 5500 4100 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 25
+rcon:spreadplayers 2000 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 26
+rcon:spreadplayers 2700 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 27
+rcon:spreadplayers 3400 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 28
+rcon:spreadplayers 4100 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 29
+rcon:spreadplayers 4800 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+# Minute 30
+rcon:spreadplayers 5500 4800 0 1 false IncariWeb
+sleep:20000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.4,0.5
+sleep:4000
+rcon:execute as IncariWeb at @s run tp @s ~ ~ ~ ~45 ~
+move:0.6,0.5
+sleep:4000
+sleep:8000
+eval:JSON.stringify(window.__incariFrames, ['frames', 'waiting', 'waitStalls', 'worstWait', 'slow', 'slowWaiting', 'worst', 'worstWaiting'])
+shot:build/browser-checks/soak.png
+# The gate: no frame in which the render thread waited 50 ms or more.
+assert:window.__incariFrames.waitStalls === 0

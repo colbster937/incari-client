@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 15:15:39 -0400
+Subject: [PATCH] render: Mesh closed chests into terrain
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
+index 36a98bfe3c45b2d198a77256302bed473b920b2f..315e70797de343b759f7c6ec8a8a7bea25877e77 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/atlas/SpriteSourceList.java
+@@ -77,2 +77,5 @@
+ 
++        // Incari start: the chests' sprites in the blocks atlas too, for chests meshed into terrain (ADR 0030)
++        if (incari.client.render.mesher.ChestBaking.intoBlocksAtlas(atlasId)) loaders.addAll(load(resourceManager, net.minecraft.data.AtlasIds.CHESTS).sources);
++        // Incari end
+         return new SpriteSourceList(loaders);
+diff --git a/src/main/java/net/minecraft/world/level/block/entity/ChestBlockEntity.java b/src/main/java/net/minecraft/world/level/block/entity/ChestBlockEntity.java
+index 2628ab13cd2aba60f38272db78bc6a324fec7082..517dfb35faf525a3efb0ecadb1ceb20e015b730d 100644
+--- a/src/main/java/net/minecraft/world/level/block/entity/ChestBlockEntity.java
++++ b/src/main/java/net/minecraft/world/level/block/entity/ChestBlockEntity.java
+@@ -123,2 +123,5 @@
+             this.chestLidController.shouldBeOpen(b1 > 0);
++            // Incari start: a chest meshed into terrain is meshed out while it opens (ADR 0030)
++            incari.client.render.mesher.ChestBaking.lidChanged(this, b1 > 0);
++            // Incari end
+             return true;
+diff --git a/src/main/java/net/minecraft/world/level/block/entity/EnderChestBlockEntity.java b/src/main/java/net/minecraft/world/level/block/entity/EnderChestBlockEntity.java
+index da645bb50c9ad7b93a0520cbe7041338675624bd..093f0e78b89522d0383c2a24d847e338e6f15141 100644
+--- a/src/main/java/net/minecraft/world/level/block/entity/EnderChestBlockEntity.java
++++ b/src/main/java/net/minecraft/world/level/block/entity/EnderChestBlockEntity.java
+@@ -66,2 +66,5 @@
+             this.chestLidController.shouldBeOpen(b1 > 0);
++            // Incari start: a chest meshed into terrain is meshed out while it opens (ADR 0030)
++            incari.client.render.mesher.ChestBaking.lidChanged(this, b1 > 0);
++            // Incari end
+             return true;

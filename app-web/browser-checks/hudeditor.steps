@@ -1,0 +1,42 @@
+# The HUD editor in the page, in the Potato GUI preset (the default), where its blurred
+# backdrop is drawn a few times a second and kept in between (BackdropCache). Creates a world, turns
+# Toggle Sprint on from the module menu, opens Edit HUD beside the search, drags the status line
+# from the top left to the right edge halfway down, and checks the profile stored in OPFS has it
+# anchored on the right. No server needed. Positions are for the 1280x577 viewport (GUI scale 2,
+# 640x288).
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/hudeditor.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue. Then Singleplayer, Create New World with the defaults.
+click:0.5,0.945
+sleep:3000
+click:0.2,0.43
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+
+# --- The module menu: Toggle Sprint on, then Edit HUD ---
+key:ShiftRight
+sleep:1500
+click:0.545,0.215
+sleep:500
+click:0.798,0.104
+sleep:2000
+move:0.5,0.7
+sleep:500
+shot:build/browser-checks/hudeditor-potato.png
+
+# --- The status line dragged to the right edge, halfway down: it snaps there ---
+drag:0.019,0.021,0.953,0.5
+sleep:800
+shot:build/browser-checks/hudeditor-placed.png
+
+# --- Back to the module menu and the game; the placement is stored ---
+key:Escape
+sleep:800
+key:Escape
+sleep:2500
+until:window.incariStorage.pending() === 0
+assert:(async () => { let d = await navigator.storage.getDirectory(); for (const p of ["incari", "game", "incari", "modules", "profiles"]) d = await d.getDirectoryHandle(p); const text = await (await (await d.getFileHandle("Default.json")).getFile()).text(); console.log("[check] profile: " + text.replace(/\s+/g, " ")); const status = JSON.parse(text).modules.togglesprint.hud.status; return status.anchor === "right" && status.x === 2; })()

@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:07:57 -0400
+Subject: [PATCH] net: Route remote connections through the platform's
+ transport
+
+
+diff --git a/src/main/java/net/minecraft/server/network/EventLoopGroupHolder.java b/src/main/java/net/minecraft/server/network/EventLoopGroupHolder.java
+index ca53989da80a7552bfbe22f05f5ceaa147334b81..c468af4312eb7a62b7be5d0173b79c71c143c0fb 100644
+--- a/src/main/java/net/minecraft/server/network/EventLoopGroupHolder.java
++++ b/src/main/java/net/minecraft/server/network/EventLoopGroupHolder.java
+@@ -56,2 +56,7 @@
+     public static EventLoopGroupHolder remote(final boolean allowNativeTransport) {
++        // Incari start: connections go through the platform's transport
++        if (incari.client.net.PlatformEventLoopGroupHolder.routesRemoteConnections()) {
++            return incari.client.net.PlatformEventLoopGroupHolder.INSTANCE;
++        }
++        // Incari end
+         if (allowNativeTransport) {
+@@ -73,3 +78,5 @@
+ 
+-    private EventLoopGroupHolder(final String type, final Class<? extends Channel> channelCls, final Class<? extends ServerChannel> serverChannelCls) {
++    // Incari start: subclassed by incari.client.net.PlatformEventLoopGroupHolder
++    protected EventLoopGroupHolder(final String type, final Class<? extends Channel> channelCls, final Class<? extends ServerChannel> serverChannelCls) {
++    // Incari end
+         this.type = type;

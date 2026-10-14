@@ -1,0 +1,129 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 10:34:36 -0400
+Subject: [PATCH] decompile: Restore types the decompiler lost in Blaze3D,
+ Realms and the renderer
+
+
+diff --git a/src/main/java/com/mojang/realmsclient/gui/screens/RealmsPdpScreen.java b/src/main/java/com/mojang/realmsclient/gui/screens/RealmsPdpScreen.java
+index b8cacf92d345c53430c14b86e5528f5c7a2d3b3e..a28de50387107834790592947c7352cc034831fc 100644
+--- a/src/main/java/com/mojang/realmsclient/gui/screens/RealmsPdpScreen.java
++++ b/src/main/java/com/mojang/realmsclient/gui/screens/RealmsPdpScreen.java
+@@ -278,3 +278,3 @@
+ 
+-        private void addHeader(final Component title, final @Nullable RealmsPdpScreen.PdpHeaderEntry.Subtitle subTitle) {
++        private void addHeader(final Component title, final RealmsPdpScreen.PdpHeaderEntry.@Nullable Subtitle subTitle) {
+             RealmsPdpScreen.PdpHeaderEntry entry = RealmsPdpScreen.this.new PdpHeaderEntry(title, subTitle);
+diff --git a/src/main/java/com/mojang/renderpearl/backend/opengl/GlPipelineRecompiler.java b/src/main/java/com/mojang/renderpearl/backend/opengl/GlPipelineRecompiler.java
+index 2a752f1d0d2e20022d7a2247a7f4eb670cdd3663..f3364c4410287eb88685bddbcac8005c907af16c 100644
+--- a/src/main/java/com/mojang/renderpearl/backend/opengl/GlPipelineRecompiler.java
++++ b/src/main/java/com/mojang/renderpearl/backend/opengl/GlPipelineRecompiler.java
+@@ -167,3 +167,3 @@
+                     case 9:
+-                        String blockName = "_push_constants_instance";
++                        blockName = "_push_constants_instance";
+                         if (SHADER_DEBUG_MODE) {
+diff --git a/src/main/java/com/mojang/renderpearl/frontend/FrontendRenderPass.java b/src/main/java/com/mojang/renderpearl/frontend/FrontendRenderPass.java
+index 14f3890718957c83931e40bd9e4b927c9164f6e7..faa0c96d331c3a4ddf62ba873ed6be1fe453b07e 100644
+--- a/src/main/java/com/mojang/renderpearl/frontend/FrontendRenderPass.java
++++ b/src/main/java/com/mojang/renderpearl/frontend/FrontendRenderPass.java
+@@ -587,2 +587,3 @@
+                             TextureViewAndSampler var10000 = var9;
++                            GpuTextureView var30;
+ 
+@@ -597,2 +598,3 @@
+                             var10000 = var9;
++                            GpuSampler var32;
+ 
+diff --git a/src/main/java/net/minecraft/client/renderer/LevelEventHandler.java b/src/main/java/net/minecraft/client/renderer/LevelEventHandler.java
+index 1915913a013a733e48fb3d457e9f19d4a3d38c3e..9d6bd1600cb24fdd150258af49edeb21c7b1b6d6 100644
+--- a/src/main/java/net/minecraft/client/renderer/LevelEventHandler.java
++++ b/src/main/java/net/minecraft/client/renderer/LevelEventHandler.java
+@@ -323,3 +323,3 @@
+                 break;
+-            case 2003:
++            case 2003: {
+                 double x = pos.getX() + 0.5;
+@@ -356,2 +356,3 @@
+                 break;
++            }
+             case 2004:
+diff --git a/src/main/java/net/minecraft/client/renderer/block/dispatch/VariantSelector.java b/src/main/java/net/minecraft/client/renderer/block/dispatch/VariantSelector.java
+index 7f3ab24a01d646c0593379bb3a3bbdfb7e85a6f6..5c8c8baad638237fa82d6b2bdd391dc12f301b6a 100644
+--- a/src/main/java/net/minecraft/client/renderer/block/dispatch/VariantSelector.java
++++ b/src/main/java/net/minecraft/client/renderer/block/dispatch/VariantSelector.java
+@@ -28,3 +28,3 @@
+                     String propertyValue = iterator.next();
+-                    Comparable<?> value = getValueHelper((Property<Comparable<?>>)property, propertyValue);
++                    Comparable<?> value = getValueHelper(property, propertyValue);
+                     if (value == null) {
+diff --git a/src/main/java/net/minecraft/client/renderer/blockentity/BeaconRenderer.java b/src/main/java/net/minecraft/client/renderer/blockentity/BeaconRenderer.java
+index 370e46fdb84bc3964b38d2988f615e4708901d26..541607799384213075d3dabe439e2eebeca72a50 100644
+--- a/src/main/java/net/minecraft/client/renderer/blockentity/BeaconRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/blockentity/BeaconRenderer.java
+@@ -122,14 +122,14 @@
+         poseStack.popPose();
+-        wnx = -beamGlowRadius;
+-        wnz = -beamGlowRadius;
+-        enx = beamGlowRadius;
+-        enz = -beamGlowRadius;
+-        wsx = -beamGlowRadius;
+-        wsz = beamGlowRadius;
+-        esx = beamGlowRadius;
+-        esz = beamGlowRadius;
+-        uu1 = 0.0F;
+-        uu2 = 1.0F;
+-        vv2 = -1.0F + texVOff;
+-        vv1 = height * scale + vv2;
++        float gwnx = -beamGlowRadius;
++        float gwnz = -beamGlowRadius;
++        float genx = beamGlowRadius;
++        float genz = -beamGlowRadius;
++        float gwsx = -beamGlowRadius;
++        float gwsz = beamGlowRadius;
++        float gesx = beamGlowRadius;
++        float gesz = beamGlowRadius;
++        float guu1 = 0.0F;
++        float guu2 = 1.0F;
++        float gvv2 = -1.0F + texVOff;
++        float gvv1 = height * scale + gvv2;
+         submitNodeCollector.submitCustomGeometry(
+@@ -137,3 +137,3 @@
+             RenderTypes.beaconBeam(beamLocation, true),
+-            (pose, buffer) -> renderPart(pose, buffer, ARGB.color(32, color), beamStart, beamEnd, wnx, wnz, enx, enz, wsx, wsz, esx, esz, 0.0F, 1.0F, vv1, vv2)
++            (pose, buffer) -> renderPart(pose, buffer, ARGB.color(32, color), beamStart, beamEnd, gwnx, gwnz, genx, genz, gwsx, gwsz, gesx, gesz, 0.0F, 1.0F, gvv1, gvv2)
+         );
+diff --git a/src/main/java/net/minecraft/client/renderer/entity/EntityRenderDispatcher.java b/src/main/java/net/minecraft/client/renderer/entity/EntityRenderDispatcher.java
+index 3ef76d4ca1d077181a56d73dda9151986fd56c78..54332dd30958fccee78ac53401e72e43968d8258 100644
+--- a/src/main/java/net/minecraft/client/renderer/entity/EntityRenderDispatcher.java
++++ b/src/main/java/net/minecraft/client/renderer/entity/EntityRenderDispatcher.java
+@@ -91,4 +91,4 @@
+         return switch (entity) {
+-            case AbstractClientPlayer player -> this.getAvatarRenderer((Map<PlayerModelType, AvatarRenderer<T>>)this.playerRenderers, (T)player);
+-            case ClientMannequin mannequin -> this.getAvatarRenderer((Map<PlayerModelType, AvatarRenderer<T>>)this.mannequinRenderers, (T)mannequin);
++            case AbstractClientPlayer player -> (EntityRenderer)this.getAvatarRenderer(this.playerRenderers, player);
++            case ClientMannequin mannequin -> (EntityRenderer)this.getAvatarRenderer(this.mannequinRenderers, mannequin);
+             default -> (EntityRenderer)this.renderers.get(entity.getType());
+@@ -110,3 +110,3 @@
+         return entityRenderState instanceof AvatarRenderState avatarRenderState
+-            ? this.getRenderer(avatarRenderState)
++            ? (EntityRenderer)this.getRenderer(avatarRenderState)
+             : (EntityRenderer)this.renderers.get(entityRenderState.entityType);
+diff --git a/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java b/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
+index cbbd577c1f9b802f51946c70da69985d23a97c81..3e3446626ea959ebb8f9de704a1913ef4b1dd7f8 100644
+--- a/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/feature/ModelFeatureRenderer.java
+@@ -64,3 +64,3 @@
+         public FeatureRendererType<ModelFeatureRenderer.Submit<S>> featureType() {
+-            return (FeatureRendererType<ModelFeatureRenderer.Submit<S>>)ModelFeatureRenderer.TYPE;
++            return (FeatureRendererType<ModelFeatureRenderer.Submit<S>>)(FeatureRendererType)ModelFeatureRenderer.TYPE;
+         }
+diff --git a/src/main/java/net/minecraft/client/renderer/item/ConditionalItemModel.java b/src/main/java/net/minecraft/client/renderer/item/ConditionalItemModel.java
+index a79f43609b2ad0ff7753519adc9d2d8632651b70..c0e741dc6252eb11613aff6c3be73c8e449657ed 100644
+--- a/src/main/java/net/minecraft/client/renderer/item/ConditionalItemModel.java
++++ b/src/main/java/net/minecraft/client/renderer/item/ConditionalItemModel.java
+@@ -89,3 +89,3 @@
+         ) {
+-            return (T)contextSwapper.swapTo(originalProperty.type().codec(), originalProperty, context.registryAccess()).result().orElse(originalProperty);
++            return (T)contextSwapper.swapTo(((MapCodec<T>)originalProperty.type()).codec(), originalProperty, context.registryAccess()).result().orElse(originalProperty);
+         }

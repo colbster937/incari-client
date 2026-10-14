@@ -1,0 +1,33 @@
+# Eagler voice chat between two browsers, the listener (this file with voice-talker.steps). Run both at once against EaglerXServer with its
+# voice service on, as VoiceA (-Pbrowser.query=...&name=VoiceA) and VoiceB; README.md ("Voice
+# chat") has the commands. Chromium's fake microphone plays a steady tone and grants the
+# permission, so each page turns global voice on, VoiceA holds push to talk, and VoiceB hears it.
+
+rcon:difficulty 0
+rcon:time set 1000
+
+# The first-run accessibility screen: Continue. Quick play joins the server.
+sleep:4000
+click:0.5,0.945
+wait:.*Joining ws://[^ ]+ as .* through Via.*
+wait:.*The server has voice chat.*
+sleep:3000
+
+# Pause menu: "Voice Chat...", then the channel button until it reads Global.
+key:Escape
+sleep:1000
+shot:build/browser-checks/voice-pause-b.png
+click:0.5,0.539
+sleep:1000
+shot:build/browser-checks/voice-screen-b.png
+click:0.375,0.173
+sleep:500
+shot:build/browser-checks/voice-global-b.png
+key:Escape
+sleep:500
+key:Escape
+sleep:500
+
+# Connected by now or soon (the log line may come before a wait could see it); then VoiceA talks.
+wait:.*Voice: VoiceA is talking.*
+shot:build/browser-checks/voice-hearing-b.png

@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 8 Oct 2026 08:50:00 -0400
+Subject: [PATCH] worldgen: Sample range choices' and lerps' sides only where
+ they're used
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/SamplerContext.java b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/SamplerContext.java
+index b4520b2b9942ce5e16eb7290b1aa79dfb9e46189..3ddb6dcae3276c6c6b222ce693573f16c44cbe83 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/SamplerContext.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/SamplerContext.java
+@@ -63,2 +63,14 @@
+             if (cell.buffer == null || !volume.equals(cell.volume)) {
++                // Incari start: rows of a cached volume answered from it, and cached as all of it
++                if (cell.buffer != null && cell.volume != null && incari.client.world.DensityBranches.copyRows(cell.volume, cell.buffer, volume, outputBuffer)) return;
++                DensityVolume whole = incari.client.world.DensityBranches.wholeVolume(volume);
++                if (whole != volume) {
++                    if (cell.buffer != null) cell.buffer.close();
++                    cell.volume = whole;
++                    cell.buffer = this.acquireBuffer(whole);
++                    input.sampleVolume(this, cell.buffer, whole);
++                    incari.client.world.DensityBranches.copyRows(whole, cell.buffer, volume, outputBuffer);
++                    return;
++                }
++                // Incari end
+                 if (cell.buffer != null) {
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/LerpFunction.java b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/LerpFunction.java
+index 9eb77fed666fc692d2da205795e1486091209bdf..c1e8a93a7826ed77eef79a0979fb436ef12cd1c6 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/LerpFunction.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/LerpFunction.java
+@@ -133,2 +133,5 @@
+         public void sampleVolume(final SamplerContext context, final DensityBuffer outputBuffer, final DensityVolume volume) {
++            // Incari start: each side sampled only where alpha doesn't skip it
++            if (incari.client.world.DensityBranches.lerp(context, outputBuffer, volume, this.alpha, this.first, this.second)) return;
++            // Incari end
+             this.alpha.sampleVolume(context, outputBuffer, volume);
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/RangeChoiceFunction.java b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/RangeChoiceFunction.java
+index ea54379dbdfce512a84578a4ae290804fafee72e..c4d5ea18bc2afb0f8918e6cc57db98205219eae2 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/RangeChoiceFunction.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/densityfunction/op/RangeChoiceFunction.java
+@@ -89,2 +89,5 @@
+         public void sampleVolume(final SamplerContext context, final DensityBuffer outputBuffer, final DensityVolume volume) {
++            // Incari start: each branch sampled only where it's chosen
++            if (incari.client.world.DensityBranches.rangeChoice(context, outputBuffer, volume, this.input, this.minInclusive, this.maxExclusive, this.whenInRange, this.whenOutOfRange)) return;
++            // Incari end
+             this.whenInRange.sampleVolume(context, outputBuffer, volume);

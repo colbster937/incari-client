@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:39:00 -0400
+Subject: [PATCH] modules: Let modules change how held items are drawn
+
+The held item event (ADR 0053): a shield drawn lower (Low Shield); 1.7's item positions, rod, sword-blocking pose and block-hit swing (1.7 Animations).
+
+diff --git a/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java b/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
+index 9ba3908d582f8e95c5c765bbe62b1e6e8f34dead..760daeb7de43b9e9644b073d659646afee2e8a5e 100644
+--- a/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
+@@ -407,2 +407,5 @@
+                 poseStack.pushPose();
++                // Incari start: modules say how the item is drawn (Low Shield, 1.7 Animations)
++                incari.client.modules.ModuleHands.begin(poseStack, isMainHand, itemStack, avatarRenderState.isUsingItem && avatarRenderState.useItemHand == hand);
++                // Incari end
+                 if (itemStack.isEmpty()) {
+@@ -461,2 +464,5 @@
+                         }
++                        // Incari start: 1.7's block-hit, the arm swinging while the item's in use
++                        if (incari.client.modules.ModuleHands.swingWhileUsing()) this.applyItemArmAttackTransform(poseStack, arm, attack);
++                        // Incari end
+ 
+@@ -472,3 +478,5 @@
+                             case BLOCK:
+-                                if (!(itemStack.getItem() instanceof ShieldItem)) {
++                                // Incari start: 1.7's sword-blocking pose (1.7 Animations)
++                                if (!(itemStack.getItem() instanceof ShieldItem) && !incari.client.modules.ModuleHands.legacyBlock(poseStack, invert)) {
++                                // Incari end
+                                     poseStack.translate(invert * -0.14142136F, 0.08F, 0.14142136F);
+@@ -560,2 +568,5 @@
+ 
++                    // Incari start: 1.7's held items (1.7 Animations)
++                    incari.client.modules.ModuleHands.beforeItem(poseStack, itemStack, invert);
++                    // Incari end
+                     (isMainHand ? state.mainHandRenderState : state.offHandRenderState)

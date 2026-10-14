@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 08:00:03 -0400
+Subject: [PATCH] skins: Draw players' Eagler skins on Eagler servers
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/PlayerInfo.java b/src/main/java/net/minecraft/client/multiplayer/PlayerInfo.java
+index 9356f5edb9f4112283dac54d765953e284709baa..63e5dd0574eb8dd0c15d462afc4b296c17af0e53 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/PlayerInfo.java
++++ b/src/main/java/net/minecraft/client/multiplayer/PlayerInfo.java
+@@ -33,3 +33,5 @@
+         boolean requireSecure = !minecraft.isLocalPlayer(profile.id());
+-        return minecraft.getSkinManager().createLookup(profile, requireSecure);
++        // Incari start: on Eagler servers, skins come from the server by UUID
++        return incari.client.skins.EaglerSkins.lookup(profile, minecraft.getSkinManager().createLookup(profile, requireSecure));
++        // Incari end
+     }

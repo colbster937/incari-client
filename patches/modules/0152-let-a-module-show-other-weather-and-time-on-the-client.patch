@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:39:00 -0400
+Subject: [PATCH] modules: Let a module show other weather and time on the
+ client
+
+Weather Changer (ADR 0053): the client level's rain and thunder, the snow that falls and the day clock's time as a module shows them; the server's own untouched.
+
+diff --git a/src/main/java/net/minecraft/client/ClientClockManager.java b/src/main/java/net/minecraft/client/ClientClockManager.java
+index f2b1eb3ee1002df516f5c389ac7eef51d82653ec..901e84448700ec1c172d0c07ca19f38db852e069 100644
+--- a/src/main/java/net/minecraft/client/ClientClockManager.java
++++ b/src/main/java/net/minecraft/client/ClientClockManager.java
+@@ -48,3 +48,5 @@
+         public long totalTicks() {
+-            return this.totalTicks;
++            // Incari start: a module may hold the time of day on the client (Weather Changer)
++            return incari.client.modules.ModuleSky.clockTicks(this, this.totalTicks);
++            // Incari end
+         }
+@@ -53,3 +55,5 @@
+         public float partialTick() {
+-            return this.partialTick;
++            // Incari start
++            return incari.client.modules.ModuleSky.clockPartialTick(this, this.partialTick);
++            // Incari end
+         }
+diff --git a/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java b/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
+index 96faef34876d4a3b9359d9daf913c8b2c75b5705..0c0958c3947ffe8d711e2d11bc45a2bf3c75de9f 100644
+--- a/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/WeatherEffectRenderer.java
+@@ -83,3 +83,5 @@
+                     if (y1 - y0 != 0) {
+-                        Biome.Precipitation precipitation = level.getPrecipitationAt(mutablePos.set(x, cameraBlockY, z));
++                        // Incari start: a module may show snow wherever it falls (Weather Changer)
++                        Biome.Precipitation precipitation = incari.client.modules.ModuleSky.precipitation(level.getPrecipitationAt(mutablePos.set(x, cameraBlockY, z)));
++                        // Incari end
+                         if (precipitation != Biome.Precipitation.NONE) {
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index 8c4eac77220f01d20598603aea64ec81daaa546a..f09dbba50d2c801c31166c712a289a0a702225ff 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -928,3 +928,5 @@
+     public float getThunderLevel(final float a) {
+-        return Mth.lerp(a, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(a);
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        return incari.client.modules.ModuleSky.thunder(this, Mth.lerp(a, this.oThunderLevel, this.thunderLevel) * this.getRainLevel(a));
++        // Incari end
+     }
+@@ -938,3 +940,5 @@
+     public float getRainLevel(final float a) {
+-        return Mth.lerp(a, this.oRainLevel, this.rainLevel);
++        // Incari start: a module may show other weather on the client (Weather Changer)
++        return incari.client.modules.ModuleSky.rain(this, Mth.lerp(a, this.oRainLevel, this.rainLevel));
++        // Incari end
+     }

@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 18:11:22 -0400
+Subject: [PATCH] entities: Draw all-or-nothing-alpha skins in the solid phase
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/SubmitNodeCollection.java b/src/main/java/net/minecraft/client/renderer/SubmitNodeCollection.java
+index 88dc48572d853934f57e271ddc3ac0dc1ff3529b..6ad8fb722aaa55218e6f83b1ad8089c199760a85 100644
+--- a/src/main/java/net/minecraft/client/renderer/SubmitNodeCollection.java
++++ b/src/main/java/net/minecraft/client/renderer/SubmitNodeCollection.java
+@@ -256,3 +256,4 @@
+                 this.waterMask.submit(submit);
+-            } else if (!renderType.forceSolidModelPhase() && renderType.hasBlending()) {
++            } else if (!renderType.forceSolidModelPhase() && renderType.hasBlending()
++                && !incari.client.render.entity.OpaqueSkins.drawsAsSolid(renderType, tintedColor)) { // Incari: all-or-nothing alpha draws as solid (ADR 0027)
+                 this.translucentModels.submit(submit);
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/DynamicTexture.java b/src/main/java/net/minecraft/client/renderer/texture/DynamicTexture.java
+index e39e28ccaea233f2d221080b91a9011966fbecf8..ec2ab8212d78200d1744067bad645ebc8caf4c3a 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/DynamicTexture.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/DynamicTexture.java
+@@ -51,2 +51,3 @@
+             RenderSystem.getDevice().createCommandEncoder().writeToTexture(this.texture, this.pixels);
++            incari.client.render.entity.OpaqueSkins.uploaded(this.texture, this.pixels); // Incari: note all-or-nothing alpha (ADR 0027)
+         } else {
+diff --git a/src/main/java/net/minecraft/client/renderer/texture/ReloadableTexture.java b/src/main/java/net/minecraft/client/renderer/texture/ReloadableTexture.java
+index cd27b085c839cd107927d38741ed9d6edc46dac3..ce94a9ecb3af16bfde2efb9e687558b26ab5f18f 100644
+--- a/src/main/java/net/minecraft/client/renderer/texture/ReloadableTexture.java
++++ b/src/main/java/net/minecraft/client/renderer/texture/ReloadableTexture.java
+@@ -43,2 +43,3 @@
+         device.createCommandEncoder().writeToTexture(this.texture, image);
++        incari.client.render.entity.OpaqueSkins.uploaded(this.texture, image); // Incari: note all-or-nothing alpha (ADR 0027)
+     }

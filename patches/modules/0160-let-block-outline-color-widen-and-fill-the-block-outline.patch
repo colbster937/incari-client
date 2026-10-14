@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 19:25:17 -0400
+Subject: [PATCH] modules: Let Block Outline color, widen and fill the block
+ outline
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+index 854128f55d3b27558da38506f73f8fe4181f0bae..3f148014f90f19d3edc24a713b4ce0bd8c320e72 100644
+--- a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+@@ -1091,2 +1091,3 @@
+             int outlineColor = state.highContrast() ? -11010079 : ARGB.black(102);
++            outlineColor = incari.client.modules.ModuleEffects.outlineColor(outlineColor, state.highContrast(), poseStack, submitNodeCollector, state.shape()); // Incari: Block Outline
+             RenderType blockOutlineRenderType;
+@@ -1106,3 +1107,3 @@
+                 outlineColor,
+-                this.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth,
++                incari.client.modules.ModuleEffects.outlineWidth(this.gameRenderer.gameRenderState().windowRenderState.appropriateLineWidth), // Incari: Block Outline
+                 state.isTranslucent()

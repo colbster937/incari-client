@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 12:03:07 -0400
+Subject: [PATCH] gui: The title screen in the client's look
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+index ee7507fe31820c1e07a621f6e2d98d8714ac6722..9243d41771b56b6dee3ef4b2faaba285ce04fe80 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+@@ -105,2 +105,5 @@
+     protected void init() {
++        // Incari start: the title screen in the client's look
++        if (incari.client.look.TitleLook.init(this, this::addRenderableWidget)) return;
++        // Incari end
+         if (this.splash == null) {
+@@ -292,2 +295,10 @@
+     public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
++        // Incari start: the title screen in the client's look
++        if (incari.client.look.TitleLook.active(this)) {
++            incari.client.look.TitleLook.extractBehind(this, graphics, mouseX, mouseY, a);
++            super.extractRenderState(graphics, mouseX, mouseY, a);
++            incari.client.look.TitleLook.extractFront(this, graphics, mouseX, mouseY, a);
++            return;
++        }
++        // Incari end
+         if (this.fadeInStart == 0L && this.fading) {

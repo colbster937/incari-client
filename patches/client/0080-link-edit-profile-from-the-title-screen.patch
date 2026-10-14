@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 21:55:19 -0400
+Subject: [PATCH] client: Link Edit Profile from the title screen
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+index 80d9e3e19ccfc348f8f073ece4fb4a678d8440ac..dad2ab9b13f8b43cc938fbb88efbf80f355c326e 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/TitleScreen.java
+@@ -160,2 +160,5 @@
+         );
++        // Incari start: a link to Edit Profile (the name and skin)
++        this.addRenderableWidget(incari.client.profile.ProfileScreen.titleLink(this));
++        // Incari end
+         if (this.realmsNotificationsScreen == null) {

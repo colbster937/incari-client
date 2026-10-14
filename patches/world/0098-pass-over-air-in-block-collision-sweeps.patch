@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 4 Oct 2026 16:04:54 -0400
+Subject: [PATCH] world: Pass over air in block collision sweeps
+
+
+diff --git a/src/main/java/net/minecraft/world/level/BlockCollisions.java b/src/main/java/net/minecraft/world/level/BlockCollisions.java
+index ae02e6148e01471b7647a481199ce32faf307296..49ed5ad6c44c159ff73946abbd41f2bbd39d7079 100644
+--- a/src/main/java/net/minecraft/world/level/BlockCollisions.java
++++ b/src/main/java/net/minecraft/world/level/BlockCollisions.java
+@@ -89,2 +89,5 @@
+                     BlockState blockState = chunk.getBlockState(this.pos);
++                    // Incari start: air has no collision shape in any context
++                    if (incari.client.world.Collisions.passOver(blockState)) continue;
++                    // Incari end
+                     if ((!this.onlySuffocatingBlocks || blockState.isSuffocating(chunk, this.pos))

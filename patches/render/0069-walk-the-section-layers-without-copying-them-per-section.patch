@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 01:00:20 -0400
+Subject: [PATCH] render: Walk the section layers without copying them per
+ section
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+index 5f979d17fe993e70a8391088be6337887fb2bba0..a5c013a66a0b3ae6c1c75467cacec46e2e8883d4 100644
+--- a/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/LevelRenderer.java
+@@ -736,3 +736,5 @@
+ 
+-                    for (ChunkSectionLayer layer : ChunkSectionLayer.values()) {
++                    // Incari start: one array of the layers, not a copy per section per frame
++                    for (ChunkSectionLayer layer : incari.client.render.SectionLayers.all()) {
++                    // Incari end
+                         SectionMesh.SectionDraw draw = sectionMesh.getSectionDraw(layer);

@@ -1,0 +1,44 @@
+# Sound on the title screen. The page starts with its audio context suspended, as a player's
+# browser does (BrowserCheck runs Chromium with --autoplay-policy=document-user-activation-required, muted on
+# this machine's speakers), and shows the unlock prompt; the first click resumes it. Then the menu
+# music streams through a media element, and a button's click plays. Needs the assets
+# `./incari assets` downloaded (the dev server serves them). README.md ("Audio") has the command.
+
+# --- Before any gesture: the context waits, and the prompt says so ---
+# (The check starts once the game loop runs; by then the sound engine has started.)
+# Until the click below, steps use holds:/until:, which don't count as a click themselves.
+sleep:3000
+until:globalThis.incariAudio !== undefined && incariAudio.context.state === 'suspended'
+holds:document.getElementById('incari-audio-unlock') !== null
+# The menu music has been asked for by now (100 ticks after the game starts) and waits for the context.
+until:incariAudio.pending.length === 1 && incariAudio.streamsStarted === 0 && incariAudio.buffersStarted === 0
+shot:build/browser-checks/audio-prompt.png
+
+# --- The first-run accessibility screen's Continue: that click unlocks the sound ---
+click:0.5,0.945
+waitfor:incariAudio.context.state === 'running' && document.getElementById('incari-audio-unlock') === null
+# The waiting music starts, and its element streams: it plays long before the whole file could have
+# been decoded, and its position moves.
+waitfor:incariAudio.streamsStarted >= 1 && incariAudio.streams.some(e => !e.paused && e.currentTime > 0.5)
+eval:incariAudio.streams.map(e => e.src.slice(0, 5) + ' ' + e.currentTime.toFixed(2) + 's of ' + e.duration.toFixed(1) + 's').join(', ')
+sleep:2000
+assert:incariAudio.streams.some(e => !e.paused && e.currentTime > 2)
+
+# --- A meter on the master bus: each channel's energy, from every sample the page plays ---
+eval:(() => { const a = incariAudio, ctx = a.context; const p = ctx.createScriptProcessor(4096, 2, 2); const m = { l: 0, r: 0, n: 0 }; p.onaudioprocess = e => { const l = e.inputBuffer.getChannelData(0), r = e.inputBuffer.getChannelData(1); for (let i = 0; i < l.length; i++) { m.l += l[i] * l[i]; m.r += r[i] * r[i]; } m.n += l.length; }; const g = ctx.createGain(); g.gain.value = 0; a.master.connect(p); p.connect(g); g.connect(ctx.destination); globalThis.incariMeter = m; return 'meter on'; })()
+sleep:1000
+# The music reaches the output: stereo, so both channels.
+assert:incariMeter.n > 40000 && incariMeter.l > 0 && incariMeter.r > 0
+
+# --- A UI sound: a button's click (a stereo sound, not positioned) ---
+eval:globalThis.clicksBefore = incariAudio.buffersStarted
+# Options... (its click), Escape back to the title screen, Options... again.
+click:0.42,0.78
+sleep:1500
+shot:build/browser-checks/audio-options.png
+key:Escape
+sleep:1000
+click:0.42,0.78
+sleep:500
+waitfor:incariAudio.buffersStarted >= clicksBefore + 2
+eval:'buffers started: ' + incariAudio.buffersStarted + ', voices: ' + incariAudio.voices

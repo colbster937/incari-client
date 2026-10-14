@@ -1,0 +1,13 @@
+# Incari's pack: one file a line, by its path in the pack. "<path> = <file>" serves a file of
+# Incari's at another path: the game's own font is replaced from Incari's namespace, so no file
+# under assets/minecraft/ is ever in the repo (tools/ci/check-repo-content.sh).
+assets/minecraft/font/default.json = assets/incari/font/default.json
+assets/incari/font/red_hat_display.ttf
+assets/incari/font/wordmark.json
+assets/incari/font/michroma.ttf
+assets/incari/font/inter.ttf
+assets/incari/font/nunito.ttf
+assets/incari/font/poppins.ttf
+assets/incari/font/jetbrains_mono.ttf
+assets/incari/font/badge.json
+assets/incari/textures/font/badge.png

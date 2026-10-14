@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 23:13:24 -0400
+Subject: [PATCH] blocks: Work out sturdy faces once per support shape, and
+ share the tables
+
+
+diff --git a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+index c3d583ea0aed5a432b55cf365c997302ee2e8be8..c184f3cd81cefa738f82d8ce9a9a70626f687665 100644
+--- a/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/src/main/java/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -980,3 +980,4 @@
+                     .anyMatch(axis -> this.collisionShape.min(axis) < 0.0 || this.collisionShape.max(axis) > 1.0);
+-                this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
++                // Incari start: worked out once per support shape, and states with the same answers share one table
++                boolean[] faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
+ 
+@@ -984,3 +985,3 @@
+                     for (SupportType type : SupportType.values()) {
+-                        this.faceSturdy[getFaceSupportIndex(direction, type)] = type.isSupporting(state, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction);
++                        faceSturdy[getFaceSupportIndex(direction, type)] = incari.client.memory.BlockStateSharing.isSupporting(type, state, direction);
+                     }
+@@ -988,2 +989,5 @@
+ 
++                this.faceSturdy = incari.client.memory.BlockStateSharing.flags(faceSturdy);
++                // Incari end
++
+                 this.isCollisionShapeFullBlock = Block.isShapeFullBlock(state.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));

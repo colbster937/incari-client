@@ -1,0 +1,79 @@
+# Which Incari modules may depend on which. `./gradlew checkModuleBoundaries` (part of `check`)
+# fails on any project dependency that isn't listed here, and on any module missing from this file.
+# ARCHITECTURE.md explains the layers; changing a line here is an architecture change and needs
+# a decision record in docs/adr/.
+#
+# <module>            <modules it may depend on, or - for none>
+
+:platform-api         -
+:platform-desktop     :platform-api
+:platform-web         :platform-api
+:web-classlib         -
+:net                  :platform-api
+:via                  -
+:mesher               -
+:framework            -
+:online               :platform-api :framework
+:features:togglesprint :framework
+:features:lowfire :framework
+:features:nohurtcam :framework
+:features:clearchat :framework
+:features:armorpotionview :framework
+:features:customscoreboard :framework
+:features:waypoints :framework
+:features:minimap :framework
+:features:fpsdisplay :framework
+:features:cps :framework
+:features:reachdisplay :framework
+:features:keystrokes :framework
+:features:coordinates :framework
+:features:shieldtotem :framework
+:features:cooldownindicator :framework
+:features:crosshair :framework
+:features:freelook :framework
+:features:weatherchanger :framework
+:features:lowshield :framework
+:features:shortswords :framework
+:features:oldtextures :framework
+:features:oldanimations :framework
+:features:shulkertooltips :framework
+:features:theme :framework
+:features:blockoutline :framework
+:features:hitcolor :framework
+:features:glintcolor :framework
+:features:hiteffects :framework
+:features:fullbright :framework
+:client               :platform-api :net :via :mesher :framework :online :features:togglesprint :features:lowfire :features:nohurtcam :features:clearchat :features:armorpotionview :features:customscoreboard :features:waypoints :features:minimap :features:fpsdisplay :features:cps :features:reachdisplay :features:keystrokes :features:coordinates :features:shieldtotem :features:cooldownindicator :features:crosshair :features:freelook :features:weatherchanger :features:lowshield :features:shortswords :features:oldanimations :features:shulkertooltips :features:theme :features:oldtextures :features:blockoutline :features:hitcolor :features:glintcolor :features:hiteffects :features:fullbright
+:render-webgl2        :client
+:app-desktop          :client :platform-api :platform-desktop
+:app-web              :client :platform-api :platform-web :web-classlib :render-webgl2 :tools:webbuild :tools:shaders :tools:sprites
+
+:tools:build          -
+:tools:survey         :tools:build
+:tools:copycheck      :tools:build
+:tools:webbuild       :tools:build :tools:survey :tools:teavm-patches :tools:wsbridge
+:tools:teavm-patches  -
+:tools:shaders        :render-webgl2 :client
+:tools:sprites        :client
+:tools:wsbridge       -
+:tools:onlinedev      :online
+
+# app-web runs tools:webbuild (the TeaVM compile), tools:shaders (the shader translation) and
+# tools:sprites (the vanilla sprites decoded for the asset pack) as build tools; nothing of them
+# ships. tools:shaders loads the game on the build machine's JVM to list its pipelines (ADR 0007),
+# and tools:sprites to decode the sprites with the game's own code (ADR 0026). tools:wsbridge is a development WebSocket-to-TCP bridge for
+# testing against a vanilla server (ADR 0009), standing in for an Eagler proxy (ADR 0016);
+# tools:webbuild runs it in-process for the screenshot-diff harness (ADR 0012). :via is the Via
+# stack under the game's pipeline (ADR 0017): Netty and the Via libraries, no game types.
+
+# :framework is the module framework (ADR 0046): no game types. Each :features:<name> depends on it
+# alone, never on another feature, the game or the platform; :client lists the features and adapts
+# the game to the framework (incari.client.modules).
+
+# tools:onlinedev serves :online's test fake over a real WebSocket, a stand-in for the online service
+# while the client's account screens are tried; never shipped.
+# :online is the client's side of Incari accounts and the online service (ADR 0058): the connection,
+# the protocol and the world's Incari players, no game types; :client draws its screens.
+
+# Planned, each added when it's needed:
+#   :server-plugin      -   (EaglerXServer API only)

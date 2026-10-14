@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 08:09:27 -0400
+Subject: [PATCH] threads: Read finished futures without join
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/font/FontManager.java b/src/main/java/net/minecraft/client/gui/font/FontManager.java
+index 9ae1d0028f26a1016046b491143bf0cb71a39a87..b31679c89987457073c5c6c2bd63441c1c47de62 100644
+--- a/src/main/java/net/minecraft/client/gui/font/FontManager.java
++++ b/src/main/java/net/minecraft/client/gui/font/FontManager.java
+@@ -297,3 +297,5 @@
+                 .map(
+-                    provider -> provider.join().map(p -> List.of(new GlyphProvider.Conditional(p, this.filter))),
++                    // Incari start: resolved only after every provider has loaded, so read it without join: a blocking call in this Function made every Function.apply a coroutine (ADR 0027)
++                    provider -> provider.resultNow().map(p -> List.of(new GlyphProvider.Conditional(p, this.filter))),
++                    // Incari end
+                     reference -> {
+diff --git a/src/main/java/net/minecraft/util/Util.java b/src/main/java/net/minecraft/util/Util.java
+index 60d1eb2e431ef9395924897dda3cf1d71a4626f8..151fbbc4c7a0828fca6631791368be396097802e 100644
+--- a/src/main/java/net/minecraft/util/Util.java
++++ b/src/main/java/net/minecraft/util/Util.java
+@@ -670,3 +670,5 @@
+         CompletableFuture<Void> all = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+-        return all.thenApply(ignored -> futures.stream().map(CompletableFuture::join).toList());
++        // Incari start: every future has completed normally here, so read it without join: a blocking call in this Function made every Function.apply a coroutine (ADR 0027)
++        return all.thenApply(ignored -> futures.stream().map(CompletableFuture::resultNow).toList());
++        // Incari end
+     }

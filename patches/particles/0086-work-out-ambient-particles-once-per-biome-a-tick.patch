@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 01:21:55 -0400
+Subject: [PATCH] particles: Work out ambient particles once per biome a tick
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+index 047d5f2550600cbd86ea0bdb9752df3547895a9c..d7611718193851a0f5b2e02120fdf5f3ea1293a0 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientLevel.java
+@@ -565,2 +565,3 @@
+         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
++        incari.client.particle.AmbientParticles.beginTick(); // Incari: ambient particles once per biome a tick (ADR 0031)
+ 
+@@ -615,3 +616,5 @@
+         if (!state.isCollisionShapeFullBlock(this, pos)) {
+-            for (AmbientParticle particle : this.environmentAttributes().getValue(EnvironmentAttributes.AMBIENT_PARTICLES, pos)) {
++            // Incari start: ambient particles once per biome a tick (ADR 0031)
++            for (AmbientParticle particle : incari.client.particle.AmbientParticles.at(this, pos)) {
++            // Incari end
+                 if (particle.canSpawn(this.random)) {

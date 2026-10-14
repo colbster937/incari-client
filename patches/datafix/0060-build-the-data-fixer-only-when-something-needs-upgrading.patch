@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 21:55:23 -0400
+Subject: [PATCH] datafix: Build the data fixer only when something needs
+ upgrading
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index c0930e25a53e269be049791132b8474bb46ac957..6f5ea75963b2e5ed81624d44cf57a5eadaa6b3e5 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -424,3 +424,5 @@
+         KeybindResolver.setKeyResolver(KeyMapping::createNameSupplier);
+-        this.fixerUpper = DataFixers.getDataFixer();
++        // Incari start: the data fixer may be built only when something needs upgrading
++        this.fixerUpper = incari.client.datafix.DataFixing.fixer();
++        // Incari end
+         this.gameThread = Thread.currentThread();
+diff --git a/src/main/java/net/minecraft/client/main/Main.java b/src/main/java/net/minecraft/client/main/Main.java
+index 13b612664ea48508907f8dfc2c444a68e354477c..690942c2f4929e7438a9f0d83c75103725f57db0 100644
+--- a/src/main/java/net/minecraft/client/main/Main.java
++++ b/src/main/java/net/minecraft/client/main/Main.java
+@@ -156,3 +156,5 @@
+             TracyClient.reportAppInfo("Minecraft Java Edition " + SharedConstants.getCurrentVersion().name());
+-            CompletableFuture<?> dataFixerOptimization = DataFixers.optimize(DataFixTypes.TYPES_FOR_LEVEL_LIST);
++            // Incari start: none where the data fixer is built only when needed
++            CompletableFuture<?> dataFixerOptimization = incari.client.datafix.DataFixing.optimizeAtStart(DataFixTypes.TYPES_FOR_LEVEL_LIST);
++            // Incari end
+             CrashReport.preload();

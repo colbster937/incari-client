@@ -1,0 +1,62 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:06:14 -0400
+Subject: [PATCH] platform: Start and stop the platform where the game started
+ SDL
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/systems/RenderSystem.java b/src/main/java/com/mojang/blaze3d/systems/RenderSystem.java
+index 5bd55b32473701e1f40472fff4adfb101c715e93..fdeff68214d6520994cf14103767f8f50c8a1dcb 100644
+--- a/src/main/java/com/mojang/blaze3d/systems/RenderSystem.java
++++ b/src/main/java/com/mojang/blaze3d/systems/RenderSystem.java
+@@ -6,3 +6,2 @@
+ import com.mojang.blaze3d.platform.SDLEventHandler;
+-import com.mojang.blaze3d.platform.SdlDebug;
+ import com.mojang.logging.LogUtils;
+@@ -33,6 +32,2 @@
+ import org.lwjgl.Version;
+-import org.lwjgl.sdl.SDLError;
+-import org.lwjgl.sdl.SDLHints;
+-import org.lwjgl.sdl.SDLInit;
+-import org.lwjgl.sdl.SDLTimer;
+ import org.lwjgl.system.MemoryUtil;
+@@ -198,21 +193,5 @@
+     public static TimeSource.NanoTimeSource initBackendSystem() {
+-        SdlDebug.init();
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.name", "Minecraft");
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.version", SharedConstants.getCurrentVersion().name());
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.identifier", "com.mojang.minecraft");
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.creator", "Mojang Studios");
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.copyright", "Copyright Mojang AB.");
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.url", "https://www.minecraft.net");
+-        SDLInit.SDL_SetAppMetadataProperty("SDL.app.metadata.type", "game");
+-        SDLHints.SDL_SetHint("SDL_NO_SIGNAL_HANDLERS", "1");
+-        SDLHints.SDL_SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
+-        SDLHints.SDL_SetHint("SDL_QUIT_ON_LAST_WINDOW_CLOSE", "0");
+-        SDLHints.SDL_SetHint("SDL_MOUSE_FOCUS_CLICKTHROUGH", "1");
+-        SDLHints.SDL_SetHint("SDL_ENABLE_SCREEN_KEYBOARD", "0");
+-        SDLHints.SDL_SetHint("SDL_IME_IMPLEMENTED_UI", "composition");
+-        if (!SDLInit.SDL_Init(32)) {
+-            throw new IllegalStateException("Unable to initialize SDL: " + SDLError.SDL_GetError());
+-        } else {
+-            return SDLTimer::SDL_GetTicksNS;
+-        }
++        // Incari start: the platform starts the window system and provides the clock
++        return incari.client.platform.PlatformLifecycle.start();
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 5a2e5bb721a6104be3dde617d6ed548fd7d24229..35571cc31b3e18bb5d0e3643681b25fc81045081 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -261,3 +261,2 @@
+ import org.jspecify.annotations.Nullable;
+-import org.lwjgl.sdl.SDLInit;
+ import org.slf4j.Logger;
+@@ -1153,3 +1152,5 @@
+             RenderSystem.unloadTrackedBackendLibrary();
+-            SDLInit.SDL_Quit();
++            // Incari start: stop the platform instead of SDL directly
++            incari.client.platform.PlatformLifecycle.stop();
++            // Incari end
+             Util.shutdownExecutors();

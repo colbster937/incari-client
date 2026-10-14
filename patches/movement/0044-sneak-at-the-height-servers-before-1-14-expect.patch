@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] movement: Sneak at the height servers before 1.14 expect
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/Avatar.java b/src/main/java/net/minecraft/world/entity/Avatar.java
+index cd2f02254350ef3dee0d7a756bd3a05c8bb53b5e..417b53593a51ab81849e618a26b47598f64b603e 100644
+--- a/src/main/java/net/minecraft/world/entity/Avatar.java
++++ b/src/main/java/net/minecraft/world/entity/Avatar.java
+@@ -66,2 +66,6 @@
+     public EntityDimensions getDefaultDimensions(final Pose pose) {
++        // Incari start: sneaking's size before 1.14
++        EntityDimensions legacy = incari.client.legacy.LegacyPlayer.dimensions(pose);
++        if (legacy != null) return legacy;
++        // Incari end
+         return POSES.getOrDefault(pose, STANDING_DIMENSIONS);

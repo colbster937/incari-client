@@ -1,0 +1,31 @@
+# ADR 0037: the Unicode font and the languages from the asset index (the panorama is no longer
+# fetched: menus show Incari's photo). The language list draws 日本語 with the
+# Unicode font; picking Japanese fetches its file before the reload, and the title screen is in
+# Japanese. Positions are for the 1280x577 viewport headless Chromium gives a 1280x720 window.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/assets.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue.
+click:0.5,0.945
+sleep:3000
+shot:build/browser-checks/assets-title.png
+# Options, Language..., search for Japan's region name.
+click:0.42,0.782
+sleep:1500
+click:0.376,0.515
+sleep:1500
+insert:日本
+sleep:1000
+shot:build/browser-checks/assets-language.png
+click:0.5,0.17
+sleep:500
+# Done reloads the resources in Japanese.
+click:0.62,0.945
+wait:.*\[Incari\] Assets: fetched 1 files .*
+sleep:8000
+# Back to the title screen.
+click:0.5,0.945
+sleep:3000
+shot:build/browser-checks/assets-title-ja.png
+assert:window.incariStorage.read('/incari/game/options.txt').then(t => t !== null && t.includes('lang:ja_jp'))

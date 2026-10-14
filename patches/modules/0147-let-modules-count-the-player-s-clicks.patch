@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:13:56 -0400
+Subject: [PATCH] modules: Let modules count the player's clicks
+
+The click event (ADR 0052): each mouse press over the world, for CPS and Keystrokes.
+
+diff --git a/src/main/java/net/minecraft/client/MouseHandler.java b/src/main/java/net/minecraft/client/MouseHandler.java
+index 2fd7b4bb27d63fd16221421c8844086e022eb51f..70d5065ad0b0ddc3eb2af6ab991601a56f1be4c7 100644
+--- a/src/main/java/net/minecraft/client/MouseHandler.java
++++ b/src/main/java/net/minecraft/client/MouseHandler.java
+@@ -140,2 +140,5 @@
+                 if (pressed) {
++                    // Incari start: modules count clicks (CPS)
++                    incari.client.modules.ModuleInput.click(rawButtonInfo.button());
++                    // Incari end
+                     KeyMapping.click(mouseKey);

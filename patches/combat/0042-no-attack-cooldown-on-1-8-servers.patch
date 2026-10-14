@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:53:34 -0400
+Subject: [PATCH] combat: No attack cooldown on 1.8 servers
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/player/Player.java b/src/main/java/net/minecraft/world/entity/player/Player.java
+index deafd313710dd2f4ce55198ca04c504282efb1e4..c0713e4780476d32f430be240a5bd9e84ad86f42 100644
+--- a/src/main/java/net/minecraft/world/entity/player/Player.java
++++ b/src/main/java/net/minecraft/world/entity/player/Player.java
+@@ -1812,2 +1812,5 @@
+     public float getAttackStrengthScale(final float a) {
++        // Incari start: 1.8 servers have no attack cooldown
++        if (incari.client.legacy.LegacyCombat.noCooldown()) return 1.0F;
++        // Incari end
+         return Mth.clamp((this.attackStrengthTicker + a) / this.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);

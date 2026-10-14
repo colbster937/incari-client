@@ -1,0 +1,29 @@
+# Joining a world shared through an Eagler relay. Needs the relay (EaglerSPRelay, local) and
+# relay-host.html open in another headless Chromium, which prints the world's code; the command
+# that runs this script puts the code in place of CODE (README.md, "Shared worlds").
+
+# The first-run accessibility screen: Continue.
+sleep:4000
+click:0.5,0.945
+sleep:2000
+# Title screen: Multiplayer; the first visit's warning: Proceed.
+click:0.5,0.5
+sleep:1500
+click:0.375,0.688
+sleep:1500
+shot:build/browser-checks/relay-multiplayer.png
+# The multiplayer screen's "Shared..." button, bottom row, fourth.
+click:0.621,0.938
+sleep:1500
+shot:build/browser-checks/relay-screen.png
+# The relay field: select what's there, type the local relay.
+click:0.5,0.277
+key:Control+KeyA
+type:ws://127.0.0.1:6699/
+click:0.5,0.416
+type:CODE
+shot:build/browser-checks/relay-filled.png
+# Join.
+click:0.42,0.553
+wait:.*\[CHAT\] incari-relay-check.*
+shot:build/browser-checks/relay-joined.png

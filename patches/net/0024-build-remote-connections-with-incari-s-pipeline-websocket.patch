@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 17:03:51 -0400
+Subject: [PATCH] net: Build remote connections with Incari's pipeline
+ (WebSocket, Eagler, Via)
+
+
+diff --git a/src/main/java/net/minecraft/network/Connection.java b/src/main/java/net/minecraft/network/Connection.java
+index 6c13bfd7dd9aa133a3ab992055f8df553dfc8cf8..8022d63a8589af65e5d030c7c442a13666dea5b6 100644
+--- a/src/main/java/net/minecraft/network/Connection.java
++++ b/src/main/java/net/minecraft/network/Connection.java
+@@ -426,2 +426,7 @@
+     public static ChannelFuture connect(final InetSocketAddress address, final EventLoopGroupHolder eventLoopGroupHolder, final Connection connection) {
++        // Incari start: WebSocket (Eagler) servers and servers of other versions (Via) get Incari's pipeline
++        if (incari.client.net.ServerConnections.accepts(address)) {
++            return incari.client.net.ServerConnections.connect(address, eventLoopGroupHolder, connection, connection.bandwidthDebugMonitor);
++        }
++        // Incari end
+         return new Bootstrap().group(eventLoopGroupHolder.eventLoopGroup()).handler(new ChannelInitializer<Channel>() {

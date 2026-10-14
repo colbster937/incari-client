@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 18:33:42 -0400
+Subject: [PATCH] modules: Let modules lower the fire overlay
+
+The fire overlay event (ADR 0050): before the flames are drawn over the
+view, modules may move them down. Low Fire draws them lower.
+
+diff --git a/src/main/java/net/minecraft/client/renderer/ScreenEffectRenderer.java b/src/main/java/net/minecraft/client/renderer/ScreenEffectRenderer.java
+index ea445974f4b44fd406655b2f1886246330fec24f..0c698388720b8b7e14536895a684beee8b2dd4cf 100644
+--- a/src/main/java/net/minecraft/client/renderer/ScreenEffectRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/ScreenEffectRenderer.java
+@@ -59,3 +59,10 @@
+                     TextureAtlasSprite fireSprite = this.sprites.get(ModelBakery.FIRE_1);
++                    // Incari start: modules may lower the flames (Low Fire)
++                    poseStack.pushPose();
++                    poseStack.translate(0.0F, -incari.client.modules.ModuleOverlays.fireDrop(), 0.0F);
++                    // Incari end
+                     submitFire(poseStack, submitNodeCollector, fireSprite);
++                    // Incari start
++                    poseStack.popPose();
++                    // Incari end
+                 }

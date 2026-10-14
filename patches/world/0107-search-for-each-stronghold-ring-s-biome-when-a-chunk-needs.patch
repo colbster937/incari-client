@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 14:38:11 -0400
+Subject: [PATCH] world: Search for each stronghold ring's biome when a chunk
+ needs it
+
+
+diff --git a/src/main/java/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java b/src/main/java/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java
+index d9f1691065998834ddbbdb06b67c57f20966cf0c..9890d9eec662db285efdea0e8125274781c84abf 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java
++++ b/src/main/java/net/minecraft/world/level/chunk/ChunkGeneratorStructureState.java
+@@ -118,2 +118,6 @@
+     private CompletableFuture<List<ChunkPos>> generateRingPositions(final Holder<StructureSet> structureSet, final ConcentricRingsStructurePlacement placement) {
++        // Incari start: each ring's biome search runs when a chunk needs it, not all at load
++        CompletableFuture<List<ChunkPos>> lazy = incari.client.world.StrongholdRings.plan(placement, this.concentricRingsSeed, this.biomeSource, this.randomState, Util.backgroundExecutor().forName("structureRings"));
++        if (lazy != null) return lazy;
++        // Incari end
+         if (placement.count() == 0) {

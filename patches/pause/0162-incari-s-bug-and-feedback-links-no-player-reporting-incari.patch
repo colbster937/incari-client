@@ -1,0 +1,74 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 12 Oct 2026 22:21:14 -0400
+Subject: [PATCH] pause: Incari's bug and feedback links, no player reporting,
+ Incari Chat for Mojang's friends
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+index e351fdd577916f207930496a87754ece221066bb..5112ffb8969617302278703ceae7503b29ecf454 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+@@ -108,3 +108,5 @@
+         LinearLayout iconButtonRow = LinearLayout.horizontal().spacing(4);
+-        SpriteIconButton reportBugsButton = SpriteIconButton.builder(REPORT_BUGS, ConfirmLinkScreen.confirmLink(this, CommonLinks.SNAPSHOT_BUGS_FEEDBACK), true)
++        // Incari start: bugs and feedback go to Incari's repository, not Mojang's
++        SpriteIconButton reportBugsButton = SpriteIconButton.builder(REPORT_BUGS, ConfirmLinkScreen.confirmLink(this, incari.client.credits.Credits.REPORT_BUGS), true)
++        // Incari end
+             .width(20)
+@@ -117,3 +119,5 @@
+                 SEND_FEEDBACK,
+-                ConfirmLinkScreen.confirmLink(this, SharedConstants.getCurrentVersion().stable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK),
++                // Incari start: bugs and feedback go to Incari's repository, not Mojang's
++                ConfirmLinkScreen.confirmLink(this, incari.client.credits.Credits.FEEDBACK),
++                // Incari end
+                 true
+@@ -131,26 +135,4 @@
+         iconButtonRow.addChild(this.friends);
+-        SpriteIconButton playerReportingButton = SpriteIconButton.builder(
+-                PLAYER_REPORTING, var1x -> this.minecraft.gui.setScreen(new SocialInteractionsScreen(this)), true
+-            )
+-            .width(20)
+-            .sprite(Identifier.withDefaultNamespace("pause_menu/player_reporting"), 15, 15)
+-            .withTootip()
+-            .build();
+-        iconButtonRow.addChild(playerReportingButton);
+-        IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
+-        if (integratedServer != null && this.minecraft.player != null) {
+-            List<Entry<UUID, PlayerInfo>> list = this.minecraft
+-                .player
+-                .connection
+-                .getSeenPlayers()
+-                .entrySet()
+-                .stream()
+-                .filter(entry -> entry.getKey() != this.minecraft.player.getUUID())
+-                .toList();
+-            if (list.isEmpty()) {
+-                playerReportingButton.active = false;
+-                playerReportingButton.setTooltip(NO_PLAYERS_TO_REPORT_TOOLTIP);
+-            }
+-        }
+-
++        // Incari start: no Player Reporting button (Mojang's reporting needs a Microsoft account; Incari Chat has Report)
++        // Incari end
+         helper.addChild(iconButtonRow, 2, gridLayout.newCellSettings().alignHorizontallyCenter());
+diff --git a/src/main/java/net/minecraft/client/gui/screens/options/OnlineOptionsScreen.java b/src/main/java/net/minecraft/client/gui/screens/options/OnlineOptionsScreen.java
+index a81eef5eb9428d18ee774f79564e446fb5f8e594..c487339f7bc123bd048858c1908ca2c74f9a2228 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/options/OnlineOptionsScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/options/OnlineOptionsScreen.java
+@@ -53,2 +53,5 @@
+     public static void confirmFriendsListEnabled(final Minecraft minecraft, final Runnable onEnabled, final @Nullable Screen lastScreen) {
++        // Incari start: Mojang's friends (a Microsoft account's) are Incari Chat's friends here
++        if (incari.client.online.ChatMenu.openInstead(lastScreen)) return;
++        // Incari end
+         PlayerSocialManager playerSocialManager = minecraft.getPlayerSocialManager();
+diff --git a/src/main/java/net/minecraft/client/gui/screens/social/PlayerEntry.java b/src/main/java/net/minecraft/client/gui/screens/social/PlayerEntry.java
+index 72408dd2de9608395c3284523e6d2a35cbdd83eb..62fa6da0eba3c908c78c93fbe206a1efb2007640 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/social/PlayerEntry.java
++++ b/src/main/java/net/minecraft/client/gui/screens/social/PlayerEntry.java
+@@ -124,2 +124,5 @@
+             this.reportButton.setTooltipDelay(TOOLTIP_DELAY);
++            // Incari start: no Report button (Mojang's reporting needs a Microsoft account; Incari Chat has Report)
++            this.reportButton.visible = false;
++            // Incari end
+             this.hideButton = new ImageButton(0, 0, 20, 20, MUTE_BUTTON_SPRITES, button -> {

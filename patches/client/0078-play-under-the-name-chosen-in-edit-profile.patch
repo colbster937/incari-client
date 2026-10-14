@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 21:55:19 -0400
+Subject: [PATCH] client: Play under the name chosen in Edit Profile
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 0946d05bd9b4fa2993ffcc49081fc5f000b35434..076faaba9b350141a7596687721b21ab638d5995 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -2626,3 +2626,5 @@
+     public User getUser() {
+-        return this.user;
++        // Incari start: offline, the player plays under the name they chose in Edit Profile
++        return incari.client.profile.PlayerName.user(this.user, this.gameDirectory);
++        // Incari end
+     }
+@@ -2635,3 +2637,5 @@
+         ProfileResult profileResult = this.profileFuture.join();
+-        return profileResult != null ? profileResult.profile() : new GameProfile(this.user.getProfileId(), this.user.getName());
++        // Incari start: offline, the player plays under the name they chose in Edit Profile
++        return profileResult != null ? profileResult.profile() : new GameProfile(this.getUser().getProfileId(), this.getUser().getName());
++        // Incari end
+     }

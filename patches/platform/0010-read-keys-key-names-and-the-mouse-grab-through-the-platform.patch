@@ -1,0 +1,49 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 11:05:52 -0400
+Subject: [PATCH] platform: Read keys, key names and the mouse grab through the
+ platform
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/platform/InputConstants.java b/src/main/java/com/mojang/blaze3d/platform/InputConstants.java
+index 6b1727fe3f92467b2cf7b49bfd7d3eaf9c0832ec..6c87c6e5f1ea00f919066f601c41693b98593ffd 100644
+--- a/src/main/java/com/mojang/blaze3d/platform/InputConstants.java
++++ b/src/main/java/com/mojang/blaze3d/platform/InputConstants.java
+@@ -20,5 +20,2 @@
+ import net.minecraft.network.chat.Component;
+-import org.lwjgl.sdl.SDLError;
+-import org.lwjgl.sdl.SDLKeyboard;
+-import org.lwjgl.sdl.SDLMouse;
+ import org.slf4j.Logger;
+@@ -217,4 +214,4 @@
+     public static boolean isKeyDown(final int key) {
+-        ByteBuffer keyboardState = SDLKeyboard.SDL_GetKeyboardState();
+-        return keyboardState != null && keyboardState.get(key) != 0;
++        // Incari start: keyboard and mouse through the platform
++        return incari.client.platform.PlatformInputHooks.isKeyDown(key);
+     }
+@@ -222,6 +219,3 @@
+     public static void grabMouse(final Window window, final double xpos, final double ypos) {
+-        SDLMouse.SDL_WarpMouseInWindow(window.handle(), (float)xpos, (float)ypos);
+-        if (!SDLMouse.SDL_SetWindowRelativeMouseMode(window.handle(), true)) {
+-            LOGGER.warn("Failed to enable relative mouse mode: {}", SDLError.SDL_GetError());
+-        }
++        incari.client.platform.PlatformInputHooks.setMouseGrabbed(window, xpos, ypos, true);
+     }
+@@ -229,6 +223,4 @@
+     public static void releaseMouse(final Window window, final double xpos, final double ypos) {
+-        SDLMouse.SDL_WarpMouseInWindow(window.handle(), (float)xpos, (float)ypos);
+-        if (!SDLMouse.SDL_SetWindowRelativeMouseMode(window.handle(), false)) {
+-            LOGGER.warn("Failed to disable relative mouse mode: {}", SDLError.SDL_GetError());
+-        }
++        incari.client.platform.PlatformInputHooks.setMouseGrabbed(window, xpos, ypos, false);
++        // Incari end
+     }
+@@ -311,4 +303,5 @@
+ 
+-                int keycode = SDLKeyboard.SDL_GetKeyFromScancode(value, (short)0, false);
+-                String systemName = SDLKeyboard.SDL_GetKeyName(keycode);
++                // Incari start: key names in the player's layout come from the platform
++                String systemName = incari.client.platform.PlatformInputHooks.keyName(value);
++                // Incari end
+                 return systemName != null && systemName.codePointCount(0, systemName.length()) == 1

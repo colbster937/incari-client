@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 19:21:12 -0400
+Subject: [PATCH] gui: Show players' heads in the tab list on offline-mode
+ servers
+
+The game shows them only where the server is in online mode. Incari's
+servers are offline-mode Eagler servers, whose skins come by Eagler's
+own messages, and Eagler clients show heads there.
+
+diff --git a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+index b60868f6232b8fb859239efd676cfe46fe81fe7f..c8fc2a5567e21cbdf471684aeb232046ca60b13b 100644
+--- a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
++++ b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+@@ -144,3 +144,5 @@
+ 
+-        boolean showHead = this.minecraft.getConnection().onlineMode();
++        // Incari start: heads on offline-mode servers too, as Eagler clients show them
++        boolean showHead = true;
++        // Incari end
+         int widthForScore;

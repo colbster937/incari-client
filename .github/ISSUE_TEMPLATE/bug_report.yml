@@ -1,0 +1,51 @@
+name: Bug report
+description: Something in Incari Client doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please don't attach or link a playable build, and don't share passwords or recovery codes.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Join a 1.8.9 server
+        2. Open the module menu
+        3. ...
+  - type: input
+    id: version
+    attributes:
+      label: Incari Client version
+      description: Shown at the bottom left of the title screen.
+  - type: dropdown
+    id: build
+    attributes:
+      label: Build
+      options:
+        - Fast
+        - Compatible
+        - Offline HTML file
+        - Not sure
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Chrome 141 on a school Chromebook
+  - type: input
+    id: server
+    attributes:
+      label: Server and its version (if any)
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, the browser console's errors (F12), what you've tried.

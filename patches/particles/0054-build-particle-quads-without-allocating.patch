@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] particles: Build particle quads without allocating
+
+
+diff --git a/src/main/java/net/minecraft/client/particle/SingleQuadParticle.java b/src/main/java/net/minecraft/client/particle/SingleQuadParticle.java
+index 3e5b08028b6db397e3793680fabad6dd15b866bd..8afdcf28f0d55f85b4d0b17b6a1d3157191dd486 100644
+--- a/src/main/java/net/minecraft/client/particle/SingleQuadParticle.java
++++ b/src/main/java/net/minecraft/client/particle/SingleQuadParticle.java
+@@ -53,3 +53,5 @@
+     public void extract(final QuadParticleRenderState particleTypeRenderState, final Camera camera, final float partialTickTime) {
+-        Quaternionf rotation = new Quaternionf();
++        // Incari start: one rotation reused, not one a particle a frame
++        Quaternionf rotation = incari.client.particle.ParticleScratch.facing();
++        // Incari end
+         this.getFacingCameraMode().setRotation(rotation, camera, partialTickTime);
+diff --git a/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java b/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
+index 6e20369a36bacb09bafe56d176b4919f63d5647e..dd79477da9d3cf253931b479d35439e0fa128e8c 100644
+--- a/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
++++ b/src/main/java/net/minecraft/client/renderer/state/level/QuadParticleRenderState.java
+@@ -84,7 +84,5 @@
+     ) {
+-        Quaternionf rotation = new Quaternionf(xRot, yRot, zRot, wRot);
+-        this.renderVertex(builder, rotation, x, y, z, 1.0F, -1.0F, scale, u1, v1, color, lightCoords);
+-        this.renderVertex(builder, rotation, x, y, z, 1.0F, 1.0F, scale, u1, v0, color, lightCoords);
+-        this.renderVertex(builder, rotation, x, y, z, -1.0F, 1.0F, scale, u0, v0, color, lightCoords);
+-        this.renderVertex(builder, rotation, x, y, z, -1.0F, -1.0F, scale, u0, v1, color, lightCoords);
++        // Incari start: corners rotated once for all the particles turned the same way, nothing allocated
++        incari.client.particle.ParticleQuads.render(builder, x, y, z, xRot, yRot, zRot, wRot, scale, u0, u1, v0, v1, color, lightCoords);
++        // Incari end
+     }

@@ -1,0 +1,56 @@
+# The client's modules in play, in the page's own world:
+#   ./gradlew :app-web:benchmark -Pbenchmark.singleplayer -Pbenchmark.script=features.txt
+#   -Pbenchmark.history=<a file of its own> -Pteavm.release -Pteavm.fast
+#   -Pbenchmark.query=modules=<ids>
+# Run it twice, with no modules (modules=) and with the HUD and play modules on, to see what they
+# cost:
+#   modules=armorpotionview,blockoutline,clearchat,cooldownindicator,coordinates,cps,crosshair,
+#   customscoreboard,fpsdisplay,freelook,fullbright,glintcolor,hitcolor,hiteffects,keystrokes,
+#   lowfire,lowshield,minimap,nohurtcam,oldanimations,reachdisplay,shieldtotem,shortswords,
+#   shulkertooltips,togglesprint,waypoints,weatherchanger
+# (no commas' spaces; Old Textures is left out: its pack reloads every resource at start).
+# The player is in creative, in armor, with a shield, totems and three effects, so every HUD
+# module has something to show. Scenarios: standing at spawn, then flying east at 11 blocks a
+# second, a command block teleporting the player each tick, so the minimap draws new chunks.
+
+setup
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamerule spawn_patrols false
+    rcon:gamerule spawn_phantoms false
+    rcon:gamerule spawn_wandering_traders false
+    rcon:gamerule command_block_output false
+    rcon:gamerule send_command_feedback false
+    rcon:time set 6000
+    rcon:weather clear
+    rcon:gamemode creative @s
+    rcon:item replace entity @s armor.head with minecraft:diamond_helmet
+    rcon:item replace entity @s armor.chest with minecraft:diamond_chestplate
+    rcon:item replace entity @s armor.legs with minecraft:diamond_leggings
+    rcon:item replace entity @s armor.feet with minecraft:diamond_boots
+    rcon:item replace entity @s weapon.mainhand with minecraft:diamond_sword
+    rcon:item replace entity @s weapon.offhand with minecraft:shield
+    rcon:give @s minecraft:totem_of_undying 3
+    rcon:effect give @s minecraft:speed infinite 1
+    rcon:effect give @s minecraft:strength infinite 0
+    rcon:effect give @s minecraft:fire_resistance infinite 0
+    rcon:forceload add 0 0
+    sleep:10000
+
+scenario still  Standing at spawn with the HUD
+    shot:features-still
+    measure:20
+
+scenario travel  Flying east at 11 blocks a second over terrain the page's server generates, the minimap drawing new chunks
+    rcon:tp @s 0.5 120 0.5 -90 20
+    rcon:gamerule send_command_feedback true
+    rconwait:execute if loaded 0 64 0 => passed
+    rconwait:execute if loaded 96 64 0 => passed
+    rcon:gamerule send_command_feedback false
+    sleep:5000
+    rcon:setblock 0 318 0 minecraft:repeating_command_block{auto:1b,Command:"execute as @a at @s run tp @s ~0.55 120 ~"}
+    sleep:2000
+    shot:features-travel
+    measure:40
+    rcon:setblock 0 318 0 minecraft:air

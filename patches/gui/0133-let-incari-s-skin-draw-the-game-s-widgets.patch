@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 10:27:23 -0400
+Subject: [PATCH] gui: Let Incari's skin draw the game's widgets
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/components/AbstractWidget.java b/src/main/java/net/minecraft/client/gui/components/AbstractWidget.java
+index e3775c2e5daaba52a1cc6e8364d76ef21afd923d..4ddc2df135032e2fd98f9ec004bf9c74aeef2e79 100644
+--- a/src/main/java/net/minecraft/client/gui/components/AbstractWidget.java
++++ b/src/main/java/net/minecraft/client/gui/components/AbstractWidget.java
+@@ -58,2 +58,5 @@
+             this.isHovered = graphics.containsPointInScissor(mouseX, mouseY) && this.areCoordinatesInRectangle(mouseX, mouseY);
++            // Incari start: Incari's skin may draw the widget itself (Skins)
++            if (!incari.client.ui.Skins.widget(graphics, this, mouseX, mouseY, a))
++            // Incari end
+             this.extractWidgetRenderState(graphics, mouseX, mouseY, a);

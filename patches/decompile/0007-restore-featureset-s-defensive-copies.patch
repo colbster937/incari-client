@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 12:37:09 -0400
+Subject: [PATCH] decompile: Restore FeatureSet's defensive copies
+
+
+diff --git a/src/main/java/com/mojang/renderpearl/backend/vulkan/init/FeatureSet.java b/src/main/java/com/mojang/renderpearl/backend/vulkan/init/FeatureSet.java
+index e8d821cf9d1f735946118cc8c06b009e2aaa35ad..c6c81abbd077ce5fa5f2d6dc00a4cca01393ccbb 100644
+--- a/src/main/java/com/mojang/renderpearl/backend/vulkan/init/FeatureSet.java
++++ b/src/main/java/com/mojang/renderpearl/backend/vulkan/init/FeatureSet.java
+@@ -14,2 +14,7 @@
+ public record FeatureSet(String name, Set<String> extensions, Set<VulkanFeature> features, FeatureSet.Condition condition) {
++    public FeatureSet {
++        extensions = Set.copyOf(extensions);
++        features = Set.copyOf(features);
++    }
++
+     public FeatureSet(final String name, final Set<String> extensions, final Set<VulkanFeature> features) {

@@ -1,0 +1,187 @@
+# TeaVM survey policy. Read by `./incari survey`; see tools/survey/README.md.
+#
+# Two kinds of lines:
+#   library <maven coordinate prefix> <keep|replace|delete> <reason>
+#   <stub|shim|rewrite|delete> <selector>=<glob>... <reason: the work item's name in the backlog>
+#
+# Triage rules are tried top to bottom; the first match wins, so put narrow rules first.
+# Selectors: symbol (API used, owner#member), caller (class needing work), origin
+# (minecraft, or a library's artifact id), kind (missing-class, missing-method, missing-field,
+# unsupported-method, missing-supertype, native, host-jdk, reflection).
+# Globs: * stays inside one name segment, ** matches anything.
+
+# ---------------------------------------------------------------------------------------------
+# Libraries. Only `keep` libraries are compiled with the game. The rest are left off the
+# classpath on purpose, so every place the game calls them shows up as its own finding.
+# Every non-native library in Mojang's version JSON must match one line.
+# ---------------------------------------------------------------------------------------------
+
+library org.lwjgl:                           replace  Platform layer: WebGL2, canvas input, Web Audio, fonts
+library net.java.dev.jna:                    delete   Native interop; only OSHI and OS integration use it
+library com.github.oshi:                     delete   Hardware and OS telemetry
+library com.mojang:jtracy:                   delete   Tracy profiler (native)
+library com.mojang:text2speech:              replace  Narrator; the browser has the Web Speech API
+library ca.weblite:java-objc-bridge:         delete   macOS-only native bridge
+library com.microsoft.azure:msal4j:          delete   Microsoft login; the browser build uses offline or Eagler identity
+library com.azure:azure-json:                delete   Only used by msal4j
+library com.ibm.icu:icu4j:                   replace  Bidi text; the browser has Intl, or a minimal shim
+library org.apache.logging.log4j:log4j-core: replace  Console logging shim
+library org.apache.logging.log4j:log4j-slf4j2-impl: replace  Console logging shim
+library io.netty:netty-buffer:               keep     FriendlyByteBuf extends ByteBuf; pure Java in heap mode
+library io.netty:netty-common:               keep     Needed by netty-buffer
+library io.netty:netty-transport:            keep     The game's Connection is a Netty pipeline; it runs over the WebSocket transport (ADR 0008)
+library io.netty:netty-codec-base:           keep     The game's packet codecs extend its encoders and decoders
+library io.netty:netty-handler:              keep     The read timeout and flow control in the game's pipeline
+library io.netty:netty-resolver:             keep     Bootstrap's address resolution; WebSocket addresses need none
+library io.netty:                            replace  Native transports, compression and HTTP codecs: the browser has none of them
+library at.yawk.lz4:                         keep     Has a pure-Java implementation
+library com.google.                          keep     Guava, Gson, failureaccess: pure Java
+library com.mojang:authlib:                  keep     GameProfile and properties are used everywhere; its HTTP parts get cut
+library com.mojang:                          keep     Brigadier, DataFixerUpper codecs, logging, blocklist, patchy
+library commons-codec:                       keep     Pure Java
+library commons-io:                          keep     Pure Java
+library org.apache.commons:                  keep     commons-lang3, commons-compress: pure Java
+library it.unimi.dsi:fastutil:               keep     Pure Java collections
+library net.sf.jopt-simple:                  keep     Command-line parsing for Main
+library org.apache.logging.log4j:log4j-api:  keep     API only; backed by the console shim
+library org.slf4j:                           keep     API only; backed by the console shim
+library org.jcraft:jorbis:                   keep     Pure-Java Ogg Vorbis decoder, useful for Web Audio
+library org.joml:                            keep     Pure Java math
+library org.jspecify:                        keep     Annotations only
+
+# ---------------------------------------------------------------------------------------------
+# Analysis roots. Every class in the client jar is a root (see Roots.java) except these, which
+# ship in the jar but never run in the client.
+# ---------------------------------------------------------------------------------------------
+
+no-root net.minecraft.data.**                Data generators run at Mojang's build time
+no-root net.minecraft.client.data.**         Client-side data generators
+no-root net.minecraft.gametest.**            Automated game tests
+no-root net.minecraft.server.Main            Dedicated server entry point
+no-root net.minecraft.server.Main$*          Dedicated server entry point
+no-root net.minecraft.server.Eula            Dedicated server EULA file
+no-root net.minecraft.server.ConsoleInput    Dedicated server console
+no-root net.minecraft.server.dedicated.**    Dedicated server
+no-root net.minecraft.server.gui.**          Dedicated server Swing GUI
+no-root net.minecraft.server.rcon.**         Dedicated server remote console
+no-root net.minecraft.server.jsonrpc.**      Dedicated server management protocol
+no-root net.minecraft.server.chase.**        Debug tool that mirrors a player between servers
+
+# ---------------------------------------------------------------------------------------------
+# Triage. The reason is the work item's name in docs/port-backlog.md; rule lines that share a
+# reason form one work item. Narrow rules first.
+# ---------------------------------------------------------------------------------------------
+
+# --- Delete: features the browser build strips --------------------------------------------
+
+delete  symbol=com.mojang.jtracy.**                         Tracy profiler hooks
+delete  caller=net.minecraft.util.profiling.jfr.**          Java Flight Recorder profiling
+delete  symbol=jdk.jfr.**                                   Java Flight Recorder profiling
+delete  symbol=io.netty.buffer.*Event                       Java Flight Recorder profiling
+delete  symbol=oshi.**                                      OSHI hardware info (crash reports, telemetry)
+delete  symbol=com.sun.jna.**                               JNA Windows process inspection (crash reports)
+delete  symbol=ca.weblite.**                                macOS window integration
+delete  caller=com.mojang.renderpearl.backend.vulkan.**     Vulkan backend (the browser gets WebGL2, later WebGPU)
+delete  symbol=org.lwjgl.vulkan.**                          Vulkan backend (the browser gets WebGL2, later WebGPU)
+delete  symbol=org.lwjgl.util.vma.**                        Vulkan backend (the browser gets WebGL2, later WebGPU)
+delete  symbol=org.lwjgl.sdl.SDLVulkan                      Vulkan backend (the browser gets WebGL2, later WebGPU)
+delete  caller=com.mojang.realmsclient.**                   Realms (Mojang's hosting service and its HTTP client)
+delete  caller=net.minecraft.server.dedicated.**            Dedicated server code the client reaches (watchdog, properties)
+delete  caller=net.minecraft.server.chase.**                Debug tool that mirrors a player between servers
+delete  caller=com.viaversion.viaversion.libs.snakeyaml.**  Via's bundled YAML parser: Incari keeps Via's settings in memory (ADR 0017)
+delete  symbol=io.netty.channel.epoll.**                    Native socket transports (epoll, kqueue)
+delete  symbol=io.netty.channel.kqueue.**                   Native socket transports (epoll, kqueue)
+delete  symbol=java.net.DatagramSocket                      LAN world discovery and hosting (UDP multicast, server sockets)
+delete  symbol=java.net.DatagramPacket                      LAN world discovery and hosting (UDP multicast, server sockets)
+delete  symbol=java.net.MulticastSocket                     LAN world discovery and hosting (UDP multicast, server sockets)
+delete  symbol=java.net.ServerSocket                        LAN world discovery and hosting (UDP multicast, server sockets)
+delete  symbol=javax.naming.**                              DNS SRV lookup of server addresses (JNDI)
+delete  symbol=org.osgi.**                                  Library support for optional runtimes (OSGi, Log4j 1, java.sql)
+delete  symbol=org.apache.log4j.**                          Library support for optional runtimes (OSGi, Log4j 1, java.sql)
+delete  symbol=java.sql.**                                  Library support for optional runtimes (OSGi, Log4j 1, java.sql)
+delete  symbol=org.lwjgl.system.Configuration               Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.system.Platform**                  Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.system.SharedLibrary               Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.system.Library                     Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.Version                            Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.util.shaderc.Shaderc#getLibrary    Native library loading and LWJGL setup
+delete  symbol=org.lwjgl.util.spvc.Spvc#getLibrary          Native library loading and LWJGL setup
+delete  symbol=java.lang.UnsatisfiedLinkError               Native library loading and LWJGL setup
+delete  caller=io.netty.util.NetUtil symbol=java.lang.Process** Operating system queries in Netty (somaxconn through sysctl): a page runs no processes
+delete  symbol=javax.management.**                         JMX server monitoring (MBeans)
+delete  symbol=com.microsoft.aad.**                        Microsoft account services (login, server chat filter)
+delete  symbol=java.security.**                             Encryption and signing (Mojang auth, chat signing, key pairs); offline and Eagler modes don't use them
+delete  symbol=javax.security.**                            Encryption and signing (Mojang auth, chat signing, key pairs); offline and Eagler modes don't use them
+delete  symbol=javax.crypto.**                              Encryption and signing (Mojang auth, chat signing, key pairs); offline and Eagler modes don't use them
+
+# --- Rewrite: the platform layer ------------------------------------------------------------
+
+rewrite caller=com.mojang.renderpearl.backend.opengl.**     OpenGL backend: replace with a WebGL2 GpuDevice backend
+rewrite symbol=org.lwjgl.opengl.**                          OpenGL backend: replace with a WebGL2 GpuDevice backend
+rewrite symbol=org.lwjgl.util.shaderc.**                    Shader toolchain: GLSL to SPIR-V (shaderc) and back (SPIRV-Cross) runs natively; move it to build time
+rewrite symbol=org.lwjgl.util.spvc.**                       Shader toolchain: GLSL to SPIR-V (shaderc) and back (SPIRV-Cross) runs natively; move it to build time
+rewrite symbol=org.lwjgl.BufferUtils                        Off-heap memory (MemoryUtil, MemoryStack, pointers): rewrite over ArrayBuffer
+rewrite symbol=org.lwjgl.system.MemoryStack**               Off-heap memory (MemoryUtil, MemoryStack, pointers): rewrite over ArrayBuffer
+rewrite symbol=org.lwjgl.system.MemoryUtil**                Off-heap memory (MemoryUtil, MemoryStack, pointers): rewrite over ArrayBuffer
+rewrite symbol=org.lwjgl.PointerBuffer                      Off-heap memory (MemoryUtil, MemoryStack, pointers): rewrite over ArrayBuffer
+rewrite symbol=org.lwjgl.system.**                          Off-heap memory (MemoryUtil, MemoryStack, pointers): rewrite over ArrayBuffer
+rewrite symbol=org.lwjgl.sdl.**                             Window, input, clipboard and events (SDL3): canvas, Pointer Lock and DOM events
+rewrite symbol=org.lwjgl.openal.**                          Audio (OpenAL): Web Audio
+rewrite symbol=javax.sound.**                               Audio (OpenAL): Web Audio
+rewrite symbol=org.lwjgl.stb.**                             Image decode and encode (STB): createImageBitmap or a pure-Java codec
+rewrite symbol=com.mojang.blaze3d.platform.NativeImage$WriteCallback  Image decode and encode (STB): createImageBitmap or a pure-Java codec
+rewrite symbol=org.lwjgl.util.freetype.**                   TrueType fonts (FreeType): pre-baked glyph atlases, Canvas2D for pack fonts
+rewrite caller=io.netty.channel.nio.** symbol=java.nio.**            Netty's NIO transport (selectors, socket channels): in the browser, connections are WebSockets on local event loops
+rewrite caller=io.netty.channel.socket.nio.** symbol=java.nio.**     Netty's NIO transport (selectors, socket channels): in the browser, connections are WebSockets on local event loops
+rewrite caller=io.netty.util.concurrent.FastThreadLocalThread symbol=java.lang.Thread#<init>  Netty's own thread class (a ThreadGroup constructor TeaVM lacks): event loops get their threads from the game's factory
+rewrite symbol=io.netty.**                                  Netty channels and pipeline: WebSocket transport under Connection
+rewrite symbol=java.net.**                                  Socket addresses, proxies and HTTP: server addresses become WebSocket URLs, HTTP becomes fetch
+rewrite kind=reflection origin=minecraft                    Game code using reflection: replace with direct references
+rewrite kind=reflection origin=log4j-api                    Logging backend discovery (ServiceLoader, class loading): bind the console logger directly
+rewrite kind=reflection origin=slf4j-api                    Logging backend discovery (ServiceLoader, class loading): bind the console logger directly
+rewrite origin=slf4j-api symbol=java.lang.**                Logging backend discovery (ServiceLoader, class loading): bind the console logger directly
+rewrite symbol=org.apache.logging.log4j.core.**             Logging backend discovery (ServiceLoader, class loading): bind the console logger directly
+rewrite origin=log4j-api                                    Logging backend discovery (ServiceLoader, class loading): bind the console logger directly
+rewrite kind=reflection origin=gson                         Gson reflective type adapters: register explicit adapters, or keep Gson on JsonElement trees
+rewrite kind=reflection                                     Library reflection: steer the library off the reflective path, or declare it for TeaVM
+rewrite symbol=java.lang.invoke.**                          VarHandle and MethodHandle (Netty, Guava atomics): the libraries probe for them and fall back when they throw; patch any game caller
+
+# --- Shim: JDK APIs TeaVM's class library lacks --------------------------------------------
+
+stub    symbol=sun.misc.Unsafe                              sun.misc.Unsafe in libraries: stub it as unavailable so Netty, Guava and JOML take their safe fallbacks
+stub    symbol=jdk.internal.misc.Unsafe                     sun.misc.Unsafe in libraries: stub it as unavailable so Netty, Guava and JOML take their safe fallbacks
+shim    symbol=java.util.concurrent.CompletableFuture       CompletableFuture (async loading everywhere): a single-threaded implementation over TeaVM coroutines
+shim    symbol=java.util.concurrent.CompletionException     CompletableFuture (async loading everywhere): a single-threaded implementation over TeaVM coroutines
+shim    symbol=java.util.concurrent.*Executor*              Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=java.util.concurrent.ForkJoin*               Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=java.util.concurrent.*Future                 Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=java.util.concurrent.*Exception              Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=net.minecraft.util.Util$2                    Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=com.google.common.util.concurrent.**         Executors, thread pools and futures: a coroutine scheduler, later Web Workers
+shim    symbol=java.util.concurrent.**                      Locks, atomics and concurrent queues: single-threaded shims
+shim    symbol=com.google.common.cache.LocalCache$Segment   Locks, atomics and concurrent queues: single-threaded shims
+shim    symbol=com.google.common.collect.MapMakerInternalMap$Segment  Locks, atomics and concurrent queues: single-threaded shims
+shim    symbol=io.netty.util.concurrent.MpscIntQueue**      Locks, atomics and concurrent queues: single-threaded shims
+shim    symbol=java.time.**                                 java.time (dates, durations, formatting): compile a java.time implementation for TeaVM
+shim    symbol=java.nio.file.**                             Filesystem (java.nio.file, channels, locks, watching): an in-memory file system kept in OPFS or IndexedDB (ADR 0011)
+shim    symbol=java.nio.channels.**                         Filesystem (java.nio.file, channels, locks, watching): an in-memory file system kept in OPFS or IndexedDB (ADR 0011)
+shim    symbol=java.io.FileInputStream#getChannel           Filesystem (java.nio.file, channels, locks, watching): an in-memory file system kept in OPFS or IndexedDB (ADR 0011)
+shim    symbol=java.io.File#toPath                          Filesystem (java.nio.file, channels, locks, watching): an in-memory file system kept in OPFS or IndexedDB (ADR 0011)
+shim    symbol=com.ibm.icu.**                               Bidi text and localized dates (ICU): the browser's Intl, or a minimal shim
+shim    symbol=com.mojang.text2speech.**                    Narrator: Web Speech API
+shim    symbol=java.lang.ScopedValue**                      ScopedValue (Java 25): a thread-local style shim
+
+# --- Stub: small gaps where a trivial implementation is enough ------------------------------
+
+stub    symbol=java.lang.management.**                      JVM memory, GC and thread stats (debug overlay, crash reports, watchdog): report browser numbers or zeros
+stub    symbol=java.lang.StackWalker**                      Caller lookup (StackWalker, modules): return nothing
+stub    symbol=java.lang.Module**                           Caller lookup (StackWalker, modules): return nothing
+stub    symbol=java.lang.System#exit                        Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.System#getenv                      Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.System#mapLibraryName              Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.Runtime                            Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.SecurityManager                    Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.RuntimePermission                  Process control (exit, shutdown hooks, environment, native libraries): no-ops in a browser tab
+stub    symbol=java.lang.Thread                             Thread details TeaVM lacks (ids, state, onSpinWait): trivial answers under coroutines
+stub    symbol=java.**                                      Small JDK methods and classes TeaVM's class library lacks: add them to the class library
+stub    symbol=javax.**                                     Small JDK methods and classes TeaVM's class library lacks: add them to the class library

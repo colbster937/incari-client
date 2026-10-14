@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 16:30:12 -0400
+Subject: [PATCH] net: Keep the version chosen on the edit screen
+
+The edit callback copied the name, address and resource pack status onto
+the list entry but not the Via version, so every edit reset it to Auto.
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java b/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
+index 20f35b106b9e06fb030b78ad3321d927c1f26730..37251f6a34d8e8e9df484c26c0bc3dab4b193b6d 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/multiplayer/JoinMultiplayerScreen.java
+@@ -194,2 +194,5 @@
+             current.setResourcePackStatus(this.editingServer.getResourcePackStatus());
++            // Incari start: keep the version chosen on the edit screen
++            current.incariVersion = this.editingServer.incariVersion;
++            // Incari end
+             this.servers.save();
+@@ -206,2 +209,5 @@
+                 serverData.copyNameIconFrom(this.editingServer);
++                // Incari start: a hidden entry that is added again takes the version chosen for it
++                serverData.incariVersion = this.editingServer.incariVersion;
++                // Incari end
+                 this.servers.save();

@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:48:35 -0400
+Subject: [PATCH] modules: Delete a world's waypoints and explored map with it
+
+Incari keeps them by the world's folder name, which a new world can take
+again.
+
+diff --git a/src/main/java/net/minecraft/world/level/storage/LevelStorageSource.java b/src/main/java/net/minecraft/world/level/storage/LevelStorageSource.java
+index 261e6f5d75dd24b61eb26e2a42ca20f36f392946..a713677fe06068cc6e82e5039970e9fc869938e9 100644
+--- a/src/main/java/net/minecraft/world/level/storage/LevelStorageSource.java
++++ b/src/main/java/net/minecraft/world/level/storage/LevelStorageSource.java
+@@ -662,2 +662,5 @@
+             }
++            // Incari start: the world's waypoints and explored map go with it
++            incari.client.modules.IncariModules.worldDeleted(this.levelId);
++            // Incari end
+         }

@@ -1,0 +1,96 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 01:39:51 -0400
+Subject: [PATCH] gui: World Options asks the world's host, which may run in a
+ worker
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java b/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
+index cfaa9fceb2afff72536d8ea26f719ce4f7c1ff27..0f277cba6561ae5b6a84218ab336b06991240ba1 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/WorldOptionsScreen.java
+@@ -2,2 +2,6 @@
+ 
++// Incari start: World Options asks a SingleplayerHost what it asked the IntegratedServer, by the same
++// names, so its server may run in a worker (ADR 0039); each IntegratedServer parameter below is one
++import incari.client.singleplayer.SingleplayerHost;
++// Incari end
+ import java.util.function.Consumer;
+@@ -26,3 +30,2 @@
+ import net.minecraft.client.renderer.RenderPipelines;
+-import net.minecraft.client.server.IntegratedServer;
+ import net.minecraft.network.chat.CommonComponents;
+@@ -135,3 +138,5 @@
+         this.layout.addTitleHeader(TITLE, this.font);
+-        IntegratedServer singleplayerServer = this.minecraft.getSingleplayerServer();
++        // Incari start: the host may be a server in a worker (ADR 0039)
++        SingleplayerHost singleplayerServer = SingleplayerHost.of(this.minecraft);
++        // Incari end
+         LinearLayout content = LinearLayout.vertical().spacing(8);
+@@ -182,3 +187,3 @@
+ 
+-    private void generalOptions(final LinearLayout content, final @Nullable IntegratedServer singleplayerServer) {
++    private void generalOptions(final LinearLayout content, final @Nullable SingleplayerHost singleplayerServer) {
+         GridLayout grid = content.addChild(new GridLayout());
+@@ -222,3 +227,3 @@
+ 
+-    private Button createGameRulesButton(final @Nullable IntegratedServer singleplayerServer) {
++    private Button createGameRulesButton(final @Nullable SingleplayerHost singleplayerServer) {
+         Button gameRulesButton = Button.builder(GAME_RULES, var1 -> {
+@@ -233,3 +238,3 @@
+     private CycleButton<GameType> createGameModeButton(
+-        final IntegratedServer singleplayerServer,
++        final SingleplayerHost singleplayerServer,
+         final Component buttonName,
+@@ -250,3 +255,3 @@
+ 
+-    private CycleButton<Boolean> createAllowCommandsButton(final IntegratedServer singleplayerServer) {
++    private CycleButton<Boolean> createAllowCommandsButton(final SingleplayerHost singleplayerServer) {
+         CycleButton<Boolean> allowCommandsButton = CycleButton.onOffBuilder(singleplayerServer.getWorldData().isAllowCommands())
+@@ -275,3 +280,3 @@
+         final @Nullable AbstractWidget widget,
+-        final @Nullable IntegratedServer singleplayerServer,
++        final @Nullable SingleplayerHost singleplayerServer,
+         final @Nullable Tooltip tooltip,
+@@ -301,3 +306,3 @@
+ 
+-    private void multiplayerOptions(final LinearLayout content, final IntegratedServer singleplayerServer) {
++    private void multiplayerOptions(final LinearLayout content, final SingleplayerHost singleplayerServer) {
+         GridLayout grid = content.addChild(new GridLayout());
+@@ -362,3 +367,3 @@
+ 
+-    private void updateGuestCommandAccessButton(final IntegratedServer singleplayerServer) {
++    private void updateGuestCommandAccessButton(final SingleplayerHost singleplayerServer) {
+         if (this.guestCommandAccessButton != null) {
+@@ -385,3 +390,3 @@
+ 
+-    private void updateForceGameModeButton(final IntegratedServer singleplayerServer) {
++    private void updateForceGameModeButton(final SingleplayerHost singleplayerServer) {
+         if (this.forceGameModeButton != null) {
+@@ -414,3 +419,3 @@
+ 
+-    protected void applyChanges(final @Nullable IntegratedServer singleplayerServer) {
++    protected void applyChanges(final @Nullable SingleplayerHost singleplayerServer) {
+         if (this.wantedDifficulty != null && this.wantedDifficulty != this.initialDifficulty && this.minecraft.getConnection() != null) {
+@@ -522,3 +527,5 @@
+     public void onGamemasterPermissionChanged(final boolean hasGamemasterPermission) {
+-        IntegratedServer singleplayerServer = this.minecraft.getSingleplayerServer();
++        // Incari start: the host may be a server in a worker (ADR 0039)
++        SingleplayerHost singleplayerServer = SingleplayerHost.of(this.minecraft);
++        // Incari end
+         this.updatePermissionDependentButtons(singleplayerServer, hasGamemasterPermission, true);
+@@ -533,3 +540,3 @@
+     private void updatePermissionDependentButtons(
+-        final @Nullable IntegratedServer singleplayerServer, final boolean allowCommands, final boolean affectGameRulesButton
++        final @Nullable SingleplayerHost singleplayerServer, final boolean allowCommands, final boolean affectGameRulesButton
+     ) {
+@@ -609,3 +616,3 @@
+ 
+-    private void changeMultiplayerScope(final IntegratedServer singleplayerServer) {
++    private void changeMultiplayerScope(final SingleplayerHost singleplayerServer) {
+         if (this.wantedMultiplayerScope != null) {
+@@ -623,3 +630,3 @@
+ 
+-    private void publish(final IntegratedServer singleplayerServer, final MinecraftServer.MultiplayerScope scope) {
++    private void publish(final SingleplayerHost singleplayerServer, final MinecraftServer.MultiplayerScope scope) {
+         if (!singleplayerServer.publishServer(scope, this.port)) {

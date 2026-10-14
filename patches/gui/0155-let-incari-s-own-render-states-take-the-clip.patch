@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 11 Oct 2026 12:19:21 -0400
+Subject: [PATCH] gui: Let Incari's own render states take the clip
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java b/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
+index 50c91a353014145fe0e38fa3d11ca6a2918bcdd7..f6f4c58e778226928dfa36d5ee0a4c418179c40e 100644
+--- a/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
++++ b/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
+@@ -157,2 +157,7 @@
+ 
++    // Incari start: Incari's own render states join the GUI with its clip (RoundRects, Circles)
++    public @Nullable ScreenRectangle incariScissor() { return this.scissorStack.peek(); }
++    public void incariSubmit(final net.minecraft.client.renderer.state.gui.GuiElementRenderState state) { this.guiRenderState.addGuiElement(state); }
++    // Incari end
++
+     public void horizontalLine(int x0, int x1, final int y, final int col) {

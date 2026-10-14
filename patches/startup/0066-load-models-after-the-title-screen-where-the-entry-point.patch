@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 00:17:10 -0400
+Subject: [PATCH] startup: Load models after the title screen where the entry
+ point asks
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index 6f5ea75963b2e5ed81624d44cf57a5eadaa6b3e5..9924f88e5165ba139550c1637b05ebc1d683246a 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -2049,2 +2049,5 @@
+     ) {
++        // Incari start: a world needs the models, which may still be loading after the title screen
++        if (incari.client.startup.DeferredModels.whenReady(() -> this.doWorldLoad(levelSourceAccess, packRepository, worldStem, gameRules, newWorld))) return;
++        // Incari end
+         this.disconnectWithProgressScreen();
+diff --git a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+index 4626640c9473381233d6108bda1347490cf0d640..1ea183bd658d6f881860a5647d23826d4100c168 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+@@ -62,2 +62,5 @@
+     ) {
++        // Incari start: a world needs the models, which may still be loading after the title screen
++        if (incari.client.startup.DeferredModels.whenReady(() -> startConnecting(parent, minecraft, hostAndPort, data, isQuickPlay, transferState))) return;
++        // Incari end
+         if (minecraft.gui.screen() instanceof ConnectScreen) {
+diff --git a/src/main/java/net/minecraft/server/packs/resources/ReloadableResourceManager.java b/src/main/java/net/minecraft/server/packs/resources/ReloadableResourceManager.java
+index 2bccd6a2ade7e5d2bda6f031202700f9811b8f01..df84b122856a8ef2f424e1d355cbe83167981fd1 100644
+--- a/src/main/java/net/minecraft/server/packs/resources/ReloadableResourceManager.java
++++ b/src/main/java/net/minecraft/server/packs/resources/ReloadableResourceManager.java
+@@ -47,3 +47,5 @@
+         this.resources = new MultiPackResourceManager(this.type, resourcePacks);
+-        return SimpleReloadInstance.create(this.resources, this.listeners, backgroundExecutor, mainThreadExecutor, initialTask, LOGGER.isDebugEnabled());
++        // Incari start: the first reload may leave the models until after the title screen
++        return incari.client.startup.DeferredModels.createReload(this.resources, this.listeners, backgroundExecutor, mainThreadExecutor, initialTask, LOGGER.isDebugEnabled());
++        // Incari end
+     }

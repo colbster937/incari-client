@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 21:55:19 -0400
+Subject: [PATCH] client: Open Edit Profile at start-up
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index 1aee24f0c727e621ca0290613db514d05b2e6dfe..3e689e6a2a8cc8d5d6d9736bbe2cedd6f115f9d7 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -420,2 +420,5 @@
+ 
++        // Incari start: Edit Profile before the title screen, as Eagler clients open
++        incari.client.profile.ProfileScreen.addAtStartup(screens);
++        // Incari end
+         return onboardingScreenAdded;

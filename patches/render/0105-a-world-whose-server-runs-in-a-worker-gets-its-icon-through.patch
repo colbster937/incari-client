@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 00:32:59 -0400
+Subject: [PATCH] render: A world whose server runs in a worker gets its icon
+ through the page
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/GameRenderer.java b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+index 903bf34db4a3408e9b583eb6ed44c4c7f24163e3..947508fe42c283bd1bd0fc43cb46eb51fe08f372 100644
+--- a/src/main/java/net/minecraft/client/renderer/GameRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+@@ -567,2 +567,5 @@
+                 IntegratedServer server = this.minecraft.getSingleplayerServer();
++                // Incari start: a world whose server runs in a worker gets its icon through the page (ADR 0039)
++                if (server == null) incari.client.singleplayer.WorkerWorlds.iconFile().ifPresent(this::takeAutoScreenshot);
++                // Incari end
+                 if (server != null && !server.isStopped()) {

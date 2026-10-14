@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 22:57:43 -0400
+Subject: [PATCH] gui: Start singleplayer's server worker while the world list
+ or world creation shows
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index 3922f2f5b5628bed187739b9a5fd012dc0a22095..27b11d180739e5d80e1f1b2709e324c5263bdd46 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -267,2 +267,5 @@
+         this.screen = screen;
++        // Incari start: singleplayer's server worker started ahead of a world being opened (ADR 0041)
++        incari.client.singleplayer.WorkerWorlds.screenShown(screen);
++        // Incari end
+         if (this.screen != null) {

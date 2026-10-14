@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:40:17 -0400
+Subject: [PATCH] modules: A module keybind waiting for a key gets the game's
+ own keys
+
+
+diff --git a/src/main/java/net/minecraft/client/KeyboardHandler.java b/src/main/java/net/minecraft/client/KeyboardHandler.java
+index 57844a307564c1b77848169641f93205ff201725..956f6bde0ef67489896c5b30f1fb8bcd772de6f0 100644
+--- a/src/main/java/net/minecraft/client/KeyboardHandler.java
++++ b/src/main/java/net/minecraft/client/KeyboardHandler.java
+@@ -470,2 +470,5 @@
+                 || screen instanceof KeyBindsScreen keyBindsScreen && keyBindsScreen.lastKeySelection > Util.getMillis() - 20L
++                // Incari start: a module keybind waiting for a key gets the game's own keys too (F2, F11)
++                || incari.client.modules.IncariModules.capturingKey(screen)
++                // Incari end
+                 || !this.minecraft.handleGlobalKeyPress(InputConstants.getKey(event), event.hasControlDownWithQuirk())) {

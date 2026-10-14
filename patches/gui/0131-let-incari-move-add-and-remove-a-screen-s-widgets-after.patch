@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 10:08:46 -0400
+Subject: [PATCH] gui: Let Incari move, add and remove a screen's widgets after
+ each layout
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/Screen.java b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+index bf95d2376e54d4493349ef22d9ff72c2fee3326d..635d89be27cf57f261bca829a79ad3e15ca16f2c 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/Screen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+@@ -67,2 +67,9 @@
+     private final List<Renderable> renderables = Lists.newArrayList();
++    // Incari start: Incari's edits to this screen, made again after each layout (ScreenEdits)
++    private final List<GuiEventListener> incariAdded = Lists.newArrayList();
++
++    private void incariEdit() {
++        incari.client.ui.ScreenEdits.laidOut(this, this.incariAdded, this::addRenderableWidget, this::removeWidget);
++    }
++    // Incari end
+     protected final Font font;
+@@ -339,2 +346,5 @@
+         this.initialized = true;
++        // Incari start: Incari's edits to this screen, made again after each layout (ScreenEdits)
++        this.incariEdit();
++        // Incari end
+         this.triggerImmediateNarration(false);
+@@ -352,2 +362,5 @@
+         this.setInitialFocus();
++        // Incari start: Incari's edits to this screen, made again after each layout (ScreenEdits)
++        this.incariEdit();
++        // Incari end
+     }
+@@ -451,2 +464,5 @@
+         this.repositionElements();
++        // Incari start: Incari's edits to this screen, made again after each layout (ScreenEdits)
++        this.incariEdit();
++        // Incari end
+     }

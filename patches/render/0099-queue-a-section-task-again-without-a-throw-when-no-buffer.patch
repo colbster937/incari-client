@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 4 Oct 2026 16:05:48 -0400
+Subject: [PATCH] render: Queue a section task again without a throw when no
+ buffer pack is free
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+index 39e2e9b38bcad26d4f073e2cd22be84478ad6f94..a6a762af83945ec27be2b6a0c24c65ccb0ed5c71 100644
+--- a/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
++++ b/src/main/java/net/minecraft/client/renderer/chunk/SectionRenderDispatcher.java
+@@ -88,3 +88,6 @@
+                 try {
+-                    SectionBufferBuilderPack buffer = Objects.requireNonNull(this.bufferPool.acquire());
++                    // Incari start: no free buffer pack: queued again without throwing for it, as the catch below does
++                    SectionBufferBuilderPack buffer = this.bufferPool.acquire();
++                    if (buffer == null) { this.queue.add(task); return; }
++                    // Incari end
+                     SectionRenderDispatcher.RenderSection.SectionTask.SectionTaskResult result = task.doTask(buffer);

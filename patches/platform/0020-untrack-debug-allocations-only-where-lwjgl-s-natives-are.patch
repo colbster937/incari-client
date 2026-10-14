@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 22:45:52 -0400
+Subject: [PATCH] platform: Untrack debug allocations only where LWJGL's
+ natives are loaded
+
+
+diff --git a/src/main/java/com/mojang/blaze3d/platform/NativeImage.java b/src/main/java/com/mojang/blaze3d/platform/NativeImage.java
+index b59f462a94c69aec9a58f575e12e23aaedf2ca8f..082824e8b9816cdfad7817153ace5a951612dcb9 100644
+--- a/src/main/java/com/mojang/blaze3d/platform/NativeImage.java
++++ b/src/main/java/com/mojang/blaze3d/platform/NativeImage.java
+@@ -443,3 +443,7 @@
+     public void untrack() {
+-        DebugMemoryUntracker.untrack(this.pixels);
++        // Incari start: LWJGL's debug allocator exists only where its native libraries do
++        if (incari.client.platform.PlatformLifecycle.hasNativeLibraries()) {
++            DebugMemoryUntracker.untrack(this.pixels);
++        }
++        // Incari end
+     }

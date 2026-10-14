@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 10:27:23 -0400
+Subject: [PATCH] gui: Let Incari's skin draw screens' backdrops
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/Screen.java b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+index 635d89be27cf57f261bca829a79ad3e15ca16f2c..9fef4a41c8164d0a93937265021b19202466d385 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/Screen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+@@ -393,2 +393,5 @@
+     public void extractBackground(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
++        // Incari start: Incari's skin may draw the backdrop its own way (Skins)
++        if (!incari.client.ui.Skins.background(graphics, this, a))
++        // Incari end
+         if (this.isInGameUi()) {

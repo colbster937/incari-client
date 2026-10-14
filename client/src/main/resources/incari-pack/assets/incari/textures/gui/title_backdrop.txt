@@ -1,0 +1,4 @@
+title_backdrop.png: "Snowy landscape in Eigergletscher, Lauterbrunnen" by Pascale Amez (2016),
+CC0 1.0 Universal Public Domain Dedication, blurred and shrunk by tools/backdrop/make_backdrop.py.
+https://commons.wikimedia.org/wiki/File:Snowy_landscape_in_Eigergletscher,_Lauterbrunnen.jpg
+(originally https://unsplash.com/photos/Q4RuIsRuMcs, published before Unsplash's 2017 licence change)

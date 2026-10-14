@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 10:09:13 -0400
+Subject: [PATCH] gui: Let Incari draw a screen of its own in place of one of
+ the game's
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/Gui.java b/src/main/java/net/minecraft/client/gui/Gui.java
+index 27b11d180739e5d80e1f1b2709e324c5263bdd46..ea0ee39979b3a7b58b694cd75ebaef826d70ccf6 100644
+--- a/src/main/java/net/minecraft/client/gui/Gui.java
++++ b/src/main/java/net/minecraft/client/gui/Gui.java
+@@ -266,2 +266,5 @@
+ 
++        // Incari start: a screen Incari draws in place of the game's (ScreenEdits)
++        screen = incari.client.ui.ScreenEdits.replaced(screen);
++        // Incari end
+         this.screen = screen;

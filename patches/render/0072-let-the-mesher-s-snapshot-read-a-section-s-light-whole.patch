@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 1 Oct 2026 08:16:50 -0400
+Subject: [PATCH] render: Let the mesher's snapshot read a section's light
+ whole
+
+
+diff --git a/src/main/java/net/minecraft/world/level/lighting/LightEngine.java b/src/main/java/net/minecraft/world/level/lighting/LightEngine.java
+index 8c51a9317033b2ee031b8bb27e8462ef48d8ca71..61eb025c15d9d94caabce99a6f4afe224fcd29e5 100644
+--- a/src/main/java/net/minecraft/world/level/lighting/LightEngine.java
++++ b/src/main/java/net/minecraft/world/level/lighting/LightEngine.java
+@@ -210,2 +210,8 @@
+ 
++    // Incari start: the section's light as getLightValue reads it (the visible data, not queued updates), for the mesher's snapshot to copy whole (ADR 0027)
++    public @Nullable DataLayer incariVisibleLayer(final long sectionNode) {
++        return this.storage.getDataLayer(sectionNode, false);
++    }
++    // Incari end
++
+     public String getDebugData(final long sectionNode) {

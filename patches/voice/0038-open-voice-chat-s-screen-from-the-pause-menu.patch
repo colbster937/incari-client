@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:36:09 -0400
+Subject: [PATCH] voice: Open voice chat's screen from the pause menu
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+index 8a9c67674a1c3d9f33f0968937f3ad3bdc381429..5e09adac1d8ad230b9355134dd9ae4a28fd76b8a 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/PauseScreen.java
+@@ -156,2 +156,5 @@
+         helper.addChild(iconButtonRow, 2, gridLayout.newCellSettings().alignHorizontallyCenter());
++        // Incari start: voice chat's screen, on a server with Eagler voice
++        incari.client.eagler.VoiceScreen.addPauseButton(helper, this);
++        // Incari end
+         Optional<? extends Holder<Dialog>> additions = this.getCustomAdditions();

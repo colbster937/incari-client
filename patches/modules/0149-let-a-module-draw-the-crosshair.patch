@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 22:39:00 -0400
+Subject: [PATCH] modules: Let a module draw the crosshair
+
+The crosshair event (ADR 0053): where the game draws its crosshair, a module may draw its own instead (Crosshair Editor).
+
+diff --git a/src/main/java/net/minecraft/client/gui/Hud.java b/src/main/java/net/minecraft/client/gui/Hud.java
+index e3928abcbe1848252d31c04af0818ec3ab5e8a98..5df4bb155b3435bd21d7060af60aecee9323cd3c 100644
+--- a/src/main/java/net/minecraft/client/gui/Hud.java
++++ b/src/main/java/net/minecraft/client/gui/Hud.java
+@@ -461,2 +461,5 @@
+                     int size = 15;
++                    // Incari start: a module may draw the crosshair (Crosshair Editor)
++                    if (!incari.client.modules.ModuleHud.crosshair(graphics))
++                    // Incari end
+                     graphics.blitSprite(RenderPipelines.CROSSHAIR, CROSSHAIR_SPRITE, (graphics.guiWidth() - 15) / 2, (graphics.guiHeight() - 15) / 2, 15, 15);

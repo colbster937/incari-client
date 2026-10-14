@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 19:21:07 -0400
+Subject: [PATCH] options: A Potato graphics preset below Fast, and the default
+
+Low-end Chromebooks want the cheapest settings from the first start:
+render distance 4, no clouds, minimal particles, no mip levels, no menu
+blur. The preset's values live in Incari's PotatoGraphics.
+
+diff --git a/src/main/java/net/minecraft/client/GraphicsPreset.java b/src/main/java/net/minecraft/client/GraphicsPreset.java
+index aba39c429dd04961ebf89b8694fc0305f874f12e..714b43b8a9dd953fffe4f1a99ace69c900fd43e0 100644
+--- a/src/main/java/net/minecraft/client/GraphicsPreset.java
++++ b/src/main/java/net/minecraft/client/GraphicsPreset.java
+@@ -11,2 +11,5 @@
+ public enum GraphicsPreset implements StringRepresentable {
++    // Incari start: a Potato preset below Fast, for low-end Chromebooks
++    POTATO("potato", incari.client.tier.PotatoGraphics.KEY),
++    // Incari end
+     FAST("fast", "options.graphics.fast"),
+@@ -38,2 +41,7 @@
+         switch (this) {
++            // Incari start: a Potato preset below Fast, for low-end Chromebooks
++            case POTATO:
++                incari.client.tier.PotatoGraphics.apply(minecraft.options, screen);
++                break;
++            // Incari end
+             case FAST: {
+diff --git a/src/main/java/net/minecraft/client/Options.java b/src/main/java/net/minecraft/client/Options.java
+index d228919efbcf89feec9607e0605a6e93b7ffac4c..e636479b4b227770787bb59772f691b9f3429cae 100644
+--- a/src/main/java/net/minecraft/client/Options.java
++++ b/src/main/java/net/minecraft/client/Options.java
+@@ -163,3 +163,5 @@
+         GraphicsPreset.CODEC,
+-        GraphicsPreset.FANCY,
++        // Incari start: Potato by default, for low-end Chromebooks
++        GraphicsPreset.POTATO,
++        // Incari end
+         this::applyGraphicsPreset

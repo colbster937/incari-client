@@ -1,0 +1,141 @@
+# The benchmark (ADR 0021): ./gradlew :app-web:benchmark plays these scenarios in the browser
+# build and reports what the page's profiler measured. The format is tools/webbuild's
+# BenchmarkScript; docs/benchmark.md explains the figures and how to run it on a Chromebook.
+#
+# The page joins a fresh world from server.properties' seed as IncariBench, with options.txt's
+# options (render distance 8). The world is made ready before anyone joins: time and weather
+# stopped, no natural spawns, and the terrain both scenarios see generated in advance, so a scenario
+# measures the client loading and drawing it, not the server making it. The player watches each
+# scenario as a spectator of an invisible armor stand: a camera the server moves, so every run
+# sees the same frames. options.txt throttles the frame rate only when minimized.
+
+server
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamerule spawn_patrols false
+    rcon:gamerule spawn_phantoms false
+    rcon:gamerule spawn_wandering_traders false
+    rcon:gamerule command_block_output false
+    rcon:gamerule mob_drops false
+    rcon:time set 6000
+    rcon:weather clear
+    # The fly-through's corridor, x -128 to 895 and z -128 to 127: the flight and its render
+    # distance. forceload takes 256 chunks at a time.
+    rcon:forceload add -128 -128 127 127
+    rcon:forceload add 128 -128 383 127
+    rcon:forceload add 384 -128 639 127
+    rcon:forceload add 640 -128 895 127
+    # The arena, 2000 blocks north, with its render distance.
+    rcon:forceload add -128 -2128 127 -1873
+    # The lobby, 2000 blocks south, with its render distance.
+    rcon:forceload add -128 1872 127 2127
+    rconwait:execute if loaded -128 64 -128 => passed
+    rconwait:execute if loaded 383 64 127 => passed
+    rconwait:execute if loaded 895 64 -128 => passed
+    rconwait:execute if loaded 895 64 127 => passed
+    rconwait:execute if loaded 127 64 -1873 => passed
+    rconwait:execute if loaded -128 64 -2128 => passed
+    rconwait:execute if loaded 127 64 2127 => passed
+    rconwait:execute if loaded -128 64 1872 => passed
+    rcon:forceload remove all
+    # The fly-through's engine: each tick, the camera moves 0.55 blocks east (11 blocks a second, a
+    # sprint-fly). Its chunk stays loaded so it always runs.
+    rcon:forceload add 0 0
+    rcon:setblock 0 318 0 minecraft:repeating_command_block{auto:1b,Command:"execute as @e[tag=incari_camera] at @s run tp @s ~0.55 ~ ~"}
+
+setup
+    rcon:gamemode spectator IncariBench
+    rcon:tp IncariBench 0.5 140 0.5 -90 25
+    sleep:5000
+
+scenario flythrough  A straight flight east over fresh terrain at 11 blocks a second, render distance 8
+    rcon:kill @e[tag=incari_camera]
+    rcon:summon minecraft:armor_stand 0.5 140 0.5 {Tags:["incari_camera"],Invisible:1b,Marker:1b,NoGravity:1b,Rotation:[-90f,25f]}
+    rcon:spectate @e[tag=incari_camera,limit=1] IncariBench
+    sleep:3000
+    measure:55
+    # A teleport ends the spectating.
+    rcon:tp IncariBench 0.5 212 -2026 0 35
+    rcon:kill @e[tag=incari_camera]
+
+scenario combat  Iron golems against waves of vindicators, pillagers and husks in an arena, watched from its edge
+    rcon:tp IncariBench 0.5 212 -2026 0 35
+    # The teleport loads the arena's chunks a moment later: building before then fails.
+    rconwait:execute if loaded -17 199 -2017 => passed
+    rconwait:execute if loaded 17 204 -1983 => passed
+    rcon:fill -17 199 -2017 17 204 -1983 minecraft:barrier outline
+    rcon:fill -16 199 -2016 16 199 -1984 minecraft:smooth_stone
+    rcon:summon minecraft:armor_stand 0.5 212 -2026 {Tags:["incari_watch"],Invisible:1b,Marker:1b,NoGravity:1b,Rotation:[0f,35f]}
+    rcon:spectate @e[tag=incari_watch,limit=1] IncariBench
+    rcon*10:summon minecraft:iron_golem 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon:spreadplayers 0 -2000 2 14 under 203 false @e[tag=incari_fighter]
+    sleep:5000
+    measure:10
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    measure:10
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    measure:10
+    rcon*4:summon minecraft:vindicator 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:pillager 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    rcon*3:summon minecraft:husk 0 200 -2000 {Tags:["incari_fighter"],PersistenceRequired:1b}
+    measure:10
+    rcon:kill @e[tag=incari_fighter]
+    rcon:kill @e[tag=incari_watch]
+
+# The crowded lobby: a crowd of player-shaped mannequins in armor with their names shown, floating
+# hologram text, signs, floating items, particle fountains, a sidebar and a boss bar, watched by a
+# camera orbiting the crowd 20 blocks out (a command block moves it each tick: sideways and turning,
+# so it circles the lobby's centre while facing it).
+scenario lobby  A crowded server lobby: 80 players in armor with name tags, holograms, signs and particles, circled by the camera
+    rcon:tp IncariBench 0.5 212 1980 0 25
+    # As in the arena: wait for the lobby's chunks before building it.
+    rconwait:execute if loaded -22 199 1978 => passed
+    rconwait:execute if loaded 22 214 2022 => passed
+    rcon:fill -22 199 1978 22 199 2022 minecraft:polished_andesite
+    rcon:fill -22 200 1978 22 214 2022 minecraft:air
+    rcon:fill -22 200 1978 22 200 1978 minecraft:oak_sign[rotation=0]{front_text:{messages:["Welcome","to the","Incari","lobby"]}}
+    rcon:fill -22 200 2022 22 200 2022 minecraft:oak_sign[rotation=8]{front_text:{messages:["Pick a","game","below","!"]}}
+    rcon:fill -22 200 1979 -22 200 2021 minecraft:oak_sign[rotation=12]{front_text:{messages:["Bedwars","Skywars","Duels","Parkour"]}}
+    rcon:fill 22 200 1979 22 200 2021 minecraft:oak_sign[rotation=4]{front_text:{messages:["Rules:","be kind","no hacks","have fun"]}}
+    rcon*80:summon minecraft:mannequin 0 200 2000 {Tags:["incari_lobby"],CustomName:"LobbyPlayer",CustomNameVisible:1b,equipment:{head:{id:"minecraft:iron_helmet"},chest:{id:"minecraft:diamond_chestplate"},legs:{id:"minecraft:iron_leggings"},feet:{id:"minecraft:golden_boots"},mainhand:{id:"minecraft:diamond_sword"}}}
+    rcon:spreadplayers 0 2000 1 15 under 205 false @e[tag=incari_lobby,type=minecraft:mannequin]
+    rcon*24:summon minecraft:armor_stand 0 203 2000 {Tags:["incari_lobby","incari_hologram"],Invisible:1b,Marker:1b,NoGravity:1b,CustomName:"Play now: 1,024 online",CustomNameVisible:1b}
+    rcon:spreadplayers 0 2000 2 18 under 205 false @e[tag=incari_hologram]
+    rcon*12:summon minecraft:text_display 0 205 2000 {Tags:["incari_lobby"],billboard:"center",text:"Incari Network",background:1073741824}
+    rcon:spreadplayers 0 2000 4 18 under 205 false @e[tag=incari_lobby,type=minecraft:text_display]
+    rcon*30:summon minecraft:item 0 201 2000 {Tags:["incari_lobby"],Item:{id:"minecraft:diamond",count:1},NoGravity:1b,Age:-32768,PickupDelay:32767}
+    rcon:spreadplayers 0 2000 1 16 under 205 false @e[tag=incari_lobby,type=minecraft:item]
+    rcon:setblock 1 318 1 minecraft:repeating_command_block{auto:1b,Command:"particle minecraft:end_rod 0 204 2000 10 3 10 0.01 30 force"}
+    rcon:setblock 2 318 0 minecraft:repeating_command_block{auto:1b,Command:"particle minecraft:happy_villager 0 202 2000 14 2 14 0 20 force"}
+    rcon:setblock 2 318 1 minecraft:repeating_command_block{auto:1b,Command:"particle minecraft:flame 0 201 2000 16 1 16 0.01 15 force"}
+    rcon:scoreboard objectives add incari_lobby dummy "Incari Network"
+    rcon:scoreboard objectives setdisplay sidebar incari_lobby
+    rcon:scoreboard players set Online incari_lobby 1024
+    rcon:scoreboard players set Bedwars incari_lobby 312
+    rcon:scoreboard players set Skywars incari_lobby 288
+    rcon:scoreboard players set Duels incari_lobby 201
+    rcon:scoreboard players set Parkour incari_lobby 97
+    rcon:bossbar add incari_lobby "Welcome to the Incari lobby"
+    rcon:bossbar set incari_lobby players @a
+    rcon:summon minecraft:armor_stand 0.5 207 1980 {Tags:["incari_lobbycam"],Invisible:1b,Marker:1b,NoGravity:1b,Rotation:[0f,25f]}
+    rcon:spectate @e[tag=incari_lobbycam,limit=1] IncariBench
+    rcon:setblock 1 318 0 minecraft:repeating_command_block{auto:1b,Command:"execute as @e[tag=incari_lobbycam] at @s run tp @s ^0.35 ^ ^ ~1 ~"}
+    sleep:5000
+    measure:40
+    rcon:setblock 1 318 0 minecraft:air
+    rcon:setblock 1 318 1 minecraft:air
+    rcon:setblock 2 318 0 minecraft:air
+    rcon:setblock 2 318 1 minecraft:air
+    rcon:bossbar remove incari_lobby
+    rcon:scoreboard objectives remove incari_lobby
+    rcon:tp IncariBench 0.5 212 1980 0 25
+    rcon:kill @e[tag=incari_lobby]
+    rcon:kill @e[tag=incari_lobbycam]

@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 17:53:23 -0400
+Subject: [PATCH] net: Join again with the version a server's refusal names
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/DisconnectedScreen.java b/src/main/java/net/minecraft/client/gui/screens/DisconnectedScreen.java
+index 3eadecbf7e8e8e2c40731ccb2779656774c32d24..ed78adea68fdc5111e43d12f1acd60eb9f92d484 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/DisconnectedScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/DisconnectedScreen.java
+@@ -43,2 +43,5 @@
+     protected void init() {
++        // Incari start: a join Incari can recover (a version refusal, a password, a redirect) goes on
++        if (incari.client.net.JoinFailures.handle(this.minecraft, this.parent, this.details.reason())) return;
++        // Incari end
+         this.layout.defaultCellSetting().alignHorizontallyCenter().padding(10);

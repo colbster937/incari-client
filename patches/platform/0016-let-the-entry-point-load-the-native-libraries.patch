@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 13:35:51 -0400
+Subject: [PATCH] platform: Let the entry point load the native libraries
+
+
+diff --git a/src/main/java/net/minecraft/client/main/Main.java b/src/main/java/net/minecraft/client/main/Main.java
+index 998dbcfc63e8830cdc489bda2c2454c0a2a4aa86..13b612664ea48508907f8dfc2c444a68e354477c 100644
+--- a/src/main/java/net/minecraft/client/main/Main.java
++++ b/src/main/java/net/minecraft/client/main/Main.java
+@@ -126,3 +126,5 @@
+         try {
+-            NativeLibrariesBootstrap.loadLibraries();
++            // Incari start: the entry point loads native libraries (desktop has them, a page doesn't)
++            incari.client.platform.PlatformLifecycle.loadNativeLibraries();
++            // Incari end
+         } catch (Throwable t) {

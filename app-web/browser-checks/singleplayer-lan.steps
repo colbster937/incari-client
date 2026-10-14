@@ -1,0 +1,24 @@
+# ADR 0038: Open to LAN with singleplayer's server on the page. A page can't listen for
+# connections, so the game says it couldn't host instead of failing. (With the server in a worker,
+# the pause menu has no World Options yet: ADR 0039.) Positions are for the 1280x577 viewport.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 "-Pbrowser.query=name=Player&singleplayer=page" \
+#       -Pbrowser.steps=@browser-checks/singleplayer-lan.steps
+
+sleep:4000
+click:0.5,0.945
+sleep:3000
+click:0.5,0.449
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+# World Options, LAN on, Apply: back to the pause menu, and the game says it couldn't host.
+key:Escape
+sleep:1500
+click:0.583,0.561
+sleep:2000
+click:0.375,0.723
+sleep:500
+click:0.375,0.945
+wait:.*\[CHAT\] Unable to host local game.*

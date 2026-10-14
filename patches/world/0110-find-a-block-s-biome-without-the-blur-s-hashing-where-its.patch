@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 22:32:36 -0400
+Subject: [PATCH] world: Find a block's biome without the blur's hashing where
+ its cells agree
+
+
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+index 5d8e5d71325a04afe02db99fb1ec525705cc2e5f..eaa5ebc7308ae4a39cc19d99737809f00c65cd84 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/material/MaterialSystem.java
+@@ -139,5 +139,7 @@
+         );
++        // Incari start: a block's biome without the blur's hashing where its cells agree
+         MaterialRuleContext context = new MaterialRuleContext(
+-            this, randomState, narrowedVolume, noiseChunk.cachingSamplers(), biomeManager::getBiome, generationContext, possibleBiomes
++            this, randomState, narrowedVolume, noiseChunk.cachingSamplers(), incari.client.world.BiomeCells.forChunk(biomeManager, minBlockX, minY, minBlockZ, maxY), generationContext, possibleBiomes
+         );
++        // Incari end
+         RuleEvaluator rule = ruleSource.compile(context);

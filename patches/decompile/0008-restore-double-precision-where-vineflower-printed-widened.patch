@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 12:44:17 -0400
+Subject: [PATCH] decompile: Restore double precision where Vineflower printed
+ widened float constants
+
+
+diff --git a/src/main/java/net/minecraft/world/attribute/AttributeRange.java b/src/main/java/net/minecraft/world/attribute/AttributeRange.java
+index 9723517f20b88f63ba3c3f190d06af947db2a70a..42911078ec09390f50ed8fb103f1ae1a385105b4 100644
+--- a/src/main/java/net/minecraft/world/attribute/AttributeRange.java
++++ b/src/main/java/net/minecraft/world/attribute/AttributeRange.java
+@@ -33,3 +33,3 @@
+             public Float sanitize(final Float value) {
+-                return value >= minValue && value <= maxValue ? value : Mth.clamp(value, minValue, maxValue);
++                return value >= minValue && value <= maxValue ? value : Float.valueOf(Mth.clamp(value, minValue, maxValue));
+             }
+diff --git a/src/main/java/net/minecraft/world/attribute/LerpFunction.java b/src/main/java/net/minecraft/world/attribute/LerpFunction.java
+index d4c9ddf3bde1c5093a03d09bcbf7e07a1930ea21..bbdaba8767ea6e41ba5f46c9f088020ef070773d 100644
+--- a/src/main/java/net/minecraft/world/attribute/LerpFunction.java
++++ b/src/main/java/net/minecraft/world/attribute/LerpFunction.java
+@@ -24,3 +24,3 @@
+             float delta = Mth.wrapDegrees(to - from);
+-            return Math.abs(delta) >= maxDelta ? to : from + alpha * delta;
++            return Math.abs(delta) >= maxDelta ? to : Float.valueOf(from + alpha * delta);
+         };
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index 82e931923f1d8a75c9547622758f17408cd722e4..ad1cb823151fb7e62f861b02337a64900c35929e 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -3867,3 +3867,3 @@
+                 Vec3 lookDirection = Vec3.atBottomCenterOf(bedPosition).subtract(standUp).normalize();
+-                float yaw = (float)Mth.wrapDegrees(Mth.atan2(lookDirection.z, lookDirection.x) * 180.0F / (float)Math.PI - 90.0);
++                float yaw = (float)Mth.wrapDegrees(Mth.atan2(lookDirection.z, lookDirection.x) * (180.0F / (float)Math.PI) - 90.0);
+                 this.setPos(standUp.x, standUp.y, standUp.z);
+diff --git a/src/main/java/net/minecraft/world/level/BlockGetter.java b/src/main/java/net/minecraft/world/level/BlockGetter.java
+index 74e80fc1f5705a6d432954efc38e1fc1c1d522b2..68ad345910df28541e5a96f8db93306cff7bbe49 100644
+--- a/src/main/java/net/minecraft/world/level/BlockGetter.java
++++ b/src/main/java/net/minecraft/world/level/BlockGetter.java
+@@ -268,5 +268,5 @@
+                 Vec3 hitPoint = hitPointOpt.get();
+-                double cornerHitX = Mth.clamp(hitPoint.x, cornerVisitedBlockX + 1.0E-5F, cornerVisitedBlockX + 1.0 - 1.0E-5F);
+-                double cornerHitY = Mth.clamp(hitPoint.y, cornerVisitedBlockY + 1.0E-5F, cornerVisitedBlockY + 1.0 - 1.0E-5F);
+-                double cornerHitZ = Mth.clamp(hitPoint.z, cornerVisitedBlockZ + 1.0E-5F, cornerVisitedBlockZ + 1.0 - 1.0E-5F);
++                double cornerHitX = Mth.clamp(hitPoint.x, cornerVisitedBlockX + (double)1.0E-5F, cornerVisitedBlockX + 1.0 - 1.0E-5F);
++                double cornerHitY = Mth.clamp(hitPoint.y, cornerVisitedBlockY + (double)1.0E-5F, cornerVisitedBlockY + 1.0 - 1.0E-5F);
++                double cornerHitZ = Mth.clamp(hitPoint.z, cornerVisitedBlockZ + (double)1.0E-5F, cornerVisitedBlockZ + 1.0 - 1.0E-5F);
+                 int oppositeCornerX = Mth.floor(cornerHitX - boxSizeX * cornerDir.getX());
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/BitRandomSource.java b/src/main/java/net/minecraft/world/level/levelgen/BitRandomSource.java
+index 53b3900ca27164d4a1ba57e8998d484c3f772813..f17861a73779633cc8b519839412a07a3a033599 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/BitRandomSource.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/BitRandomSource.java
+@@ -58,3 +58,3 @@
+         long combined = ((long)upper << 27) + lower;
+-        return combined * 1.110223E-16F;
++        return combined * 1.1102230246251565E-16;
+     }
+diff --git a/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java b/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
+index fe3f1777546504cab9c9d1fcf7d5c2efe59d100a..7aa4e52d4d526925525fa5f88069218d1be2f737 100644
+--- a/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
++++ b/src/main/java/net/minecraft/world/level/levelgen/XoroshiroRandomSource.java
+@@ -92,3 +92,3 @@
+     public double nextDouble() {
+-        return this.nextBits(53) * 1.110223E-16F;
++        return this.nextBits(53) * 1.1102230246251565E-16;
+     }

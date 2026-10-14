@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 07:59:55 -0400
+Subject: [PATCH] net: Ping Eagler servers with their MOTD query
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java b/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
+index 6f87300e2f2796e124638c2929045b8e156ffc9c..c3d005c8ab6f17c5026b8a71216a7162775ce14c 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
+@@ -56,2 +56,7 @@
+         final ServerAddress rawAddress = ServerAddress.parseString(data.ip);
++        // Incari start: Eagler (WebSocket) servers answer a MOTD query instead
++        if (incari.client.net.EaglerPings.ping(data, rawAddress, onPersistentDataChange, onPongResponse)) {
++            return;
++        }
++        // Incari end
+         Optional<InetSocketAddress> resolvedAddress = ServerNameResolver.DEFAULT.resolveAddress(rawAddress).map(ResolvedServerAddress::asInetSocketAddress);

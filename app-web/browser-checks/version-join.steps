@@ -1,0 +1,42 @@
+# The browser build joins a server of another version through Via, over ws://: a vanilla
+# 1.8.9, 1.12.2 or 1.20.4 server behind the dev bridge (tools/wsbridge, which speaks Eagler), or a
+# real EaglerXServer in front of one. It pings nothing first: quick play's version check asks the
+# server's MOTD. Checks read the page's console and the server's answers over RCON (the backend's).
+# README.md ("Other versions") has the setup and commands.
+
+# On a server that has run a while, night falls and mobs can kill the player mid-check. (1.8 and
+# 1.12 take a number; later versions a name. The other form fails harmlessly.)
+rcon:difficulty 0
+rcon:difficulty peaceful
+rcon:time set 1000
+
+# The first-run accessibility screen: Continue. Quick play connects after it, through Via.
+sleep:4000
+click:0.5,0.945
+wait:.*Joining ws://[^ ]+ as .* through Via.*
+
+# --- Joined: the server lists the player, and a system message reaches the client's chat ---
+rconwait:list => IncariWeb
+sleep:3000
+rcon:tellraw IncariWeb "incari-check-chat"
+wait:.*\[CHAT\] incari-check-chat.*
+shot:build/browser-checks/version-joined.png
+
+# --- Idle for 20 s: a 1.8 server wants a movement packet every tick, which Via sends ---
+sleep:20000
+rconwait:list => IncariWeb
+rcon:tellraw IncariWeb "incari-check-still-here"
+wait:.*\[CHAT\] incari-check-still-here.*
+
+# --- Kicked, then back through a reload of the page (quick play again) ---
+rcon:kick IncariWeb incari-check-kick
+wait:.*Client disconnected with reason: incari-check-kick.*
+sleep:1000
+reload:
+# The accessibility screen was answered and saved: quick play connects straight away.
+wait:.*Joining ws://[^ ]+ as .* through Via.*
+rconwait:list => IncariWeb
+sleep:3000
+rcon:tellraw IncariWeb "incari-check-rejoined"
+wait:.*\[CHAT\] incari-check-rejoined.*
+shot:build/browser-checks/version-rejoined.png

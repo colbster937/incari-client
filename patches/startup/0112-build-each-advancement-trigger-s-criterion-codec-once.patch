@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 22:33:08 -0400
+Subject: [PATCH] startup: Build each advancement trigger's criterion codec
+ once
+
+
+diff --git a/src/main/java/net/minecraft/advancements/triggers/Criterion.java b/src/main/java/net/minecraft/advancements/triggers/Criterion.java
+index 67cc1d6c46cd47feb254a5c124a61a66ecc43558..87e6aaa6e8ad9a44e529af7c40bd21a0a8f9ac02 100644
+--- a/src/main/java/net/minecraft/advancements/triggers/Criterion.java
++++ b/src/main/java/net/minecraft/advancements/triggers/Criterion.java
+@@ -14,3 +14,7 @@
+     private static <T extends CriterionTriggerInstance> Codec<Criterion<T>> criterionCodec(final CriterionTrigger<T> trigger) {
+-        return trigger.codec().xmap(instance -> new Criterion<>(trigger, (T)instance), Criterion::triggerInstance);
++        // Incari start: one codec per trigger, built once
++        return incari.client.startup.CriterionCodecs.forTrigger(
++            trigger, () -> trigger.codec().xmap(instance -> new Criterion<>(trigger, (T)instance), Criterion::triggerInstance)
++        );
++        // Incari end
+     }

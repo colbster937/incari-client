@@ -1,0 +1,14 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 01:21:55 -0400
+Subject: [PATCH] render: Leave blank sign lines out
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/blockentity/AbstractSignRenderer.java b/src/main/java/net/minecraft/client/renderer/blockentity/AbstractSignRenderer.java
+index eafab1de81c171474fa168e20c9b3c3c3566c8fe..e26fe17f68c4a1effa2c5d93e228ebc7cb4c22d1 100644
+--- a/src/main/java/net/minecraft/client/renderer/blockentity/AbstractSignRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/blockentity/AbstractSignRenderer.java
+@@ -70,2 +70,3 @@
+             FormattedCharSequence actualLine = formattedLines[i];
++            if (incari.client.render.SignLines.skip(actualLine)) continue; // Incari: blank sign lines left out (ADR 0031)
+             float x1 = -this.font.width(actualLine) / 2;

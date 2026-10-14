@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:50:36 -0400
+Subject: [PATCH] modules: Hand the world's projection, bobbing and all, to the
+ waypoint tags
+
+The tags were projected with the camera's projection alone, while the world
+is drawn with view bobbing, the hurt tilt and nausea's warp on top.
+
+diff --git a/src/main/java/net/minecraft/client/renderer/GameRenderer.java b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+index debb1be334cf7d1a15eebacd64d726b894156b56..25f807f27e314f66915b84ceacc8497be197254d 100644
+--- a/src/main/java/net/minecraft/client/renderer/GameRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/GameRenderer.java
+@@ -673,2 +673,5 @@
+ 
++        // Incari start: waypoint tags follow the world's bobbing, tilt and warp (ADR 0051)
++        incari.client.modules.ModuleHud.worldProjection(cameraState.projectionMatrix, projectionMatrix);
++        // Incari end
+         RenderSystem.setProjectionMatrix(this.levelProjectionMatrixBuffer.getBuffer(projectionMatrix), ProjectionType.PERSPECTIVE);

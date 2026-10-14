@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 28 Sep 2026 07:55:30 -0400
+Subject: [PATCH] audio: Decode and stream sounds through the platform where it
+ has a decoder
+
+
+diff --git a/src/main/java/net/minecraft/client/sounds/SoundBufferLibrary.java b/src/main/java/net/minecraft/client/sounds/SoundBufferLibrary.java
+index 30fcc733ef0bbbb1e330635871228a906b632408..13ab5585b5d73bddab0be81b1a56275e0fd3136f 100644
+--- a/src/main/java/net/minecraft/client/sounds/SoundBufferLibrary.java
++++ b/src/main/java/net/minecraft/client/sounds/SoundBufferLibrary.java
+@@ -26,2 +26,6 @@
+     public CompletableFuture<SoundBuffer> getCompleteBuffer(final Identifier location) {
++        // Incari start: the platform may decode sounds itself (the browser: natively, off the page's thread)
++        CompletableFuture<SoundBuffer> platformDecoded = incari.client.audio.PlatformSoundLoading.completeBuffer(this.cache, this.resourceManager, location);
++        if (platformDecoded != null) return platformDecoded;
++        // Incari end
+         return this.cache.computeIfAbsent(location, l -> CompletableFuture.supplyAsync(() -> {
+@@ -40,2 +44,6 @@
+     public CompletableFuture<AudioStream> getStream(final Identifier location, final boolean looping) {
++        // Incari start: a device that streams compressed files gets the whole file (the browser plays it as media)
++        CompletableFuture<AudioStream> platformStream = incari.client.audio.PlatformSoundLoading.stream(this.resourceManager, location, looping);
++        if (platformStream != null) return platformStream;
++        // Incari end
+         return CompletableFuture.supplyAsync(() -> {

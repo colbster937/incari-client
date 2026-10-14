@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 3 Oct 2026 18:28:19 -0400
+Subject: [PATCH] render: Refill the occlusion graph's copies for a full update
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java b/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
+index cfe81efcc6f4fcbc6fcf78e9893bfe2b5a39cc47..1809107f9a97a722d3b4c8e3f0b00ba61a1afb31 100644
+--- a/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
++++ b/src/main/java/net/minecraft/client/renderer/SectionOcclusionGraph.java
+@@ -161,4 +161,6 @@
+         this.needsFullUpdate = false;
+-        LongOpenHashSet clonedEmptySections = this.emptySections.clone();
+-        LongOpenHashSet clonedLoadedChunks = this.loadedChunks.clone();
++        // Incari start: the copies refilled, not made anew each full update (ADR 0032)
++        LongOpenHashSet clonedEmptySections = incari.client.render.GraphUpdates.emptySectionsCopy(this.emptySections);
++        LongOpenHashSet clonedLoadedChunks = incari.client.render.GraphUpdates.loadedChunksCopy(this.loadedChunks);
++        // Incari end
+         this.fullUpdateTask = CompletableFuture.runAsync(() -> {

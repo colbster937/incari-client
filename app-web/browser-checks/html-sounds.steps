@@ -1,0 +1,41 @@
+# The single HTML file's sounds (ADR 0062: all but music, smaller): opened from the disk, a quick world's block
+# breaks play their sounds from the file. Build it first (./incari build --html --only fast), then:
+#
+#   ./gradlew :app-web:browserCheck -Pteavm.fast -Pbrowser.html=$PWD/dist/incari.html -Pbrowser.gpu=gl \
+#       -Pbrowser.seconds=300 "-Pbrowser.query=name=Player&world=Html&seed=1" \
+#       -Pbrowser.steps=@browser-checks/html-sounds.steps
+
+sleep:6000
+# The first-run accessibility screen: Continue (also the gesture the audio waits for).
+click:0.5,0.945
+wait:.*logged in with entity id.*
+sleep:6000
+eval:globalThis.before = incariAudio.buffersStarted
+
+key:KeyT
+sleep:800
+type:/fill ~-4 ~ ~-4 ~4 ~4 ~4 minecraft:air
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/fill ~-4 ~-3 ~-4 ~4 ~-1 ~4 minecraft:stone
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/gamemode creative
+key:Enter
+sleep:800
+key:KeyT
+sleep:800
+type:/tp @s ~ ~ ~ 0 90
+key:Enter
+sleep:1500
+click:0.5,0.5
+sleep:1500
+click:0.5,0.5
+sleep:1500
+click:0.5,0.5
+sleep:3000
+eval:'buffers started: ' + (incariAudio.buffersStarted - before)

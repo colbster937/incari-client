@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 22:17:55 -0400
+Subject: [PATCH] modules: Let modules change the movement keys
+
+The module framework's movement event (ADR 0046): after the game
+reads the movement keys each tick, modules may change them. Toggle Sprint
+latches sprint and sneak this way.
+
+diff --git a/src/main/java/net/minecraft/client/player/KeyboardInput.java b/src/main/java/net/minecraft/client/player/KeyboardInput.java
+index 60888bb4220be95109f2d8cab391307778e635f9..7dca9b5a8daddb03965ec24e26feac3d6bf774aa 100644
+--- a/src/main/java/net/minecraft/client/player/KeyboardInput.java
++++ b/src/main/java/net/minecraft/client/player/KeyboardInput.java
+@@ -32,2 +32,5 @@
+         );
++        // Incari start: modules may change the movement keys (Toggle Sprint)
++        this.keyPresses = incari.client.modules.ModuleInput.adjust(this.keyPresses, this.options);
++        // Incari end
+         float forwardImpulse = calculateImpulse(this.keyPresses.forward(), this.keyPresses.backward());

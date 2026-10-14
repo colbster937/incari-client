@@ -1,0 +1,71 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 12:07:44 -0400
+Subject: [PATCH] gui: The HUD's text panels in the client's look
+
+Signed-off-by: incari-client <335801235+incari-client@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/gui/Hud.java b/src/main/java/net/minecraft/client/gui/Hud.java
+index 84977420997b886d87f219ccb7a1b6dbafdf76d9..92b7a563bd1b79c0d10c8ef39938c8cf58434b74 100644
+--- a/src/main/java/net/minecraft/client/gui/Hud.java
++++ b/src/main/java/net/minecraft/client/gui/Hud.java
+@@ -726,4 +726,10 @@
+         int headerY = bottom - entriesCount * 9;
++        // Incari start: the sidebar on one glass card (HudLook)
++        if (!incari.client.look.HudLook.scoreboard(graphics, left - 2, headerY - 9 - 1, right, bottom, headerY - 1)) {
++        // Incari end
+         graphics.fill(left - 2, headerY - 9 - 1, right, headerY - 1, headerBackgroundColor);
+         graphics.fill(left - 2, headerY - 1, right, bottom, backgroundColor);
++        // Incari start
++        }
++        // Incari end
+         graphics.text(this.getFont(), objectiveDisplayName, left + width / 2 - objectiveDisplayNameWidth / 2, headerY - 9, -1, false);
+diff --git a/src/main/java/net/minecraft/client/gui/components/ChatComponent.java b/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
+index 1e1e3229fb3968d0c074f2c27c18e0fabf67abf7..2e94103c187c9b5fa1102cb003e3f32980c4f279 100644
+--- a/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
++++ b/src/main/java/net/minecraft/client/gui/components/ChatComponent.java
+@@ -166,3 +166,5 @@
+                 int entryTop = entryBottom - entryHeight;
+-                graphics.fill(-4, entryTop, maxWidth + 4 + 4, entryBottom, ARGB.black(alphax * backgroundOpacity));
++                // Incari start: chat's lines on the look's cold tint (HudLook)
++                graphics.fill(-4, entryTop, maxWidth + 4 + 4, entryBottom, incari.client.look.HudLook.chatLine(ARGB.black(alphax * backgroundOpacity)));
++                // Incari end
+             });
+diff --git a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+index c8fc2a5567e21cbdf471684aeb232046ca60b13b..4cbc749dbf5a17b8d1d3a36c5329473e18f87bdc 100644
+--- a/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
++++ b/src/main/java/net/minecraft/client/gui/components/PlayerTabOverlay.java
+@@ -181,2 +181,5 @@
+         if (headerLines != null) {
++            // Incari start: the tab list on rounded glass (HudLook)
++            if (!incari.client.look.HudLook.tabBox(graphics, screenWidth / 2 - maxLineWidth / 2 - 1, yyo - 1, screenWidth / 2 + maxLineWidth / 2 + 1, yyo + headerLines.size() * 9, true, false))
++            // Incari end
+             graphics.fill(
+@@ -194,2 +197,5 @@
+ 
++        // Incari start: the tab list on rounded glass (HudLook)
++        if (!incari.client.look.HudLook.tabBox(graphics, screenWidth / 2 - maxLineWidth / 2 - 1, yyo - 1, screenWidth / 2 + maxLineWidth / 2 + 1, yyo + rows * 9, headerLines == null, footerLines == null))
++        // Incari end
+         graphics.fill(screenWidth / 2 - maxLineWidth / 2 - 1, yyo - 1, screenWidth / 2 + maxLineWidth / 2 + 1, yyo + rows * 9, Integer.MIN_VALUE);
+@@ -202,2 +208,5 @@
+             int yo = yyo + row * 9;
++            // Incari start: the tab list on rounded glass (HudLook)
++            if (!incari.client.look.HudLook.tabRow(graphics, xo, yo, xo + slotWidth, yo + 8))
++            // Incari end
+             graphics.fill(xo, yo, xo + slotWidth, yo + 8, background);
+@@ -229,2 +238,5 @@
+             yyo += rows * 9 + 1;
++            // Incari start: the tab list on rounded glass (HudLook)
++            if (!incari.client.look.HudLook.tabBox(graphics, screenWidth / 2 - maxLineWidth / 2 - 1, yyo - 1, screenWidth / 2 + maxLineWidth / 2 + 1, yyo + footerLines.size() * 9, false, true))
++            // Incari end
+             graphics.fill(
+diff --git a/src/main/java/net/minecraft/client/gui/screens/ChatScreen.java b/src/main/java/net/minecraft/client/gui/screens/ChatScreen.java
+index 927c7a0dc5600ef6f255deb32e378d2f8383bf11..cb1277e1aec2152d319b11d62a5e2da82865887d 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/ChatScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/ChatScreen.java
+@@ -277,2 +277,5 @@
+     public void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a) {
++        // Incari start: the chat field as a rounded well (HudLook)
++        if (!incari.client.look.HudLook.chatField(graphics, 2, this.height - 14, this.width - 2, this.height - 2))
++        // Incari end
+         graphics.fill(2, this.height - 14, this.width - 2, this.height - 2, this.minecraft.options.getBackgroundColor(Integer.MIN_VALUE));

@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 07:59:41 -0400
+Subject: [PATCH] net: Plan each join for the server's version and handshake
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+index ee1325f73462eab62d4f8619b689d226dd624dc1..4626640c9473381233d6108bda1347490cf0d640 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+@@ -118,2 +118,5 @@
+                     address = resolvedAddress.get();
++                    // Incari start: work out the server's version (Via) and its handshake (Eagler)
++                    incari.client.net.ServerConnections.prepare(server, hostAndPort);
++                    // Incari end
+                     Connection pendingConnection;

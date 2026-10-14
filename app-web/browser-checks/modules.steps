@@ -1,0 +1,45 @@
+# ADR 0046: the module framework in the page. Creates a world, opens the module menu with
+# Right Shift, turns Toggle Sprint on with its switch, opens its generated settings, then latches
+# sprint with a tap of Left Control and walks: the HUD says "[Sprinting (Toggled)]". The profile is
+# stored in OPFS with the module on. No server needed. Positions are for the 1280x577 viewport.
+#
+#   ./gradlew :app-web:browserCheck -Pbrowser.gpu=gl -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/modules.steps
+
+sleep:4000
+# The first-run accessibility screen: Continue. Then Singleplayer, Create New World with the defaults.
+click:0.5,0.945
+sleep:3000
+click:0.2,0.43
+sleep:4000
+click:0.38,0.945
+wait:.*logged in with entity id.*
+sleep:8000
+
+# --- The module menu: Right Shift, then Toggle Sprint's switch and its settings ---
+key:ShiftRight
+sleep:1500
+shot:build/browser-checks/modules-menu.png
+click:0.545,0.215
+sleep:500
+shot:build/browser-checks/modules-menu-on.png
+click:0.553,0.292
+sleep:1500
+shot:build/browser-checks/modules-settings.png
+key:Escape
+sleep:800
+key:Escape
+sleep:1500
+
+# --- A tap of Left Control latches sprinting; W alone then sprints and the HUD says so ---
+key:ControlLeft
+sleep:300
+down:KeyW
+sleep:1500
+shot:build/browser-checks/modules-hud.png
+up:KeyW
+sleep:500
+
+# --- The profile is stored with Toggle Sprint on ---
+sleep:2000
+until:window.incariStorage.pending() === 0
+assert:(async () => { let d = await navigator.storage.getDirectory(); for (const p of ["incari", "game", "incari", "modules", "profiles"]) d = await d.getDirectoryHandle(p); const text = await (await (await d.getFileHandle("Default.json")).getFile()).text(); console.log("[check] profile: " + text.replace(/\s+/g, " ")); return JSON.parse(text).modules.togglesprint.enabled === true; })()

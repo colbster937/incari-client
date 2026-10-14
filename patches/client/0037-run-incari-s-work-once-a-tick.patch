@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 29 Sep 2026 18:36:09 -0400
+Subject: [PATCH] client: Run Incari's work once a tick
+
+
+diff --git a/src/main/java/net/minecraft/client/Minecraft.java b/src/main/java/net/minecraft/client/Minecraft.java
+index e04f062322dd4263116352428c67399fddef2c5f..c4d07d478932b8b541be74a41cfa29cd17e86e42 100644
+--- a/src/main/java/net/minecraft/client/Minecraft.java
++++ b/src/main/java/net/minecraft/client/Minecraft.java
+@@ -1809,2 +1809,5 @@
+         this.gui.tick();
++        // Incari start: Incari's per-tick work (voice chat)
++        incari.client.IncariTicks.tick(this);
++        // Incari end
+         if (this.gui.screen() != null) {

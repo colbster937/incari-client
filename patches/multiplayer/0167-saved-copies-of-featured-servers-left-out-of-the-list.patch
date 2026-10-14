@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 17:09:52 -0400
+Subject: [PATCH] multiplayer: Saved copies of featured servers left out of the
+ list
+
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerList.java b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+index 75d5f548a948b1041d81ca439f09fe7463afae25..58ba8d3515f7f9e66cf94f1d3e469e3ba8a6b271 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerList.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerList.java
+@@ -43,2 +43,5 @@
+                 ServerData serverData = ServerData.read(serverTag);
++                // Incari start: featured servers first, never saved
++                if (incari.client.net.FeaturedServers.isSavedCopy(serverData)) return;
++                // Incari end
+                 if (serverTag.getBooleanOr("hidden", false)) {

@@ -1,0 +1,26 @@
+# A screenshot taken in a world (F2) downloads as a PNG when the player clicks its name in
+# the chat message, as it opens in the file manager on a desktop. Needs a world: a vanilla server
+# behind tools/wsbridge, as server-join.steps (the browser-checks README has the setup), joined
+# straight away with ?server=. Positions are for the 1280x577 viewport.
+#
+#   INCARI_RCON_PASSWORD=<password> ./gradlew :app-web:browserCheck \
+#       "-Pbrowser.query=server=ws://127.0.0.1:8817&name=IncariWeb" -Pbrowser.rcon=127.0.0.1:25592 \
+#       -Pbrowser.seconds=300 -Pbrowser.steps=@browser-checks/screenshot.steps
+
+downloads:build/browser-checks/downloads
+rcon:whitelist off
+rcon:time set day
+# The first-run accessibility screen: Continue. Quick play connects after it.
+sleep:4000
+click:0.5,0.945
+rconwait:list => IncariWeb
+sleep:6000
+key:F2
+wait:.*\[CHAT\] Saved screenshot as .*\.png.*
+sleep:1000
+# Open chat, and click the file name in the message ("Saved screenshot as <name>").
+key:KeyT
+sleep:1000
+shot:build/browser-checks/screenshot-chat.png
+click:0.28,0.848
+download:.*\.png

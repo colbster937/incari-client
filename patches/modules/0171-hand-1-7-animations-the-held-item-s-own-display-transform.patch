@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 18:57:27 -0400
+Subject: [PATCH] modules: Hand 1.7 Animations the held item's own display
+ transform
+
+It undid a fixed handheld transform, so items whose models are held
+otherwise (maces, spears, a resource pack's swords) were misplaced.
+
+diff --git a/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java b/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
+index 760daeb7de43b9e9644b073d659646afee2e8a5e..19c8e8e4e76f5985756f2543b94265fef16d0e21 100644
+--- a/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
++++ b/src/main/java/net/minecraft/client/renderer/FirstPersonHandsAndItemsRenderer.java
+@@ -569,3 +569,3 @@
+                     // Incari start: 1.7's held items (1.7 Animations)
+-                    incari.client.modules.ModuleHands.beforeItem(poseStack, itemStack, invert);
++                    incari.client.modules.ModuleHands.beforeItem(poseStack, itemStack, invert, (isMainHand ? state.mainHandRenderState : state.offHandRenderState).incariTransform());
+                     // Incari end
+diff --git a/src/main/java/net/minecraft/client/renderer/item/ItemStackRenderState.java b/src/main/java/net/minecraft/client/renderer/item/ItemStackRenderState.java
+index 0daea1420170408eeb2486cf0b31564e1afdec53..b00f8330a1763e9e5247499e490b29935ed9b8a9 100644
+--- a/src/main/java/net/minecraft/client/renderer/item/ItemStackRenderState.java
++++ b/src/main/java/net/minecraft/client/renderer/item/ItemStackRenderState.java
+@@ -61,2 +61,8 @@
+ 
++    // Incari start: 1.7 Animations undoes the held item's own display transform
++    public ItemTransform incariTransform() {
++        return this.activeLayerCount == 0 ? ItemTransform.NO_TRANSFORM : this.layers[0].itemTransform;
++    }
++    // Incari end
++
+     public void setAnimated() {

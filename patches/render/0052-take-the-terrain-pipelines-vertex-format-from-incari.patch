@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 30 Sep 2026 11:54:44 -0400
+Subject: [PATCH] render: Take the terrain pipelines' vertex format from Incari
+
+
+diff --git a/src/main/java/net/minecraft/client/renderer/RenderPipelines.java b/src/main/java/net/minecraft/client/renderer/RenderPipelines.java
+index add9f5febc18e1c902a09681880010719c26be67..c74f2c5ede443b43b19f37bb28909598610add6a 100644
+--- a/src/main/java/net/minecraft/client/renderer/RenderPipelines.java
++++ b/src/main/java/net/minecraft/client/renderer/RenderPipelines.java
+@@ -76,2 +76,5 @@
+     private static final RenderPipeline.Snippet TERRAIN_SNIPPET = RenderPipeline.builder(LIT_BLOCKS_SNIPPET)
++        // Incari start: the terrain vertex format (compact in the browser)
++        .withVertexBinding(0, incari.client.render.TerrainVertexFormat.terrain())
++        // Incari end
+         .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+@@ -83,2 +86,5 @@
+     private static final RenderPipeline.Snippet MULTIDRAW_TERRAIN_SNIPPET = RenderPipeline.builder(LIT_BLOCKS_SNIPPET)
++        // Incari start: the terrain vertex format (compact in the browser)
++        .withVertexBinding(0, incari.client.render.TerrainVertexFormat.terrain())
++        // Incari end
+         .withBindGroupLayout(BindGroupLayouts.PROJECTION)
+@@ -407,2 +413,5 @@
+                 RenderPipeline.builder(GENERIC_BLOCKS_SNIPPET)
++                    // Incari start: the terrain vertex format (compact in the browser)
++                    .withVertexBinding(0, incari.client.render.TerrainVertexFormat.terrain())
++                    // Incari end
+                     .withVertexShader("core/terrain")
+@@ -420,2 +429,5 @@
+                 RenderPipeline.builder(GENERIC_BLOCKS_SNIPPET)
++                    // Incari start: the terrain vertex format (compact in the browser)
++                    .withVertexBinding(0, incari.client.render.TerrainVertexFormat.terrain())
++                    // Incari end
+                     .withVertexShader("core/terrain")

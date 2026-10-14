@@ -1,0 +1,16 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Mon, 28 Sep 2026 22:47:06 -0400
+Subject: [PATCH] platform: Let the platform pace frames under the frame limit
+
+
+diff --git a/src/main/java/net/minecraft/client/FramerateLimiter.java b/src/main/java/net/minecraft/client/FramerateLimiter.java
+index 4a4cf66c65065475ff2614789cf64830a2b59fa7..b13f2a5b0fa5f2eba44b42c525a8f9e769c73a2d 100644
+--- a/src/main/java/net/minecraft/client/FramerateLimiter.java
++++ b/src/main/java/net/minecraft/client/FramerateLimiter.java
+@@ -15,2 +15,5 @@
+     public static void limitDisplayFPS(final int framerateLimit) {
++        // Incari start: a platform that paces frames itself (the browser) delays the next frame instead of sleeping in this one
++        if (incari.client.platform.ClientPlatform.get().limitFrameRate(framerateLimit)) return;
++        // Incari end
+         long targetTimePerFrame = 1000000000L / framerateLimit;

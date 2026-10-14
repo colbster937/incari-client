@@ -1,0 +1,37 @@
+# Whole-class changes to the vendor tree, applied before the patch files.
+#
+# A patch that deletes or rewrites a whole Mojang file would contain every one of its lines.
+# A line here names the class and contains no Mojang code at all.
+#
+#   delete  <fully.qualified.ClassName>
+#   replace <fully.qualified.ClassName>  <repo-relative path to Incari's replacement source>
+#
+# Only top-level classes; nested classes go with their outer class. Patches may not touch
+# a class listed here: edit the replacement source instead.
+
+# Window, input, displays and the shell over the Platform interfaces. The replacements are
+# Incari code in client/: they keep the game's API and delegate to incari.platform.api.
+replace com.mojang.blaze3d.Blaze3D                          client/src/main/java/com/mojang/blaze3d/Blaze3D.java
+replace com.mojang.blaze3d.platform.ClipboardManager        client/src/main/java/com/mojang/blaze3d/platform/ClipboardManager.java
+replace com.mojang.blaze3d.platform.MacosUtil               client/src/main/java/com/mojang/blaze3d/platform/MacosUtil.java
+replace com.mojang.blaze3d.platform.MessageBox              client/src/main/java/com/mojang/blaze3d/platform/MessageBox.java
+replace com.mojang.blaze3d.platform.Monitor                 client/src/main/java/com/mojang/blaze3d/platform/Monitor.java
+replace com.mojang.blaze3d.platform.MonitorManager          client/src/main/java/com/mojang/blaze3d/platform/MonitorManager.java
+replace com.mojang.blaze3d.platform.SDLEventHandler         client/src/main/java/com/mojang/blaze3d/platform/SDLEventHandler.java
+replace com.mojang.blaze3d.platform.TextInputManager        client/src/main/java/com/mojang/blaze3d/platform/TextInputManager.java
+replace com.mojang.blaze3d.platform.Window                  client/src/main/java/com/mojang/blaze3d/platform/Window.java
+replace com.mojang.blaze3d.platform.cursor.CursorType       client/src/main/java/com/mojang/blaze3d/platform/cursor/CursorType.java
+# SDL's log hook moved into platform-desktop, which owns SDL.
+delete  com.mojang.blaze3d.platform.SdlDebug
+
+# Audio: com.mojang.blaze3d.audio over PlatformAudio
+replace com.mojang.blaze3d.audio.Library               client/src/main/java/com/mojang/blaze3d/audio/Library.java
+replace com.mojang.blaze3d.audio.Channel               client/src/main/java/com/mojang/blaze3d/audio/Channel.java
+replace com.mojang.blaze3d.audio.Listener              client/src/main/java/com/mojang/blaze3d/audio/Listener.java
+replace com.mojang.blaze3d.audio.SoundBuffer           client/src/main/java/com/mojang/blaze3d/audio/SoundBuffer.java
+replace com.mojang.blaze3d.audio.DeviceList            client/src/main/java/com/mojang/blaze3d/audio/DeviceList.java
+replace com.mojang.blaze3d.audio.CallbackDeviceTracker client/src/main/java/com/mojang/blaze3d/audio/CallbackDeviceTracker.java
+delete  com.mojang.blaze3d.audio.OpenAlUtil
+
+# Networking (ADR 0009): server addresses may be ws:// or wss:// URLs, for the WebSocket transport.
+replace net.minecraft.client.multiplayer.resolver.ServerAddress  client/src/main/java/net/minecraft/client/multiplayer/resolver/ServerAddress.java

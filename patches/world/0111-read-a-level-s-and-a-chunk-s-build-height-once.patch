@@ -1,0 +1,67 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 22:32:50 -0400
+Subject: [PATCH] world: Read a level's and a chunk's build height once
+
+
+diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
+index 8558d22ef726392ca784128fbe6135eaf08a9aae..8c4eac77220f01d20598603aea64ec81daaa546a 100644
+--- a/src/main/java/net/minecraft/world/level/Level.java
++++ b/src/main/java/net/minecraft/world/level/Level.java
+@@ -124,2 +124,5 @@
+     private final Holder<DimensionType> dimensionTypeRegistration;
++    // Incari start: the dimension's height read once
++    private final incari.client.world.Heights incariHeights;
++    // Incari end
+     protected final WritableLevelData levelData;
+@@ -145,2 +148,5 @@
+         this.dimensionTypeRegistration = dimensionTypeRegistration;
++        // Incari start: the dimension's height read once
++        this.incariHeights = incari.client.world.Heights.of(dimensionTypeRegistration);
++        // Incari end
+         this.dimension = dimension;
+@@ -1049,2 +1055,14 @@
+ 
++    // Incari start: the dimension's height read once
++    @Override
++    public int getMinY() {
++        return this.incariHeights.minY();
++    }
++
++    @Override
++    public int getHeight() {
++        return this.incariHeights.height();
++    }
++    // Incari end
++
+     public Holder<DimensionType> dimensionTypeRegistration() {
+diff --git a/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java b/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
+index d25d0044f221ec67cbc825f06a3e1e4efa24ef2e..fedc0d10d9f3030a6c19e4804b4c5cd5673179bc 100644
+--- a/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
++++ b/src/main/java/net/minecraft/world/level/chunk/ChunkAccess.java
+@@ -78,2 +78,5 @@
+     protected final LevelHeightAccessor levelHeightAccessor;
++    // Incari start: the level's height read once
++    private final incari.client.world.Heights incariHeights;
++    // Incari end
+     protected final LevelChunkSection[] sections;
+@@ -92,2 +95,5 @@
+         this.levelHeightAccessor = levelHeightAccessor;
++        // Incari start: the level's height read once
++        this.incariHeights = incari.client.world.Heights.of(levelHeightAccessor);
++        // Incari end
+         this.sections = new LevelChunkSection[levelHeightAccessor.getSectionsCount()];
+@@ -398,3 +404,5 @@
+     public int getMinY() {
+-        return this.levelHeightAccessor.getMinY();
++        // Incari start: the level's height read once
++        return this.incariHeights.minY();
++        // Incari end
+     }
+@@ -403,3 +411,5 @@
+     public int getHeight() {
+-        return this.levelHeightAccessor.getHeight();
++        // Incari start: the level's height read once
++        return this.incariHeights.height();
++        // Incari end
+     }

@@ -1,0 +1,32 @@
+{
+  "name": "incari",
+  "private": true,
+  "description": "Tooling for Incari's TypeScript and JavaScript: the browser host page (app-web/src/main/ts) and the storage worker (platform-web/src/main/js).",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/incari-client/incari-client.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint --max-warnings 0 .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "node --test \"app-web/src/test/ts/**/*.test.ts\" \"platform-web/src/test/ts/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.5",
+    "eslint": "10.12.0",
+    "fake-indexeddb": "6.2.5",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2"
+  }
+}

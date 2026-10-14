@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 26 Sep 2026 12:36:34 -0400
+Subject: [PATCH] decompile: Restore the chat log's capacity and the
+ notification delay default
+
+
+diff --git a/src/main/java/net/minecraft/client/PeriodicNotificationManager.java b/src/main/java/net/minecraft/client/PeriodicNotificationManager.java
+index 83e5c98465b1e83f895f535db0bf0510e56da1ce..c4f893f93d4d532d49b74d7971096768164e40b7 100644
+--- a/src/main/java/net/minecraft/client/PeriodicNotificationManager.java
++++ b/src/main/java/net/minecraft/client/PeriodicNotificationManager.java
+@@ -120,2 +120,5 @@
+     public record Notification(long delay, long period, String title, String message) {
++        public Notification {
++            delay = delay != 0L ? delay : period;
++        }
+     }
+diff --git a/src/main/java/net/minecraft/client/multiplayer/chat/ChatLog.java b/src/main/java/net/minecraft/client/multiplayer/chat/ChatLog.java
+index 7106be74327ee69f67f84ac4a7a968facf514b2f..a82dafc911c85a674e9c5a58c413e6609b212e8c 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/chat/ChatLog.java
++++ b/src/main/java/net/minecraft/client/multiplayer/chat/ChatLog.java
+@@ -32,3 +32,3 @@
+     private ChatLog(final int capacity, final List<LoggedChatEvent> buffer) {
+-        this.buffer = buffer.toArray(LoggedChatEvent[]::new);
++        this.buffer = buffer.toArray(size -> new LoggedChatEvent[capacity]);
+         this.nextId = buffer.size();

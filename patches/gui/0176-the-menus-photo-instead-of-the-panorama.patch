@@ -1,0 +1,17 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Tue, 13 Oct 2026 20:19:39 -0400
+Subject: [PATCH] gui: The menus' photo instead of the panorama
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/Screen.java b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+index 9fef4a41c8164d0a93937265021b19202466d385..e642e55c53805f7cbfba4b2f8c10c2fbc1e081d0 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/Screen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/Screen.java
+@@ -418,3 +418,5 @@
+     protected void extractPanorama(final GuiGraphicsExtractor graphics, final float a) {
+-        this.minecraft.gameRenderer.panorama().extractRenderState(graphics, this.width, this.height);
++        // Incari start: the menus' photo instead of the panorama, as on every other menu (MenuBackdrop)
++        incari.client.ui.MenuBackdrop.extract(graphics, this.width, this.height);
++        // Incari end
+     }

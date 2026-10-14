@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 10:27:23 -0400
+Subject: [PATCH] gui: Let Incari's skin draw the GUI's sprites and textures
+
+
+diff --git a/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java b/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
+index c663485dc4f2b23b4a37db4a14a5f954e3e57da5..50c91a353014145fe0e38fa3d11ca6a2918bcdd7 100644
+--- a/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
++++ b/src/main/java/net/minecraft/client/gui/GuiGraphicsExtractor.java
+@@ -366,2 +366,5 @@
+     ) {
++        // Incari start: Incari's skin may draw the texture its own way (Skins)
++        if (incari.client.ui.Skins.texture(this, texture, x, y, width, height, u, v, srcWidth, srcHeight, textureWidth, textureHeight, color)) return;
++        // Incari end
+         this.innerBlit(
+@@ -415,2 +418,5 @@
+     ) {
++        // Incari start: Incari's skin may draw the sprite its own way (Skins)
++        if (incari.client.ui.Skins.sprite(this, location, x, y, width, height, color)) return;
++        // Incari end
+         TextureAtlasSprite sprite = this.guiSprites.getSprite(location);
+@@ -459,2 +465,5 @@
+     ) {
++        // Incari start: Incari's skin may draw the sprite its own way (Skins)
++        if (incari.client.ui.Skins.spritePart(this, location, spriteWidth, spriteHeight, textureX, textureY, x, y, width, height, color)) return;
++        // Incari end
+         TextureAtlasSprite sprite = this.guiSprites.getSprite(location);

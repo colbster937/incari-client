@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 2 Oct 2026 07:53:23 -0400
+Subject: [PATCH] threads: Skip the chunk palettes' threading checks on one
+ thread
+
+
+diff --git a/src/main/java/net/minecraft/util/ThreadingDetector.java b/src/main/java/net/minecraft/util/ThreadingDetector.java
+index 7eb0de4f4abeba928eac78e564b724ea618f276c..b7527ea8edceca57cafcf46ae7dec6de52a638e2 100644
+--- a/src/main/java/net/minecraft/util/ThreadingDetector.java
++++ b/src/main/java/net/minecraft/util/ThreadingDetector.java
+@@ -29,2 +29,5 @@
+     public void checkAndLock() {
++        // Incari start: one thread can't race itself (ADR 0030)
++        if (incari.client.platform.ClientPlatform.oneThread()) return;
++        // Incari end
+         boolean released = false;
+@@ -54,2 +57,5 @@
+     public void checkAndUnlock() {
++        // Incari start: one thread can't race itself (ADR 0030)
++        if (incari.client.platform.ClientPlatform.oneThread()) return;
++        // Incari end
+         try {

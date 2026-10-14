@@ -1,0 +1,92 @@
+# The client's menus and screens (the look's first performance pass), in the page's own world:
+#   ./gradlew :app-web:benchmark -Pbenchmark.singleplayer -Pbenchmark.script=menus.txt
+#   -Pbenchmark.history=<a file of its own> -Pteavm.release -Pteavm.fast
+# The player stands at the world's spawn in survival with a few items. Scenarios: the HUD alone (the
+# world's own cost, for comparison), then the module menu, the pause menu and the inventory, in
+# Potato and again in Normal (glows, eased hovers, the menus' blur). The pointer rests over the
+# module menu's first card, so its hover is drawn. The menus are reached with the keyboard (Tab
+# order in the module menu: All, the five categories, GUI, Profile, Done, Edit HUD, the search, the
+# cards), and each scenario takes a screenshot in build/benchmark to show it got there.
+
+setup
+    rcon:gamerule advance_time false
+    rcon:gamerule advance_weather false
+    rcon:gamerule spawn_mobs false
+    rcon:gamerule send_command_feedback false
+    rcon:time set 6000
+    rcon:weather clear
+    rcon:gamemode survival @s
+    rcon:give @s minecraft:diamond_sword
+    rcon:give @s minecraft:bow
+    rcon:give @s minecraft:arrow 64
+    rcon:give @s minecraft:oak_planks 64
+    rcon:give @s minecraft:cooked_beef 32
+    rcon:give @s minecraft:iron_chestplate
+    sleep:10000
+
+scenario hud  The world at spawn with the HUD, no screen open
+    measure:20
+
+scenario menu_potato  The module menu in Potato, the pointer over its first card
+    key:ShiftRight
+    sleep:1500
+    move:0.36,0.3
+    sleep:1000
+    shot:menus-menu-potato
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario pause_potato  The pause menu in Potato
+    key:Escape
+    sleep:2000
+    shot:menus-pause-potato
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario inventory_potato  The inventory in Potato: the glass panel with a well under each slot
+    key:KeyE
+    sleep:2000
+    shot:menus-inventory-potato
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario menu_normal  The module menu in Normal, the pointer over its first card
+    # The module menu's GUI entry (the seventh stop) switches to Normal.
+    key:ShiftRight
+    sleep:1500
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Tab
+    key:Enter
+    sleep:1000
+    move:0.5,0.5
+    sleep:300
+    move:0.36,0.3
+    sleep:1000
+    shot:menus-menu-normal
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario pause_normal  The pause menu in Normal, blurred
+    key:Escape
+    sleep:2000
+    shot:menus-pause-normal
+    measure:20
+    key:Escape
+    sleep:2000
+
+scenario inventory_normal  The inventory in Normal
+    key:KeyE
+    sleep:2000
+    shot:menus-inventory-normal
+    measure:20
+    key:Escape
+    sleep:2000

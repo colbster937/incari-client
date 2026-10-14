@@ -1,0 +1,14 @@
+# ADR 0062: a guest joining an Incari player's shared world (?shared=<relay>|<code>, the code from
+# share-host.steps' console): joined as it is, no Via; the world arrives and the guest plays in it.
+sleep:4000
+click:0.5,0.945
+wait:.*Loaded \d+ advancements.*
+sleep:20000
+shot:build/browser-checks/share-guest-joined.png
+key:KeyT
+sleep:800
+type:hello from the guest
+key:Enter
+wait:.*\[CHAT\] <Guest> hello from the guest.*
+sleep:2000
+shot:build/browser-checks/share-guest-chat.png

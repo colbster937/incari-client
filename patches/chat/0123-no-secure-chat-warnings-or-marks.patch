@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 19:21:17 -0400
+Subject: [PATCH] chat: No secure-chat warnings or marks
+
+Incari's players join offline-mode servers, where no chat message is
+signed: the join's "can't be verified" toast and every message's
+not-secure mark warn about nothing the player can change.
+
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java b/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
+index ee6b7cfbbdaec9dc2156348d59ca82e70fc6ce67..33eca288c0364666a69c00099c060c06ac35e05d 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ClientPacketListener.java
+@@ -559,2 +559,5 @@
+         this.serverEnforcesSecureChat = packet.enforcesSecureChat();
++        // Incari start: no secure-chat warning; Incari's players join offline-mode servers, which never sign chat
++        this.seenInsecureChatWarning = true;
++        // Incari end
+         if (this.serverData != null && !this.seenInsecureChatWarning && !this.enforcesSecureChat()) {
+diff --git a/src/main/java/net/minecraft/client/multiplayer/chat/ChatListener.java b/src/main/java/net/minecraft/client/multiplayer/chat/ChatListener.java
+index e82aa07132f5402c6ca9bea3e8e96b7b276439ca..981b7f7e0036b053530345e9f9e0ddf71f7e47e5 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/chat/ChatListener.java
++++ b/src/main/java/net/minecraft/client/multiplayer/chat/ChatListener.java
+@@ -168,3 +168,5 @@
+             if (receiver != null && receiver.chatAbilities().canReceivePlayerMessages()) {
+-                GuiMessageTag tag = trustLevel.createTag(message);
++                // Incari start: no not-secure or modified marks; offline-mode servers sign no messages
++                GuiMessageTag tag = null;
++                // Incari end
+                 MessageSignature signature = message.signature();
