@@ -415,10 +415,15 @@ public final class TitleLook {
         graphics.pose().popMatrix();
     }
 
-    /** {@code TitleScreen.extractRenderState}, after its widgets: the version in the bottom left corner. */
+    /**
+     * {@code TitleScreen.extractRenderState}, after its widgets: the version in the bottom left
+     * corner, a line up where the screen is too narrow for it beside the copyright.
+     */
     public static void extractFront(Screen title, GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         Font font = Minecraft.getInstance().font;
-        graphics.text(font, VERSION, 6, title.height - 12, Theme.MUTED, false);
+        int copyrightLeft = title.width - font.width(COPYRIGHT) - 6;
+        int y = 6 + font.width(VERSION) + Theme.GAP * 2 > copyrightLeft ? title.height - 24 : title.height - 12;
+        graphics.text(font, VERSION, 6, y, Theme.MUTED, false);
     }
 
     /** Incari's mark and INCARI, letter-spaced, and the line under them. */
