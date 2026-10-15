@@ -25,8 +25,6 @@ public enum Icons {
     GRID,
     /** Options. */
     GEAR,
-    /** Quit. */
-    POWER,
     /** A step from what goes in to what comes out: crafting, smelting. */
     ARROW,
     /** The HUD's layout: a screen's frame with two panels placed in it. */
@@ -168,13 +166,6 @@ public enum Icons {
                     teeth = Math.min(teeth, segment(x, y, ax * 0.25F, ay * 0.25F, ax * 0.42F, ay * 0.42F) - 0.065F);
                 }
                 yield Math.max(Math.min(body, teeth), 0.12F - r);
-            }
-            case POWER -> {
-                float ring = Math.abs(length(x, y) - 0.34F) - stroke * 0.5F;
-                // The ring's gap at the top, around the stem.
-                boolean gap = y < 0 && Math.abs(x) < -y * 0.75F;
-                float stem = segment(x, y, 0, -0.44F, 0, -0.04F) - stroke * 0.5F;
-                yield Math.min(gap ? Float.MAX_VALUE : ring, stem);
             }
             case ARROW -> {
                 float shaft = segment(x, y, -0.38F, 0, 0.34F, 0);
