@@ -162,12 +162,17 @@ public final class Ui {
         private static final int ICON = 9;
 
         private final @Nullable Icons icon;
-        private final Component hint;
+        private Component hint;
         private boolean centered;
 
         MenuButton(Component label, @Nullable Icons icon, Component hint, int width, Runnable action) {
             super(0, 0, width, Theme.CONTROL_HEIGHT, label, button -> action.run(), DEFAULT_NARRATION);
             this.icon = icon;
+            this.hint = hint;
+        }
+
+        /** The hint at its right end; empty for none. */
+        public void setHint(Component hint) {
             this.hint = hint;
         }
 
