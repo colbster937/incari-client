@@ -1,0 +1,20 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Thu, 15 Oct 2026 21:10:59 -0400
+Subject: [PATCH] render: A spear's stab is not drawn on the item swapped to
+
+A swing outlives the item that started it, and a new one cannot replace
+it in its first half, so throwing a pearl just after a stab drew the
+stab on the pearl.
+
+diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+index dcb7d6fae467a18f7e590d6e755cce93a4ce29e9..4efd7513dc444c189740ac234fc07b28ddf50046 100644
+--- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
++++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
+@@ -3360,3 +3360,5 @@
+     public LivingEntity.@Nullable SwingDescription getCurrentSwing() {
+-        return this.swingState.currentSwing;
++        // Incari start: a spear's stab isn't drawn on the item swapped to
++        return incari.client.render.entity.HeldSwings.drawn(this, this.swingState.currentSwing);
++        // Incari end
+     }
