@@ -402,8 +402,27 @@ export function embeddedFiles(document: Document): EmbeddedFile[] {
   }));
 }
 
+/**
+ * Makes `navigator.sendBeacon` say it couldn't queue the beacon (false) instead of throwing, as
+ * Chromium does on a `file://` page. Scripts that aren't the game's (school monitoring, analytics)
+ * beacon when the tab is hidden, and their uncaught error would end the game (boot.ts).
+ */
+export function quietBeacons(navigator: Pick<Navigator, "sendBeacon">): void {
+  const send = navigator.sendBeacon.bind(navigator);
+  navigator.sendBeacon = (url, data) => {
+    try {
+      return send(url, data);
+    } catch {
+      return false;
+    }
+  };
+}
+
 /** What `SingleFile` calls after this script: starts the page, or says on the loading screen why it couldn't. */
 export function start(page: Window & FileScope): void {
+  if (typeof page.navigator.sendBeacon === "function") {
+    quietBeacons(page.navigator);
+  }
   startPage(page, embeddedFiles(page.document)).catch((error: unknown) => {
     const status = page.document.getElementById("incari-status");
     const detail = page.document.getElementById("incari-detail");

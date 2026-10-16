@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, it } from "node:test";
 
 import {
   installFiles,
+  quietBeacons,
   shimSource,
   startWorker,
   type FileScope,
@@ -301,5 +302,24 @@ describe("offline files: a worker's start", () => {
     assert.equal(typeof (worker as unknown as FileScope).incariFiles?.url, "function");
     const response = await worker.fetch("runtime.js");
     assert.equal(response.headers.get("content-type"), "text/javascript");
+  });
+});
+
+describe("quietBeacons", () => {
+  it("answers false where the browser throws, and passes the rest through", () => {
+    const sent: string[] = [];
+    const navigator = {
+      sendBeacon(url: string | URL): boolean {
+        if (String(url).startsWith("file:")) {
+          throw new TypeError("Beacons are only supported over HTTP(S).");
+        }
+        sent.push(String(url));
+        return true;
+      },
+    };
+    quietBeacons(navigator);
+    assert.equal(navigator.sendBeacon("file:///home/player/log"), false);
+    assert.equal(navigator.sendBeacon("https://example.com/log"), true);
+    assert.deepEqual(sent, ["https://example.com/log"]);
   });
 });

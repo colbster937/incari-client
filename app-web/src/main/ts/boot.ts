@@ -326,7 +326,12 @@ async function boot(): Promise<void> {
   Error.stackTraceLimit = 1000;
   // An error that escapes Java (a JavaScript exception in the runtime) ends the game. main()
   // returns at the first suspension, so later ones only reach the window's handlers.
+  // Not one from a browser extension's script, which isn't the game's to end.
   window.addEventListener("error", (event) => {
+    if (/^(chrome|moz|safari(-web)?)-extension:/.test(event.filename)) {
+      console.warn(`[Incari] Ignored an extension's error: ${event.message}`);
+      return;
+    }
     fail(event.error ?? event.message);
   });
   window.addEventListener("unhandledrejection", (event) => {
