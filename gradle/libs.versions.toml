@@ -9,7 +9,7 @@ lwjgl = "3.4.3"
 # Must match the Netty version in Minecraft's version JSON: :net compiles against these jars, and
 # the game runs with Mojang's copies of the same version.
 netty = "4.2.16.Final"
-asm = "9.11"
+asm = "9.11.1"
 # The Via stack the client runs (ADR 0017): ViaVersion translates for older servers,
 # ViaBackwards for newer ones. Pinned together: ViaBackwards is built against this ViaVersion.
 viaversion = "5.12.1"
