@@ -17,6 +17,7 @@ Version translation is `:via`'s job.
 | `eagler.EaglerQuery` | The MOTD query the server list uses |
 | `eagler.EaglerPassword` | Auth plugins' password methods |
 | `relay.*` | Joining a world shared through an Eagler relay, over a WebRTC data channel |
+| `wisp.WispConnection`, `WispAddress` | A Java server's TCP port through a Wisp proxy (Wispcraft, ADR 0065), with its SRV lookup |
 
 ## Invariants
 
@@ -46,3 +47,10 @@ java -jar server.jar nogui        # server-port=25581, online-mode=false, player
 The report (`run/smoke-server/incari-smoke/report.txt`) covers ping, join, chat, the Nether and
 back, and reconnecting. Against a real EaglerXServer, use its address; `smokeSkinA` with
 `smokeSkinB` checks skins both ways (setup in ADR 0016). In the browser: `server-join.steps`.
+
+The same server through a Wisp proxy (ADR 0065), with `@mercuryworkshop/wisp-js` from npm:
+
+```sh
+wisp-js-server --port 6001 -O '{"allow_private_ips":true,"allow_loopback_ips":true}'
+./gradlew :app-desktop:smokeServer -Pincari.server=127.0.0.1:25581 -Pincari.wisp=ws://127.0.0.1:6001/
+```

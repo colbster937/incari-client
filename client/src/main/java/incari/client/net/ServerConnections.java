@@ -16,6 +16,7 @@ import incari.net.eagler.EaglerTextures;
 import incari.net.relay.LanFraming;
 import incari.net.relay.LanLogin;
 import incari.net.relay.RelayWorldAddress;
+import incari.net.wisp.WispAddress;
 import incari.via.IncariVia;
 import incari.via.ViaPipeline;
 import io.netty.bootstrap.Bootstrap;
@@ -61,6 +62,7 @@ import org.slf4j.Logger;
  *
  * <ul>
  *   <li>a WebSocket address: one packet per message, and the Eagler handshake at the head;
+ *   <li>a server joined through a Wisp proxy ({@link WispServers}): the game's TCP pipeline as it is;
  *   <li>a server of another version: Via after the framing, translating both ways.
  * </ul>
  *
@@ -125,7 +127,8 @@ public final class ServerConnections {
 
     /** Whether {@code Connection.connect} should hand this connection to {@link #connect}. */
     public static boolean accepts(InetSocketAddress address) {
-        if (address instanceof WebSocketAddress) {
+        if (address instanceof WebSocketAddress || address instanceof WispAddress) {
+            // Neither is a socket the game's own channel classes can open.
             return true;
         }
         Plan plan = NEXT.get();

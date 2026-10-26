@@ -84,19 +84,34 @@ public final class ServerVersions {
         if (choices.stream().noneMatch(choice -> choice.protocol() == server.incariVersion)) {
             server.incariVersion = AUTO;
         }
-        return Button.builder(label(server.incariVersion), pressed -> {
-                    Minecraft minecraft = Minecraft.getInstance();
-                    Screen editScreen = minecraft.gui.screen();
-                    if (editScreen != null) {
-                        minecraft.gui.setScreen(
-                                new VersionSelectScreen(editScreen, choices, server.incariVersion, protocol -> {
-                                    server.incariVersion = protocol;
-                                    pressed.setMessage(label(protocol));
-                                }));
-                    }
-                })
-                .bounds(x, y, 200, 20)
-                .build();
+        return new VersionButton(server, x, y, pressed -> {
+            Minecraft minecraft = Minecraft.getInstance();
+            Screen editScreen = minecraft.gui.screen();
+            if (editScreen != null) {
+                minecraft.gui.setScreen(new VersionSelectScreen(editScreen, choices, server.incariVersion, protocol -> {
+                    server.incariVersion = protocol;
+                    pressed.setMessage(label(protocol));
+                }));
+            }
+        });
+    }
+
+    /** The version button, knowing its server: the edit-server screen's edit puts Wispcraft's beside it. */
+    static final class VersionButton extends Button.Plain {
+
+        /** Its width as the game's layout places it: a whole row. */
+        static final int FULL_WIDTH = 200;
+
+        private final ServerData server;
+
+        VersionButton(ServerData server, int x, int y, OnPress onPress) {
+            super(x, y, FULL_WIDTH, 20, label(server.incariVersion), onPress, DEFAULT_NARRATION);
+            this.server = server;
+        }
+
+        ServerData server() {
+            return server;
+        }
     }
 
     // Literal English until Incari has its own language files.

@@ -144,6 +144,8 @@ tasks.register<JavaExec>("smokeServer") {
     val server = providers.gradleProperty("incari.server").orElse("ws://127.0.0.1:8816")
     runsGame(repoRoot.dir("run/smoke-server").asFile, providers.provider { "IncariSmoke" }, null)
     systemProperty("incari.smoke", "server:" + server.get())
+    // `-Pincari.wisp=ws://127.0.0.1:6001/`: joins a host:port server through that Wisp proxy (Wispcraft).
+    providers.gradleProperty("incari.wisp").orNull?.let { systemProperty("incari.smoke.wisp", it) }
     timeout = Duration.ofMinutes(15)
 }
 

@@ -1,5 +1,7 @@
 package incari.net;
 
+import incari.net.wisp.WispAddress;
+import incari.net.wisp.WispConnection;
 import incari.platform.api.net.NetConnection;
 import incari.platform.api.net.PlatformNetwork;
 import io.netty.buffer.ByteBuf;
@@ -65,11 +67,17 @@ public abstract class NetConnectionChannel extends AbstractChannel {
      */
     protected abstract NetConnection open(InetSocketAddress remote, NetConnection.Listener listener);
 
-    /** {@link #open} on a platform: a WebSocket for a {@link WebSocketAddress}, a TCP socket otherwise. */
+    /**
+     * {@link #open} on a platform: a WebSocket for a {@link WebSocketAddress}, a stream through a Wisp
+     * proxy for a {@link WispAddress}, a TCP socket otherwise.
+     */
     protected static NetConnection openOn(
             final PlatformNetwork network, final InetSocketAddress remote, final NetConnection.Listener listener) {
         if (remote instanceof WebSocketAddress webSocket) {
             return network.openWebSocket(webSocket.url().toString(), listener);
+        }
+        if (remote instanceof WispAddress wisp) {
+            return WispConnection.open(network, wisp, listener);
         }
         return network.connect(remote.getHostString(), remote.getPort(), listener);
     }

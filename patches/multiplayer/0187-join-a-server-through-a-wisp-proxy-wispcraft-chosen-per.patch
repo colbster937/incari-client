@@ -1,0 +1,68 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: incari-client <335801235+incari-client@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 20:37:03 -0400
+Subject: [PATCH] multiplayer: Join a server through a Wisp proxy (Wispcraft),
+ chosen per server
+
+Signed-off-by: bedrock3359 <181285672+nobuildersnotools@users.noreply.github.com>
+
+diff --git a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+index 1ea183bd658d6f881860a5647d23826d4100c168..258b97668ffec14afacfd6a0bd3915f4323116f8 100644
+--- a/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
++++ b/src/main/java/net/minecraft/client/gui/screens/ConnectScreen.java
+@@ -103,2 +103,5 @@
+ 
++                    // Incari start: a server joined through a Wisp proxy is resolved by the proxy
++                    incari.client.net.WispServers.route(server);
++                    // Incari end
+                     Optional<InetSocketAddress> resolvedAddress = ServerNameResolver.DEFAULT
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerData.java b/src/main/java/net/minecraft/client/multiplayer/ServerData.java
+index d341e525944cc6a230b66473898a20b870d2835a..e1f287abc6d19e2569d0a596ddff5d696fc34355 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerData.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerData.java
+@@ -38,2 +38,5 @@
+     // Incari end
++    // Incari start: whether to join this server through a Wisp proxy (Wispcraft), saved with it
++    public incari.client.net.WispChoice incariWisp = incari.client.net.WispChoice.OFF;
++    // Incari end
+ 
+@@ -58,2 +61,5 @@
+         // Incari end
++        // Incari start: the Wisp choice
++        incari.client.net.WispServers.write(this, tag);
++        // Incari end
+         return tag;
+@@ -77,2 +83,5 @@
+         // Incari end
++        // Incari start: the Wisp choice
++        incari.client.net.WispServers.read(server, tag);
++        // Incari end
+         return server;
+@@ -125,2 +134,5 @@
+         // Incari end
++        // Incari start: the Wisp choice
++        this.incariWisp = other.incariWisp;
++        // Incari end
+     }
+diff --git a/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java b/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
+index c3d005c8ab6f17c5026b8a71216a7162775ce14c..9aadd7483cec229d76da4de0b455de9ccad51e24 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
++++ b/src/main/java/net/minecraft/client/multiplayer/ServerStatusPinger.java
+@@ -61,2 +61,5 @@
+         // Incari end
++        // Incari start: a server joined through a Wisp proxy is resolved by the proxy
++        incari.client.net.WispServers.route(data);
++        // Incari end
+         Optional<InetSocketAddress> resolvedAddress = ServerNameResolver.DEFAULT.resolveAddress(rawAddress).map(ResolvedServerAddress::asInetSocketAddress);
+diff --git a/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java b/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
+index 70f15022312422c2e14931ac1d38bd3bc4687d72..dc8103c83071e33d801fa702ab3bbf0b0cc798c1 100644
+--- a/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
++++ b/src/main/java/net/minecraft/client/multiplayer/resolver/ServerNameResolver.java
+@@ -26,2 +26,7 @@
+         // Incari end
++        // Incari start: a Wisp proxy resolves the host itself
++        if (incari.client.net.WispServers.isRouted(address)) {
++            return incari.client.net.WispServers.resolve(address, this.addressCheck);
++        }
++        // Incari end
+         Optional<ResolvedServerAddress> resolvedAddress = this.resolver.resolve(address);

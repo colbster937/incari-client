@@ -1318,6 +1318,10 @@ public final class SmokeTest {
                         net.minecraft.network.chat.Component.literal("Edit Server Info"),
                         ok -> {},
                         new ServerData("Test", "ws://127.0.0.1:8801", ServerData.Type.OTHER)));
+        screens.put(
+                "wispcraft",
+                () -> incari.client.net.WispServers.screen(
+                        new TitleScreen(), new ServerData("Test", "127.0.0.1", ServerData.Type.OTHER), () -> {}));
         screens.put("modules", () -> {
             incari.client.modules.IncariModules.openMenu(new TitleScreen());
             return minecraft.gui.screen();
@@ -3324,7 +3328,10 @@ public final class SmokeTest {
                         : stateDescription());
     }
 
-    /** M2: the screens Incari adds, drawn: the edit-server screen's Version button, the Eagler skin screen. */
+    /**
+     * M2: the screens Incari adds, drawn: the edit-server screen's Version and Wispcraft buttons, the
+     * Wispcraft screen, the Eagler skin screen.
+     */
     private void screensScenario() {
         waitForTitle();
         onGameThread(() -> {
@@ -3340,6 +3347,36 @@ public final class SmokeTest {
         });
         sleep(Duration.ofSeconds(2));
         screenshot("screen-edit-server");
+        // Into the Wispcraft screen and back: the edit screen is shown again, only laid out again.
+        Screen editServer = onGameThread(() -> minecraft.gui.screen());
+        onGameThread(() -> {
+            ServerData server = new ServerData("Test", "mc.example.com", ServerData.Type.OTHER);
+            server.incariWisp = new incari.client.net.WispChoice(true, incari.client.net.WispChoice.DEFAULT_PROXY);
+            minecraft.gui.setScreen(incari.client.net.WispServers.screen(editServer, server, () -> {}));
+            return null;
+        });
+        sleep(Duration.ofSeconds(2));
+        screenshot("screen-wispcraft");
+        String widths = onGameThread(() -> {
+            minecraft.gui.setScreen(editServer);
+            StringBuilder found = new StringBuilder();
+            for (var child : editServer.children()) {
+                if (child instanceof net.minecraft.client.gui.components.AbstractWidget widget
+                        && widget.getMessage().getString().matches("(Version|Wispcraft): .*")) {
+                    found.append(found.isEmpty() ? "" : ", ")
+                            .append(widget.getMessage().getString())
+                            .append(" ")
+                            .append(widget.getWidth());
+                }
+            }
+            return found.toString();
+        });
+        sleep(Duration.ofSeconds(1));
+        screenshot("screen-edit-server-again");
+        report.check(
+                "edit-server buttons after the Wispcraft screen",
+                widths.matches("Version: [^,]+ 98, Wispcraft: \\w+ 98"),
+                widths);
         onGameThread(() -> {
             minecraft.gui.setScreen(new net.minecraft.client.gui.screens.options.SkinCustomizationScreen(
                     new TitleScreen(), minecraft.options));
@@ -3675,7 +3712,7 @@ public final class SmokeTest {
 
     /** A server list ping: handshake, status and ping packets, as the multiplayer screen sends them. */
     private void ping(String address) throws Exception {
-        ServerData data = new ServerData("Incari smoke server", address, ServerData.Type.OTHER);
+        ServerData data = smokeServerData(address);
         ServerStatusPinger pinger = new ServerStatusPinger();
         pinger.pingServer(data, () -> {}, () -> {}, EventLoopGroupHolder.remote(false));
         boolean answered = waitUntil(Duration.ofSeconds(15), () -> {
@@ -3695,11 +3732,21 @@ public final class SmokeTest {
                     new TitleScreen(),
                     minecraft,
                     ServerAddress.parseString(address),
-                    new ServerData("Incari smoke server", address, ServerData.Type.OTHER),
+                    smokeServerData(address),
                     false,
                     null);
             return null;
         });
+    }
+
+    /** The dedicated server's list entry: through the Wisp proxy {@code -Pincari.wisp} names, if any. */
+    private static ServerData smokeServerData(String address) {
+        ServerData data = new ServerData("Incari smoke server", address, ServerData.Type.OTHER);
+        String wisp = System.getProperty("incari.smoke.wisp");
+        if (wisp != null) {
+            data.incariWisp = new incari.client.net.WispChoice(true, wisp);
+        }
+        return data;
     }
 
     /** How the current connection reaches the server, for the report. */
@@ -3710,6 +3757,9 @@ public final class SmokeTest {
                 return "no connection";
             }
             var remote = listener.getConnection().getRemoteAddress();
+            if (remote instanceof incari.net.wisp.WispAddress) {
+                return "Wisp to " + remote;
+            }
             return (remote instanceof incari.net.WebSocketAddress ? "a WebSocket to " : "TCP to ") + remote;
         });
     }
